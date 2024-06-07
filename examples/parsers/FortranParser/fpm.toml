@@ -1,0 +1,15 @@
+name = "FortranParser"
+license = "BSD-3-Clause"
+author = "Stuart Midgley"
+keywords = ["parser"]
+
+[library]
+source-dir = "src"
+
+[install]
+library = false
+
+[build]
+auto-executables = false
+auto-examples = false
+auto-tests = true

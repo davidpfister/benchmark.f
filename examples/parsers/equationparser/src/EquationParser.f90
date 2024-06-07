@@ -1,0 +1,3112 @@
+! CODE DEVELOPED BY SCOTT E BOYCE 
+!                   CONTACT <seboyce@usgs.gov> or <Boyce@engineer.com>
+!
+! MODULE EquationParser
+!  DESIGNED TO TAKE IN A LIST OF VARIABLE VALUES AND EVALUTE --SIMILAR TO ExpressionParser, but handlese equations and conditionals such as x = x + 1 or COND = X > Y
+!    --MAJOR LIMITATION:
+!                        EQUATION PARSER CAN NOT HANDLE NEGATIVE NUMBER INPUTS eg: "A+B*(-3+C)"  A, B, C CAN CONTAIN NEGATIVE NUMBERS, BUT "-3" DOES NOT WORK
+!                        USE NEG FUNCTION TO GET NEGATIVE NUMBERS IF NEEDED      eg: "A+B*(NEG(3)+C)"    => "NEG(3)" YIELDS "-3"
+!
+!  VERSION 3.0 [5/17/2017] NOW CALLED EQUATIONPARSER AND ONLY HANDLES SCALAR RETURN VARIABLES.
+!                          ADDED NEW FUNCTIONS
+!                              EVAL          (Ln,NML,NMV,CHKCASE,CHKKEY) RESULT(ANS)  -- SOLVES EQUATION AND RETURNS ANSWER (SAME AS OLD EXPERSION PARSER)
+!                              EVAL_CONDITION(Ln,NML,NMV,CHKCASE,CHKKEY) RESULT(COND) -- SOLVES INEQUALITY IN Ln
+!                              EVAL_EQUATION (Ln,NML,NMV,CHKCASE,CHKKEY,IDX)          -- SOLVES EQUATION OF THE FORM   "A = B + C". IT WILL SET VALUE IN VECTOR FOR A WITH SUM OF B AND C. IT MUST CONTAIN ONE VARIABLE TO LEFT OF = AND HAVE ONE =
+!
+!                              INEQUALITY HASS PRIORITY ON | THEN &.
+!                                  YOU CANNOT HAVE () ACROSS | OR &
+!                                                                    eg. (5<3 & 8>5) | 4==4
+!
+!  VERSION 2.0 [6/15/2015] RESTRUCTURED MAIN VARIABLE "EQN" TO BE DERIVED DATA TYPE
+!                          ADDED ABILITY TO HAVE CONDITIONAL EQUATION OF THE FORMAT "IF[CONDITION, TRUE, FALSE]"
+!                               WHERE "CONDITION" IS AN EQUATION WITH "<", ">", "<=", OR ">=", THERE ALSO CAN BE MULTIPLE CONDITIONS WITH & (AND) or | (OR) OPERATORS.
+!                                                 --NOTE & IS HIGHER PRECEDANCE THAN | SO IT IS ALWAYS EVALUATED FIRST. PARENTHESIS ARE NOT ALLOWED TO SPAN ACROSS THE INEQUALITY!
+!                                     "TRUE"  IS THE RESULT THAT IS RETURNED IF "CONDITION" IS TRUE,  IT CAN BE AN EQUATION AS WELL
+!                                     "FALSE" IS THE RESULT THAT IS RETURNED IF "CONDITION" IS FALSE, IT CAN BE AN EQUATION AS WELL  --THIS IS OPTIONAL
+!                                             WHEN "FALSE" IS NOT PRESENT AND THE CONDITIONAL IS FALSE THEN THE RESULT IS SET TO NaN
+!                                             THIS ALLOWS FOR OUTSIDE PROGRAMS TO CASECASE CONDITIONAL EXPRESSIONS BY CHECKING FOR NaN
+!                               
+!                               EXAMPLE:  IF[A<B, NEG(1), EXP(C*D)]
+!                               EXAMPLE:  IF[(A+B*C)<B & A<C | B>C, NEG(1), EXP(C*D)]  
+!                               CONDITIONAL EQUATION CAN BE APART OF ANY EQUATION OR WITHIN ANOTHER CONDITINAL EQUATION, eg: A + IF[A<B, IF[B<C,1,0], IF[A<C,1,0]]
+!                          ADDED ABILITY TO SOLVE FOR MIN OR MAX OF A SEQUENCE OF EXPRESSIONS OF THE FORMAT "MAX[SEQ1, SEQ2, SEQ3, ...]"
+!                               WHERE "SEQ" CAN BE ANY VALID EQUATION (NOTE THE LENGTH CAN BE AS MANY TERMS AS NEEDED)
+!                               EXAMPLE:  MAX[1,2,3,4] or MIN[A, B, EXP(C*D), ABS(E-F^2)]
+!
+!  VERSION 1.1 [3/30/2014] ADDED THE ABILITY TO HAVE KEYWORD FUNCTIONS 
+!                          SUCH AS "EXP", NUMERICAL INPUT (eg 5*8+A), AND NEW ELEMENTAL SUBROUTINE UPPER
+!
+!  VERSION 1.0 [5/01/2013] ORIGINAL VERSION THAT SUPPORTS 5 OPERATION, +-*/^, PARSING WITH ( )
+!
+!
+! MODULE IS DESIGNED TO TAKE IN A LIST OF VARIABLE VALUES AND EVALUTE
+! AN EQUATION CONTAINING THE VARIABLES WITHIN A STRING
+! THE EQUATION FOLLOWS ORDER PRECIDENCE (ORDER OF OPERATIONS)
+!
+MODULE EquationParser!, ONLY: EVAL, EVAL_EQUATION, EVAL_CONDITION, NAME_LOOKUP    
+  USE, INTRINSIC:: IEEE_ARITHMETIC, ONLY: IEEE_VALUE, IEEE_QUIET_NAN                                         !MODULE THAT TAKES IN A STRING EQUATION, REMOVES BLANKS, SOLVES FOR VARIABLE DEFINITIONS.
+  USE CONSTANTS
+  IMPLICIT NONE
+  PRIVATE                                                            !MAKES ALL VARIABLES AND FUNCTIONS PRIVATE
+  !INTEGER,PARAMETER:: VARLEN=25                                     !LENTH OF VARIABLE NAMES
+  !CHARACTER(VARLEN),   ALLOCATABLE,DIMENSION(:)::VAR                !NAME OF VARIABLES USED MAX LEN OF 25
+  !DOUBLE PRECISION,ALLOCATABLE,DIMENSION(:,:,:)::VAL                !STORED VALUES OF VARIABLES, 3rd DIM IS 1to1 WITH VAR NAMES
+  CHARACTER(4), PARAMETER:: WARN='WARN'
+  !CHARACTER(10),PARAMETER:: NUMBERS='0123456789'
+  !CHARACTER(11),PARAMETER:: NUMPNT='0123456789.'
+  CHARACTER(9), PARAMETER:: NEGCHK='([{,+-*/^'
+  CHARACTER(4), PARAMETER:: ED = 'EeDd'
+  CHARACTER(2), PARAMETER:: PM = '+-'
+  CHARACTER(5), PARAMETER::OP='+-*/^'
+  CHARACTER(1), PARAMETER::LP='('
+  CHARACTER(1), PARAMETER::RP=')'
+  CHARACTER(1), PARAMETER::LB='['
+  CHARACTER(1), PARAMETER::RB=']'
+  CHARACTER(1), PARAMETER::LC='{'
+  CHARACTER(1), PARAMETER::RC='}'
+  !CHARACTER(1), PARAMETER::CM=','
+  INTEGER,           SAVE::IOUT=Z
+  !
+  TYPE EQN_TERMS
+    CHARACTER(:),ALLOCATABLE::T
+  END TYPE
+  !
+  PUBLIC::  EVAL, EVAL_EQUATION, EVAL_CONDITION, NAME_LOOKUP, KEYWORDCHECK  !THIS IS THE DRIVER INTERFACE OF THE MODULE AND DIRECTS THE INPUTS TO THE APPORPIATE SUBROUTINES. EqnEval DEFERS TO 3 DIFFERENT FUNCTIONS DEPENDING ON INPUT
+  !
+  ! THESE SHOULD ONLY BE CALLED ONCE AND ALLOW FOR INDIRECT LINKAGE TO UTIL MODULE ERROR REPORTING.
+  PUBLIC:: EQUATION_SETUP_ERROR_ROUTINES, REMOVE_EQUATION_ERROR_ROUTINES
+  !
+  INTEGER, PARAMETER:: KEYLEN = 12
+  CHARACTER(KEYLEN),PARAMETER, DIMENSION(12)::  KEYWORDLIST = ['ABS         ','EXP         ','LOG         ', &
+                                                               'LOG10       ','NEG         ','SQRT        ', &
+                                                               'ROUND       ','TRUNCATE    ',                &
+                                                               'CEILING     ','FLOOR       ',                &
+                                                               'NEG_TO_ZERO ','POS_TO_ZERO ']   !CHECK SEARCH LOOPS AT "DO WHILE (I <= LINELEN-4)"
+  !
+  CHARACTER(KEYLEN),PARAMETER, DIMENSION(15)::  MAGICLIST = [  'DATE_DIFF   ', 'ADD_YEAR    ', 'ADD_MONTH   ', &
+                                                                'ADD_DAY     ', 'ADD_HOUR    ', 'ADD_MIN     ', &
+                                                                'ADD_SEC     ', 'MAKE_DATE   ', 'JULIAN_DAY  ', &
+                                                                'GET_DAY     ', 'GET_MONTH   ', 'GEY_YEAR    ', &
+                                                                'MONTHDAYS   ', 'HAS_MONTHDAY', 'MODULO      ' ]
+  !CHARACTER(4),PARAMETER,DIMENSION(6)::  KEYWORDLIST = ['ABS ','EXP ','LOG ','L10 ','NEG ','SQRT','      ']   !CHECK SEARCH LOOPS AT "DO WHILE (I <= LINELEN-4)"
+  !
+  !CHARACTER(3),PARAMETER, DIMENSION(3):: SPECIALWORDLIST = ['IF ', 'MIN', 'MAX']
+  !
+  PROCEDURE(STOP_ERROR_ROUTINE), POINTER :: STOP_ERROR => NULL()
+  PROCEDURE(WARNING_MESSAGE),  POINTER :: WARNING    => NULL()
+  !
+  ABSTRACT INTERFACE 
+     SUBROUTINE STOP_ERROR_ROUTINE(LINE, INFILE, OUTPUT, MSG, MSG2, STAT, GUESS)
+       CHARACTER(*), INTENT(IN), OPTIONAL:: LINE       ! Line that error occured on
+       INTEGER,      INTENT(IN), OPTIONAL:: INFILE     ! File Unit that error originated from
+       INTEGER,      INTENT(IN), OPTIONAL:: OUTPUT     ! File unit to write error too
+       CHARACTER(*), INTENT(IN), OPTIONAL:: MSG, MSG2  ! Supplemental messages to write in error
+       INTEGER,      INTENT(IN), OPTIONAL:: STAT       ! IOSTAT or STAT number associated with error (STAT=0 disables ERROR STOP)
+       LOGICAL,      INTENT(IN), OPTIONAL:: GUESS      ! If set to TRUE, then the line is guessed as being the previous line in INFILE
+     END SUBROUTINE
+     !
+     SUBROUTINE WARNING_MESSAGE(LINE,INFILE,OUTPUT,MSG, INLINE, CMD_PRINT, SET_UNIT, KPER)
+        INTEGER,      INTENT(IN), OPTIONAL:: INFILE
+        CHARACTER(*), INTENT(IN), OPTIONAL:: LINE
+        CHARACTER(*), INTENT(IN), OPTIONAL:: MSG
+        INTEGER,      INTENT(IN), OPTIONAL:: OUTPUT 
+        LOGICAL,      INTENT(IN), OPTIONAL:: INLINE 
+        LOGICAL,      INTENT(IN), OPTIONAL:: CMD_PRINT
+        LOGICAL,      INTENT(IN), OPTIONAL:: SET_UNIT 
+        INTEGER,      INTENT(IN), OPTIONAL:: KPER   
+     END SUBROUTINE
+  END INTERFACE
+  !
+CONTAINS
+!
+!######################################################################      
+!
+! OPTIONAL SET UP ROUTINE TO ALLOW INDIRECT LINK TO UNIT_MODULE FOR BETTER ERROR REPORTING
+! ONLY CALL THIS ROUTINE ONCE AT THE START OF THE SIMULATION TO INITIALIZE SUBROUTINES
+SUBROUTINE EQUATION_SETUP_ERROR_ROUTINES(OUTPUT,STOP_ERROR_SUB, WARNING_SUB)
+  INTEGER, INTENT(IN):: OUTPUT
+  PROCEDURE(STOP_ERROR_ROUTINE):: STOP_ERROR_SUB
+  PROCEDURE(WARNING_MESSAGE ):: WARNING_SUB
+  !
+  IOUT = OUTPUT
+  STOP_ERROR => STOP_ERROR_SUB
+  WARNING    => WARNING_SUB
+  !
+END SUBROUTINE
+SUBROUTINE REMOVE_EQUATION_ERROR_ROUTINES()
+  !
+  IOUT = Z
+  STOP_ERROR => NULL()
+  WARNING    => NULL()
+  !
+END SUBROUTINE
+!
+!######################################################################      
+!
+!!!SUBROUTINE CHECK_FOR_ERROR(ERRMSG,LN)
+!!!  CHARACTER(:),ALLOCATABLE, INTENT(IN):: ERRMSG            !IS ALLOCATED WHEN THERE IS AN ERROR RAISED
+!!!  CHARACTER(*),OPTIONAL,    INTENT(IN):: LN
+!!!  !
+!!!  IF(ERRMSG.NE.WARN) THEN
+!!!      IF(ASSOCIATED(STOP_ERROR)) THEN
+!!!          CALL STOP_ERROR(LINE=LN,OUTPUT=IOUT,MSG=ERRMSG)
+!!!      ELSEIF(PRESENT(LN)) THEN
+!!!         WRITE(*,'(A)') ERRMSG//BLN//'THIS ERROR OCCURED WHILE PROCESSING THE FOLLOWING LINE:'//BLN//TRIM(LN)
+!!!      ELSE
+!!!         WRITE(*,'(A)') ERRMSG//BLN//'THIS ERROR OCCURED WHILE PROCESSING THE FOLLOWING LINE:'//BLN//TRIM(LN)
+!!!      END IF
+!!!      ERROR STOP
+!!!  ELSEIF(LEN_TRIM(ERRMSG)>FOUR) THEN
+!!!             IF(ASSOCIATED(WARNING)) THEN
+!!!                 CALL WARNING(LINE=LN, OUTPUT=IOUT,MSG=ERRMSG)
+!!!             ELSE    
+!!!                 WRITE(*,'(A)') ERRMSG
+!!!             END IF
+!!!  END IF
+!!!  !
+!!!END SUBROUTINE
+!!!!
+!!!!######################################################################      
+!!!!
+!!!PURE FUNCTION RETURN_CHECK(ERRMSG)
+!!!  CHARACTER(:),ALLOCATABLE, INTENT(IN):: ERRMSG            !IS ALLOCATED WHEN THERE IS AN ERROR RAISED
+!!!  LOGICAL:: RETURN_CHECK
+!!!  !
+!!!  RETURN_CHECK = ERRMSG(ONE:FOUR).NE.WARN
+!!!  !
+!!!END FUNCTION
+!
+!######################################################################      
+!
+SUBROUTINE CHECK_FOR_ERROR(ERRMSG,LN)
+  CHARACTER(:),ALLOCATABLE, INTENT(IN):: ERRMSG            !IS ALLOCATED WHEN THERE IS AN ERROR RAISED
+  CHARACTER(*),OPTIONAL,    INTENT(IN):: LN
+  !
+  IF(RETURN_CHECK(ERRMSG)) THEN
+     IF(LEN_TRIM(ERRMSG)>FOUR) THEN
+        IF( ERRMSG(1:4).NE.WARN .AND. INDEX(ERRMSG,'ERROR') > Z ) THEN
+            IF(ASSOCIATED(STOP_ERROR)) THEN
+                CALL STOP_ERROR(LINE=LN,OUTPUT=IOUT,MSG=ERRMSG)
+            ELSEIF(PRESENT(LN)) THEN
+               WRITE(*,'(A)') ERRMSG//BLN//'THIS ERROR OCCURED WHILE PROCESSING THE FOLLOWING LINE:'//BLN//TRIM(LN)
+            ELSE
+               WRITE(*,'(A)') ERRMSG//BLN//'THIS ERROR OCCURED WHILE PROCESSING THE FOLLOWING LINE:'//BLN//TRIM(LN)
+            END IF
+            ERROR STOP
+        ELSE
+                   IF(ASSOCIATED(WARNING)) THEN
+                       CALL WARNING(LINE=LN, OUTPUT=IOUT,MSG=ERRMSG)
+                   ELSE    
+                       WRITE(*,'(A)') ERRMSG
+                   END IF
+        END IF
+     END IF
+  END IF
+  !
+END SUBROUTINE
+!
+!######################################################################      
+!
+PURE FUNCTION RETURN_CHECK(ERRMSG)
+  CHARACTER(:),ALLOCATABLE, INTENT(IN):: ERRMSG            !IS ALLOCATED WHEN THERE IS AN ERROR RAISED
+  LOGICAL:: RETURN_CHECK
+  !
+  RETURN_CHECK = .FALSE.
+  IF(ALLOCATED(ERRMSG)) THEN
+                        IF(ERRMSG.NE.'') RETURN_CHECK = .TRUE.
+  END IF
+END FUNCTION
+!
+!######################################################################      
+!
+SUBROUTINE EVAL_EQUATION(Ln,NML,NMV,IDX,ERRMSG)             !Ln='Actual EQUATION',NML='Named Variable List',NMV='Named Variable Values',CHKCASE=OPTIONAL:CONVERT A COPY OF NML TO UPPER,CHKKEY=OPTIONAL:CHECK FOR KEYWORD IN NML,RES='EQUATION Result'
+  CHARACTER(*),                           INTENT(IN   ):: Ln               !STRING THAT CONTAINS EQUATION
+  CHARACTER(*),              DIMENSION(:),INTENT(IN   ):: NML              !ARRAY OF VARIABLE NAMES
+  DOUBLE PRECISION,          DIMENSION(:),INTENT(INOUT):: NMV              !ARRAY OF VARIABLE VALUES WITH HIGHEST DIMENSION ONE TO ONE WITH VARIABLE NAME ARRAY (RIGHT MOST DIM) 
+  INTEGER,         OPTIONAL,              INTENT(OUT  ):: IDX              !OPTIONAL INDEX OF WHAT VARIABLE WAS SET
+  CHARACTER(:),    OPTIONAL, ALLOCATABLE, INTENT(INOUT):: ERRMSG           !OPTIONAL AND IS SET TO NON-BLANK IF ERR OCCURED
+  DOUBLE PRECISION::ANS
+  CONTIGUOUS:: NML, NMV
+  !
+  TYPE (EQN_TERMS),DIMENSION(:),ALLOCATABLE::Eqn
+  CHARACTER(LEN_TRIM(LN))::LOCAL_LINE
+  CHARACTER(LEN(NML)):: NAME
+  CHARACTER(:),ALLOCATABLE:: MSG
+  !
+  INTEGER::I,NAME_IDX,R,MP, ILB, IRB
+  !INTEGER::NVAR
+  LOGICAL:: CHECK
+  !
+  IF(PRESENT(ERRMSG)) THEN; IF(ALLOCATED(ERRMSG)) DEALLOCATE(ERRMSG)
+  END IF
+  !
+  ILB = Z
+  IRB = Z
+  MP = LEN(LN)
+  DO I=1, MP
+      IF    (LN(I:I) == '=') THEN
+                                  R=I
+                                  EXIT
+      ELSEIF(LN(I:I) == LB) THEN
+                                  ILB = I
+      ELSEIF(LN(I:I) == RB) THEN
+                                  IRB = I
+      END IF
+      IF(I==MP) THEN
+          IF(PRESENT(ERRMSG)) THEN
+              ERRMSG = 'EVAL_EQUATION ERROR: WHILE SOLVING AN EQUATION, FAILED TO LOCATE WITHIN CURRENT LINE AN "="'//NL//'IT MUST BE PRESENT TO IDENTIFY WHAT VARIABLE IS TO BE SET.'
+              IF(PRESENT(IDX)) IDX = ONE
+              RETURN
+          ELSE
+              MSG = 'EVAL_EQUATION ERROR: WHILE SOLVING AN EQUATION, FAILED TO LOCATE WITHIN CURRENT LINE AN "="'//NL//'IT MUST BE PRESENT TO IDENTIFY WHAT VARIABLE IS TO BE SET.'
+              CALL CHECK_FOR_ERROR(MSG,LN)
+          END IF
+      END IF
+  END DO
+  !
+  IF (ILB > Z) THEN !FOUND ARRAY INDEX FOR LHS
+      !
+      IF(IRB==Z)THEN
+          IF(PRESENT(ERRMSG)) THEN
+              ERRMSG = 'EVAL_EQUATION ERROR: THE VARIABLE TO THE LEFT OF THE EQUATION SIGN, "=",'//NL//'CONTAINED A LEFT BRACKETS, "[", BUT NOT A CORRESPONDING RIGHT BRACKET, "]".'
+              RETURN
+          ELSE
+              MSG = 'EVAL_EQUATION ERROR: THE VARIABLE TO THE LEFT OF THE EQUATION SIGN, "=",'//NL//'CONTAINED A LEFT BRACKETS, "[", BUT NOT A CORRESPONDING RIGHT BRACKET, "]".'
+              CALL CHECK_FOR_ERROR(MSG,LN)
+          END IF
+      END IF
+      !
+      LOCAL_LINE = LN(ILB+1:IRB-1)
+      !
+      !CALL UPPER(LOCAL_LINE)
+      CALL REMOVEBLANK(LOCAL_LINE)
+      CALL SplitFunc(LOCAL_LINE,Eqn,MSG)
+      !
+      IRB=1 ! ==> R 
+      MP=1      
+      CALL EqnParser(Eqn,IRB,ANS,MP,NML,NMV,MSG)
+      !
+      DEALLOCATE(Eqn)
+      !
+      IF(RETURN_CHECK(MSG)) THEN
+                            IF(PRESENT(ERRMSG)) THEN
+                                ERRMSG = MSG
+                                IF(PRESENT(IDX)) IDX = ONE
+                                RETURN
+                            ELSE
+                                CALL CHECK_FOR_ERROR(MSG,LN)
+                            END IF
+      ELSE
+          IRB = NINT(ANS) - ONE
+      END IF
+      !
+      NAME = ADJUSTL(LN(:ILB-1))
+  ELSE
+      NAME = ADJUSTL(LN(:R-1))
+  ENDIF
+  !
+  !CALL UPPER(NAME)
+  !
+  NAME_IDX = Z
+  DO I=1, SIZE(NML,1)
+                     IF(NAME.EQ.NML(I))THEN
+                                            NAME_IDX=I
+                                            EXIT
+                     END IF
+  END DO
+  !
+  IF(NAME_IDX==Z) THEN
+      IF(PRESENT(ERRMSG)) THEN
+          ERRMSG = 'EquationParser ERROR: FAILED TO IDENTIFY/LOCATION VARIABLE NAME TO THE LEFTSIDE OF EQUATION.'//BLN//'THE NAME BEING SEARCH FOR WAS: "'//TRIM(NAME)//'"'//BLN//'THE FOLLOWING IS A LIST OF THE AVAILBLE VARIABLE NAMES AND THEIR VALUES:'//PRINT_VARIABLE_LIST(NML,NMV)
+          IF(PRESENT(IDX)) IDX = ONE
+          RETURN
+      ELSE
+          MSG = 'EquationParser ERROR: FAILED TO IDENTIFY/LOCATION VARIABLE NAME TO THE LEFTSIDE OF EQUATION.'//BLN//'THE NAME BEING SEARCH FOR WAS: "'//TRIM(NAME)//'"'//BLN//'THE FOLLOWING IS A LIST OF THE AVAILBLE VARIABLE NAMES AND THEIR VALUES:'//PRINT_VARIABLE_LIST(NML,NMV)
+          CALL CHECK_FOR_ERROR(MSG,LN)
+      END IF
+  ELSEIF(ILB > Z) THEN !HAS AN ARRAY INDEX.
+      !
+      IF( NML(NAME_IDX) == NML(NAME_IDX+IRB) ) THEN !IS FALSE IF BAD INDEX
+          !
+          NAME_IDX = NAME_IDX + IRB
+      ELSE
+          BLOCK
+              CHARACTER(16):: ITXT
+              INTEGER:: IERR
+              !
+              IRB = IRB + ONE
+              READ(ITXT,*,IOSTAT=IERR) IRB
+              !
+              IF(IERR.NE.Z) ITXT='???'
+              !
+              ITXT = ADJUSTL(ITXT)
+              !
+              IF(PRESENT(ERRMSG)) THEN
+                  ERRMSG = ERRMSG//BLN//'EQUATION ERROR: LEFT OF THE EQUAL SIGN FOUND "'//TRIM(ADJUSTL(LN(:R-1)))//'", WHICH IS A VARIABLE NAME FOLLOWED BY []'//NL//'INDICATING IT IS AN ARRAY VARIABLE.'//NL//'THE ARRAY INDEX "'//TRIM(ADJUSTL(LN(ILB+1:IRB-1)))//'" RETURNED THE RESULT OF "'//TRIM(ITXT)//'" WHICH IS INVALID'//NL//'FOR EQUATION:'//NL//TRIM(ADJUSTL(LN))
+                  IF(PRESENT(IDX)) IDX = ONE
+                  RETURN
+              ELSE
+                  MSG = 'EQUATION ERROR: LEFT OF THE EQUAL SIGN FOUND "'//TRIM(ADJUSTL(LN(:R-1)))//'", WHICH IS A VARIABLE NAME FOLLOWED BY []'//NL//'INDICATING IT IS AN ARRAY VARIABLE.'//NL//'THE ARRAY INDEX "'//TRIM(ADJUSTL(LN(ILB+1:IRB-1)))//'" RETURNED THE RESULT OF "'//TRIM(ITXT)//'" WHICH IS INVALID'//NL//'FOR EQUATION:'//NL//TRIM(ADJUSTL(LN))
+                  CALL CHECK_FOR_ERROR(MSG,LN)
+              END IF
+          END BLOCK
+      END IF
+  END IF
+  !
+  LOCAL_LINE = ADJUSTL(LN(R+1:))
+  !
+  !MAKE LINE ALL UPPER CASE FOR COMPARISONS
+  !CALL UPPER(LOCAL_LINE)
+  !
+  ! SEARCH FOR VARIABLE NAME -- Speed up for case of one variable setting another ==> X = Y
+  MP = Z
+  DO I=1, SIZE(NML)
+    IF(LOCAL_LINE == NML(I))THEN
+      MP=I
+      EXIT
+    END IF
+  END DO
+  !
+  IF(MP > Z) THEN
+      ANS = NMV(MP)
+  ELSE
+     CALL QUICK_NUM_CHECK(LOCAL_LINE, ANS, CHECK)
+     !
+     IF(CHECK) THEN
+         !
+         !REMOVE ALL INTERNAL BLANK SPACES
+         CALL REMOVEBLANK(LOCAL_LINE)
+         !
+         CALL SplitFunc(LOCAL_LINE,Eqn,MSG)  !SPLIT STRING INTO AN ARRAY OF STRINGS FOR EACH VARIABLE, OPERATOR, AND PAREN
+         !
+         R=1
+         MP=1      
+         CALL EqnParser(Eqn,R,ANS,MP,NML,NMV,MSG)
+         !
+         IF(ALLOCATED(Eqn)) DEALLOCATE(Eqn)
+         !
+     END IF
+  END IF
+  !
+  !
+  IF(RETURN_CHECK(MSG)) THEN
+                        IF(PRESENT(ERRMSG)) THEN
+                            ERRMSG = MSG
+                            IF(PRESENT(IDX)) IDX = ONE
+                        ELSE
+                            CALL CHECK_FOR_ERROR(MSG,LN)
+                        END IF
+  ELSE
+      NMV(NAME_IDX) = ANS
+      !
+      MP = SIZE(NML,1)                      !CHECK IF SETTING ENTIRE ARRAY TO VALUE
+      IF(ILB == Z .AND. NAME_IDX < MP) THEN
+          !
+          IF(NML(NAME_IDX) == NML(NAME_IDX+1)) THEN
+              !
+              DO R = NAME_IDX, MP-1
+                  IF(NML(R) == NML(R+1)) THEN
+                                             NMV(R+1) = NMV(R)
+                  ELSE
+                      EXIT
+                  ENDIF
+              END DO
+          END IF
+      END IF
+      !
+      IF(PRESENT(IDX)) IDX = NAME_IDX
+  END IF
+END SUBROUTINE
+!
+!######################################################################      
+!
+FUNCTION EVAL_CONDITION(Ln,NML,NMV,ERRMSG) RESULT(COND)       !Ln='Actual EQUATION',NML='Named Variable List',NMV='Named Variable Values',CHKCASE=OPTIONAL:CONVERT A COPY OF NML TO UPPER,CHKKEY=OPTIONAL:CHECK FOR KEYWORD IN NML,RES='EQUATION Result'
+  CHARACTER(*),                           INTENT(IN   ):: Ln                 !STRING THAT CONTAINS EQUATION
+  CHARACTER(*),             DIMENSION(:), INTENT(IN   ):: NML                !ARRAY OF VARIABLE NAMES
+  DOUBLE PRECISION,         DIMENSION(:), INTENT(IN   ):: NMV                !ARRAY OF VARIABLE VALUES WITH HIGHEST DIMENSION ONE TO ONE WITH VARIABLE NAME ARRAY (RIGHT MOST DIM) 
+  CHARACTER(:),    OPTIONAL, ALLOCATABLE, INTENT(INOUT):: ERRMSG             !OPTIONAL AND IS SET TO NON-BLANK IF ERR OCCURED
+  LOGICAL                                              :: COND
+  CONTIGUOUS:: NML, NMV
+  !
+  INTEGER,         DIMENSION(:),ALLOCATABLE:: IDX                      !POINTER ARRAY THAT IS ONLY USED TO POINT TO THE & AND | IN CONDITIONAL PART OF IF
+  CHARACTER(LEN_TRIM(LN))::LOCAL_LINE
+  CHARACTER(:),ALLOCATABLE:: MSG
+  INTEGER::I,J,N
+  !INTEGER::NVAR
+  !LOGICAL::CHKC,CHKK
+  LOGICAL:: COND2
+  !
+  IF(PRESENT(ERRMSG)) THEN; IF(ALLOCATED(ERRMSG)) DEALLOCATE(ERRMSG)
+  END IF
+  !
+  LOCAL_LINE = TRIM(LN)
+  !
+  N = LEN(LOCAL_LINE)
+  !
+  DO J=1, N
+      IF ( LB ==  LOCAL_LINE(J:J) ) THEN  !LOOK FOR STARTING [
+          !
+          LOCAL_LINE(J:J) = BLNK
+          !
+          DO I=N, J, -1
+                 IF ( RB ==  LOCAL_LINE(I:I) )  THEN ! LOOK FOR ENDING ]
+                       LOCAL_LINE(I:I) = BLNK
+                       EXIT
+                 END IF
+          END DO
+      END IF
+      !
+      IF ( BLNK.NE. LOCAL_LINE(J:J) ) EXIT
+  END DO
+  !
+  !CALL UPPER(      LOCAL_LINE)
+  CALL REMOVEBLANK(LOCAL_LINE)
+  !
+  ! PROCESS CONDITIONAL
+  IF ( INDEX(LOCAL_LINE,'|') > Z ) THEN  !SEARCH IF THERE IS AN "OR" OPERATOR 
+     !
+     I=Z                                     !COUND THE NUMBER OF |'s
+     DO J=1, LEN(LOCAL_LINE)
+         IF ( '|' == LOCAL_LINE(J:J) ) I=I+1
+     END DO
+     !
+     ALLOCATE(IDX(I+2))          !POINTER ARRAY OF THE LOCATION OF ALL |'s
+     IDX(1)=Z                    !START OF LOCATION 
+     IDX(I+2)=LEN(LOCAL_LINE)+1    !END OF LOCATION
+     !
+     I=2
+     DO J=1, LEN(LOCAL_LINE)
+        IF ( '|' == LOCAL_LINE(J:J) ) THEN
+            IDX(I)=J                       !Store the locations from 2 to the last |
+            I=I+1
+        END IF
+     END DO
+     !
+     DO I=1, SIZE(IDX,1)-1
+        IF (I==1) THEN
+           CALL PROCESS_CONDITION(LOCAL_LINE( IDX(I)+1:IDX(I+1)-1 ), COND, NML,NMV,MSG)    !PASS ONLY PORTION BETWEEN MULTIPLE |'s
+        ELSE
+           CALL PROCESS_CONDITION(LOCAL_LINE( IDX(I)+1:IDX(I+1)-1 ), COND2,NML,NMV,MSG)   !PASS ONLY PORTION BETWEEN MULTIPLE |'s
+           COND = COND .OR. COND2
+           IF(COND) EXIT  !OR HAS ONE TRUE, SO NO NEED TO CHECK THE REST
+        END IF
+     END DO
+     !
+     DEALLOCATE(IDX)
+  ELSE
+     CALL PROCESS_CONDITION(LOCAL_LINE, COND,NML,NMV,MSG)  !NO | SO EVALUATE CONDITIONAL (THERE STILL CAN BE &'s)
+  END IF
+  !
+  IF(RETURN_CHECK(MSG)) THEN
+    IF(PRESENT(ERRMSG)) THEN
+        ERRMSG = MSG
+        COND   = .TRUE.
+    ELSE
+        CALL CHECK_FOR_ERROR(MSG,LN)
+    END IF
+  END IF
+  !
+END FUNCTION
+!
+!######################################################################      
+!
+
+ pure recursive function ReplaceStr(string, search, substitute) result(modifiedString)
+    implicit none
+    character(*), intent(in)  :: string, search, substitute
+    character(:), allocatable :: modifiedString
+    integer                       :: i, stringLen, searchLen
+    stringLen = len(string)
+    searchLen = len(search)
+    if (stringLen == 0 .or. searchLen == 0) then
+        modifiedString = ''
+        return
+    elseif (stringLen < searchLen) then
+        modifiedString = string
+        return
+    end if
+    i = 1
+    do
+        if (string(i:i + searchLen - 1) == search) then
+            modifiedString = string(1:i - 1)//substitute//replaceStr(string(i + searchLen:stringLen), search, substitute)
+            exit
+        end if
+        if (i + searchLen > stringLen) then
+            modifiedString = string
+            exit
+        end if
+        i = i + 1
+        cycle
+    end do
+ end function ReplaceStr
+ 
+FUNCTION EVAL(Ln,NML,NMV,ERRMSG) RESULT(ANS)              !Ln='Actual EQUATION',NML='Named Variable List',NMV='Named Variable Values',CHKCASE=OPTIONAL:CONVERT A COPY OF NML TO UPPER,CHKKEY=OPTIONAL:CHECK FOR KEYWORD IN NML,RES='EQUATION Result'
+  CHARACTER(*),                           INTENT(IN   ):: Ln             !STRING THAT CONTAINS EQUATION
+  CHARACTER(*),             DIMENSION(:), INTENT(IN   ):: NML            !ARRAY OF VARIABLE NAMES
+  DOUBLE PRECISION,         DIMENSION(:), INTENT(IN   ):: NMV            !ARRAY OF VARIABLE VALUES WITH HIGHEST DIMENSION ONE TO ONE WITH VARIABLE NAME ARRAY (RIGHT MOST DIM) 
+  CHARACTER(:),    OPTIONAL, ALLOCATABLE, INTENT(INOUT):: ERRMSG         !OPTIONAL AND IS SET TO NON-BLANK IF ERR OCCURED
+  DOUBLE PRECISION                                     :: ANS
+  CONTIGUOUS:: NML, NMV
+  !
+  TYPE (EQN_TERMS),DIMENSION(:),ALLOCATABLE::Eqn
+  CHARACTER(LEN_TRIM(LN))::LOCAL_LINE
+  CHARACTER(:),ALLOCATABLE:: MSG            !IS ALLOCATED WHEN THERE IS AN ERROR RAISED
+  INTEGER::R,MP
+  !INTEGER::NVAR
+  !
+  IF(PRESENT(ERRMSG)) THEN; IF(ALLOCATED(ERRMSG)) DEALLOCATE(ERRMSG)
+  END IF
+  !
+  IF(Ln==BLNK)  THEN
+     IF(PRESENT(ERRMSG)) THEN
+         ERRMSG = 'EquationParser EVAL ERROR: THE LINE PASSED TO "EVAL" ROUTINE TO BE SOLVED WAS EMPTY/BLANK. CAN NOT PROCESS AN EXPRESSION FROM AN EMPTY LINE. UNFORTUNETLY CANNOT SPECIFY WHERE THIS ERROR OCCURED DUE TO THE LINE BEING EMPTY.'
+     ELSE
+         MSG = 'EquationParser EVAL ERROR: THE LINE PASSED TO "EVAL" ROUTINE TO BE SOLVED WAS EMPTY/BLANK. CAN NOT PROCESS AN EXPRESSION FROM AN EMPTY LINE. UNFORTUNETLY CANNOT SPECIFY WHERE THIS ERROR OCCURED DUE TO THE LINE BEING EMPTY.'
+     END IF
+     ANS = DZ
+     RETURN
+  END IF
+  !
+  LOCAL_LINE = ReplaceStr(TRIM(LN), '**', '^')
+  CALL SplitFunc_PREPARE_LINE(LOCAL_LINE)
+  !
+  CALL SplitFunc(LOCAL_LINE,Eqn,MSG)                                           !SPLIT STRING INTO AN ARRAY OF STRINGS FOR EACH VARIABLE, OPERATOR, AND PAREN
+  !
+  IF(.NOT. RETURN_CHECK(MSG)) THEN
+      !
+      R=1
+      MP=1      
+      CALL EqnParser(Eqn,R,ANS,MP,NML,NMV,MSG)
+  END IF
+  !
+  IF(RETURN_CHECK(MSG)) THEN
+    IF(PRESENT(ERRMSG)) THEN
+        ERRMSG = MSG
+        ANS   = DZ
+    ELSE
+        CALL CHECK_FOR_ERROR(MSG,LN)
+    END IF
+  END IF
+  !
+  DEALLOCATE(Eqn)
+END FUNCTION
+!
+!######################################################################            
+!
+RECURSIVE PURE SUBROUTINE EqnParser(Eqn,R,ANS,MP,NML,NMV,ERRMSG)         !EVALUATE PARTS OF AN EQUATION
+  !CHARACTER(VARLEN),DIMENSION(:), INTENT(IN   )::Eqn               !ARRAY CONTAINING ALL PARTS OF EQUATION
+  TYPE (EQN_TERMS), DIMENSION(:), INTENT(IN   )::Eqn
+  INTEGER,                        INTENT(INOUT)::R                  !CURRENT INDEX OF ARRAY TO OPERATE ON 
+  INTEGER,                        INTENT(IN   )::MP                 !MINIMUM PRECDIENCE OF CURRENT EQUATION
+  CHARACTER(*),    DIMENSION(:),  INTENT(IN   )::NML                !ARRAY OF VARIABLE NAMES
+  DOUBLE PRECISION,DIMENSION(:),  INTENT(IN   )::NMV                !ARRAY OF VARIABLE VALUES WITH HIGHEST DIMENSION ONE TO ONE WITH VARIABLE NAME ARRAY (RIGHT MOST DIM) 
+  DOUBLE PRECISION,               INTENT(INOUT)::ANS                !CAN THINK OF THIS AS THE LEFT HAND SIDE OF THE OPERATION (LHS op RIGHT)
+  CHARACTER(:),ALLOCATABLE,       INTENT(INOUT):: ERRMSG            !IS ALLOCATED WHEN THERE IS AN ERROR RAISED
+  CONTIGUOUS:: Eqn,NML,NMV
+  !
+  DOUBLE PRECISION:: RHS
+  INTEGER::PREC
+  !
+  !CHARACTER(5), PARAMETER:: OP='+-*/^'
+  !
+  CHARACTER(1)::DIRECTION,COP  !DIRECTION OF OPERATOR, CURRENT OPERATOR
+  !
+  ! operator
+  ! precedence   operators       associativity
+  ! 3            ^               right to left
+  ! 2            * /             left to right
+  ! 1            + -             left to right
+  ! StartOver    (      
+  ! StartOver    KEYWORD    
+  !
+  RHS=DZ
+  !
+  CALL NextAtom(Eqn,R,ANS,NML,NMV,ERRMSG)                           !NEXT ATOM MOVES TO NEXT PART OF EQUATION
+  !
+  DO
+    IF ( R>SIZE(Eqn)                      ) EXIT                    !REACHED END OF FUNCTION
+    IF ( INDEX(OP,Eqn(R)%T) < 1           ) EXIT                    !ENSURE THAT IT IS AN OPERATOR 
+    !                                                                
+    CALL PRECEDENCE(Eqn(R)%T, DIRECTION, PREC, ERRMSG)              !RERETRIVE PRECEDENCE LEVEL AND GET THE DIRECTION OF THE OPERATOR
+    !
+    IF ( PREC < MP ) EXIT                                           !PRECEDENCE LEVEL HAS BEEN REDUCED SO EXIT TO BACK CALCULATE
+    !
+    COP=Eqn(R)%T                                                    !CURRENT OPERATION
+    !
+    IF (DIRECTION=='L')THEN                                         !DIRECTION IS TO THE LEFT
+      PREC=PREC+1
+    !ELSE DIRECTION=='R'                                            !DIRECTION IS TO THE RIGHT NO NEED FOR UPDATE
+    ! PREC = PREC  
+    END IF
+    R=R+1
+    CALL EqnParser(Eqn,R,RHS,PREC,NML,NMV,ERRMSG)
+    !
+    IF(COP=='/')THEN
+      IF(NEGNEARZERO_30 < RHS .AND. RHS < NEARZERO_30 .AND. .NOT.(NEGNEARZERO_30 < ANS .AND. ANS < NEARZERO_30)) THEN  !DIV/0 ERROR, BUT 0/0 ALLOWED
+         IF(R==ONE) R=TWO
+         IF(RETURN_CHECK(ERRMSG) ) THEN
+             ERRMSG = ERRMSG//BLN//'SOLVING MATH OPERATION "/" RESULTED IN A FATAL ERROR.'//BLN//'THE LEFT HAND SIDE OF DIVISION, /, IS NON-ZERO, BUT THE RIGHT HAND SIDE IS ZERO.'//NL//'THIS RESULTS IN A DIVISION BY ZERO ERROR (1/0).'//BLN//'THIS OCCURS DURING AN OPERATION SOMEWHERE BEFORE A "/" AROUND THE FOLLOWING TERM "'//Eqn(R-1)%T//'"'//BLN//'FOR EQUATION:'//NL//REMAKE_FUNCTION(Eqn)
+         ELSE
+             ERRMSG = 'SOLVING MATH OPERATION "/" RESULTED IN A FATAL ERROR.'//BLN//'THE LEFT HAND SIDE OF DIVISION, /, IS NON-ZERO, BUT THE RIGHT HAND SIDE IS ZERO.'//NL//'THIS RESULTS IN A DIVISION BY ZERO ERROR (1/0).'//BLN//'THIS OCCURS DURING AN OPERATION SOMEWHERE BEFORE A "/" AROUND THE FOLLOWING TERM "'//Eqn(R-1)%T//'"'//BLN//'FOR EQUATION:'//NL//REMAKE_FUNCTION(Eqn)
+         END IF
+         !
+         ANS = DZ
+         !IF(ASSOCIATED(STOP_ERROR)) THEN
+         !    CALL STOP_ERROR(OUTPUT=IOUT,MSG='EQUATION ERROR: DIVIDE BY 0 DURING AN OPERATION SOMEWHERE AFTER A "/" AND BEFORE "'//Eqn(R-1)%T//'"'//NL//'FOR EQUATION:'//NL//REMAKE_FUNCTION(Eqn)//NL//'THE FOLLOWING IS A LIST OF THE AVAILBLE VARIABLE NAMES AND THEIR VALUES:'//PRINT_VARIABLE_LIST(NML,NMV) )
+         !ELSE
+         !    WRITE(*,'(4A /, 9x,A)')'EQUATION ERROR: DIVIDE BY 0 DURING AN OPERATION SOMEWHERE ', &
+         !               'AFTER A "/" AND BEFORE "',Eqn(R-1)%T,'" FOR EQUATION:', REMAKE_FUNCTION(Eqn)
+         !    ERROR STOP
+         !END IF
+      END IF
+    END IF
+    !
+    IF ( RETURN_CHECK(ERRMSG) ) THEN
+        R = SIZE(Eqn) + ONE
+        EXIT
+    ELSE
+        !
+        ANS=MathOP(COP,ANS,RHS)
+        !
+        IF(ANS.NE.ANS) THEN
+            IF(R==ONE) R=TWO
+            IF    (COP == '/') THEN
+                 !
+                 IF(RETURN_CHECK(ERRMSG) ) THEN
+                     ERRMSG = ERRMSG//BLN//'SOLVING MATH OPERATION "/" RESULTED IN A FATAL ERROR.'//BLN//'THE LEFT HAND SIDE OF DIVISION, /, IS NON-ZERO, BUT THE RIGHT HAND SIDE IS ZERO.'//NL//'THIS RESULTS IN A DIVISION BY ZERO ERROR (1/0).'//BLN//'THIS OCCURS DURING AN OPERATION SOMEWHERE AFTER A "/" AROUND THE FOLLOWING TERM "'//Eqn(R-1)%T//'"'//BLN//'FOR EQUATION:'//NL//REMAKE_FUNCTION(Eqn)
+                 ELSE
+                     ERRMSG = 'SOLVING MATH OPERATION "/" RESULTED IN A FATAL ERROR.'//BLN//'THE LEFT HAND SIDE OF DIVISION, /, IS NON-ZERO, BUT THE RIGHT HAND SIDE IS ZERO.'//NL//'THIS RESULTS IN A DIVISION BY ZERO ERROR (1/0).'//BLN//'THIS OCCURS DURING AN OPERATION SOMEWHERE AFTER A "/" AROUND THE FOLLOWING TERM "'//Eqn(R-1)%T//'"'//BLN//'FOR EQUATION:'//NL//REMAKE_FUNCTION(Eqn)
+                 END IF
+            ELSEIF(COP == '^') THEN
+                 !
+                 IF(RETURN_CHECK(ERRMSG) ) THEN
+                     ERRMSG = ERRMSG//BLN//'SOLVING MATH OPERATION "^" RESULTED IN A FATAL ERROR.'//BLN//'THE LEFT HAND SIDE OF POWER, ^, IS NEGATIVE AND THE RIGHT HAND SIDE IS NOT AN INTEGER.'//NL//'THIS RESULTED IN A FLAOTING POINT ERROR BECAUSE IMAGINARY NUMBERS ARE NOT SUPPORTED.'//BLN//'FOR EXAMPLE: -2^0.5 <==> SQRT(-2)'//BLN//'THIS OCCURS DURING AN OPERATION SOMEWHERE BEFORE A "^" AROUND THE FOLLOWING TERM "'//Eqn(R-1)%T//'"'//BLN//'FOR EQUATION:'//NL//REMAKE_FUNCTION(Eqn)
+                 ELSE
+                     ERRMSG = 'SOLVING MATH OPERATION "^" RESULTED IN A FATAL ERROR.'//BLN//'THE LEFT HAND SIDE OF POWER, ^, IS NEGATIVE AND THE RIGHT HAND SIDE IS NOT AN INTEGER.'//NL//'THIS RESULTED IN A FLAOTING POINT ERROR BECAUSE IMAGINARY NUMBERS ARE NOT SUPPORTED.'//BLN//'FOR EXAMPLE: -2^0.5 <==> SQRT(-2)'//BLN//'THIS OCCURS DURING AN OPERATION SOMEWHERE BEFORE A "^" AROUND THE FOLLOWING TERM "'//Eqn(R-1)%T//'"'//BLN//'FOR EQUATION:'//NL//REMAKE_FUNCTION(Eqn)
+                 END IF
+            ELSE
+                 IF(RETURN_CHECK(ERRMSG) ) THEN
+                     ERRMSG = ERRMSG//BLN//'SOLVING MATH OPERATION "'//COP//'" RESULTED IN A FATAL ERROR (EITHER DIVIDE BY ZERO OR NEGATIVE NUMBER RAISED TO A NON-INTEGER POWER). THIS OCCURED AROUND THE FOLLOWING TERM "'//Eqn(R-1)%T//'"'
+                 ELSE
+                     ERRMSG = 'SOLVING MATH OPERATION "'//COP//'" RESULTED IN A FATAL ERROR (EITHER DIVIDE BY ZERO OR NEGATIVE NUMBER RAISED TO A NON-INTEGER POWER). THIS OCCURED AROUND THE FOLLOWING TERM "'//Eqn(R-1)%T//'"'
+                 END IF
+            END IF
+            ANS = DZ
+            R = SIZE(Eqn) + ONE
+            EXIT    
+        END IF
+    END IF
+    !
+  END DO
+  !
+END SUBROUTINE
+!
+!######################################################################    
+!
+RECURSIVE PURE SUBROUTINE NextAtom(Eqn,R,ANS,NML,NMV,ERRMSG) !PULLS NEXT VARIABLE IN EQUATION
+  !CHARACTER(*),DIMENSION(:),      INTENT(IN   )::Eqn               !ARRAY CONTAINING ALL PARTS OF EQUATION
+  TYPE (EQN_TERMS), DIMENSION(:), INTENT(IN   )::Eqn                !!ARRAY CONTAINING ALL PARTS OF EQUATION
+  INTEGER,                        INTENT(INOUT)::R                  !CURRENT INDEX OF ARRAY TO OPERATE ON 
+  DOUBLE PRECISION,               INTENT(INOUT)::ANS                !THE ATOM THAT IS RETURNED
+  CHARACTER(*),    DIMENSION(:),  INTENT(IN   )::NML                !ARRAY OF VARIABLE NAMES
+  DOUBLE PRECISION,DIMENSION(:),  INTENT(IN   )::NMV                !ARRAY OF VARIABLE VALUES WITH HIGHEST DIMENSION ONE TO ONE WITH VARIABLE NAME ARRAY (RIGHT MOST DIM) 
+  CHARACTER(:),ALLOCATABLE,       INTENT(INOUT):: ERRMSG            !IS ALLOCATED WHEN THERE IS AN ERROR RAISED
+  CONTIGUOUS:: Eqn,NML,NMV
+  !
+  !CHARACTER(5), PARAMETER::OP='+-*/^'
+  !CHARACTER(1), PARAMETER::LP='('
+  !CHARACTER(1), PARAMETER::RP=')'
+  CHARACTER(LEN(NML))::WORD
+  INTEGER:: I,MP
+  LOGICAL:: VALID
+  !
+  IF(RETURN_CHECK(ERRMSG)) THEN
+    ANS=DZ
+    R = SIZE(Eqn) + ONE
+  ELSEIF (R>SIZE(Eqn)) THEN
+    ANS=DZ
+  ELSE IF(LP==Eqn(R)%T)THEN          !FOUND "(" START PRECDIENCE OVER TO EVALUATE TO ")"
+    MP=1
+    R=R+1
+    CALL EqnParser(Eqn,R,ANS,MP,NML,NMV,ERRMSG)
+    IF( R > SIZE(Eqn,1) ) THEN
+        IF(.NOT. RETURN_CHECK(ERRMSG)) THEN
+            ERRMSG = 'EQUATION ERROR:  UNMATCHED PARENTHESIS SOMEWHERE AFTER A "(" AND BEFORE "'//Eqn(R-1)%T//'"'//NL//'FOR EQUATION:'//NL//REMAKE_FUNCTION(Eqn)//BLN//  &
+                         'THIS ERROR COULD ALSO OCCUR IF YOU HAVE AN IF[] BLOCK THAT CONTAINS A SET OF PARENTHESIS AROUND AN INEQUALITY.'//NL// &
+                         'FOR EXAMPLE:'//BLN//'IF[ (A<B), 1, 0] OR'//NL//'IF[ (C>A & A<B) | B>C, 1, 0]'//BLN//'HOWEVER THIS IS ALLOWED:'//BLN//'IF[ (B+C)>A & A<B | (A+B)*C > D, 1, 0]'//BLN!//'THE FOLLOWING IS A LIST OF THE AVAILBLE VARIABLE NAMES AND THEIR VALUES:'//PRINT_VARIABLE_LIST(NML,NMV)
+        END IF
+        !
+    ELSEIF(RP/=Eqn(R)%T) THEN
+        ERRMSG = 'EQUATION ERROR:  UNMATCHED PARENTHESIS SOMEWHERE AFTER A "(" AND BEFORE "'//Eqn(R)%T//'"'//NL//'FOR EQUATION:'//NL//REMAKE_FUNCTION(Eqn)//NL//'THE FOLLOWING IS A LIST OF THE AVAILBLE VARIABLE NAMES AND THEIR VALUES:'//PRINT_VARIABLE_LIST(NML,NMV)
+        R = SIZE(Eqn)
+        !
+    END IF
+    R=R+1
+  ELSE IF( INDEX(OP,Eqn(R)%T)>Z ) THEN
+       IF(R==ONE) THEN
+           ERRMSG = 'EQUATION ERROR: EXPECTED VARIABLE, BUT FOUND AN OPERATOR: +, -, *, /, AT "'//Eqn(R)%T//'" WHICH IS LOCATED AT THE START OF THE EQUATION.'//NL//'PLEASE NOTE THAT A NEGATIVE VARIABLE "-Y + X" IS NOT ALLOWED.'//NL//'NEGATIVE VARIABLES CAN ONLY BE DEFINED WITH THE NEG FUNCTION SUCH AS "NEG(Y) + X" OR CHANGING THE MATH TO BE "X - Y"'//NL//'THIS OCCURED WITHIN THE FOLLOWING EQUATION:'//NL//REMAKE_FUNCTION(Eqn)//NL//'THE FOLLOWING IS A LIST OF THE AVAILBLE VARIABLE NAMES AND THEIR VALUES:'//PRINT_VARIABLE_LIST(NML,NMV)
+       ELSE
+           ERRMSG = 'EQUATION ERROR: EXPECTED VARIABLE, BUT FOUND AN OPERATOR: +, -, *, /, AT "'//Eqn(R-ONE)%T//'"'//NL//'THIS MOST LIKELY OCCURED CAUSE YOU HAD TWO OPERATORS IN A ROW SUCH AS ++ or -+ OR A NEGATIVE VARIABLE "X + (-Y)".'//NL//'NEGATIVE VARIABLES CAN ONLY BE DEFINED WITH THE NEG FUNCTION SUCH AS "X + NEG(Y)" OR CHANGING THE MATH TO BE "X - Y"'//NL//'THIS OCCURED WITHIN THE FOLLOWING EQUATION:'//NL//REMAKE_FUNCTION(Eqn)//NL//'THE FOLLOWING IS A LIST OF THE AVAILBLE VARIABLE NAMES AND THEIR VALUES:'//PRINT_VARIABLE_LIST(NML,NMV)
+       END IF
+       R = SIZE(Eqn) + 1
+       !
+  ELSE IF(KEYWORD(Eqn(R)%T)) THEN      !KEYWORD AND PARETHESIS FOUND SO RESTART EQUATION SEARCH
+    WORD=Eqn(R)%T
+    R=R+1
+    !
+    IF(LP/=Eqn(R)%T) THEN
+         ERRMSG = 'EQUATION ERROR: KEYWORD MUST BE FOLLOWED BY "("'//NL//'THE KEYWORD FOUND IS "'//Eqn(R-1)%T//'" AND WAS FOLLOWED BY "'//Eqn(R)%T//'"'//NL//'FOR EQUATION:'//NL//REMAKE_FUNCTION(Eqn)//NL//'THE FOLLOWING IS A LIST OF THE AVAILBLE VARIABLE NAMES AND THEIR VALUES:'//PRINT_VARIABLE_LIST(NML,NMV)
+         R = SIZE(Eqn) + 1
+    ELSE
+         MP=1   
+         R=R+1
+         CALL EqnParser(Eqn,R,ANS,MP,NML,NMV,ERRMSG)    !FOUND KEYWORD and "(" START PRECDIENCE OVER TO EVALUATE TO ")"
+         !
+         IF( R <= SIZE(Eqn,1) ) THEN
+            IF( RP/=Eqn(R)%T  ) THEN
+                 ERRMSG = 'EQUATION ERROR:  UNMATCHED PARENTHESIS FOR KEYWORD "'//TRIM(WORD)//'"'//NL//'THAT OCCURS BEFORE "'//Eqn(R)%T//'"'//NL//'FOR EQUATION:'//REMAKE_FUNCTION(Eqn)//NL//'THE FOLLOWING IS A LIST OF THE AVAILBLE VARIABLE NAMES AND THEIR VALUES:'//PRINT_VARIABLE_LIST(NML,NMV)
+                 R = SIZE(Eqn)
+            ELSE 
+                 CALL KEYWORDEVAL(WORD,ANS,VALID)                                !UPDATE ANS BY SOLVING IT WITH THE FUNCTION WORD                        
+                 !
+                 IF( .NOT.VALID ) THEN
+                      ERRMSG = 'EQUATION ERROR: BAD VALUE ( e.g. LOG(0) ) PASSED TO THE FOLLOWING KEYWORD, "'//TRIM(WORD)//'"'//NL//'FOR EQUATION:'//NL//REMAKE_FUNCTION(Eqn)//NL//'THE FOLLOWING IS A LIST OF THE AVAILBLE VARIABLE NAMES AND THEIR VALUES:'//PRINT_VARIABLE_LIST(NML,NMV)
+                      R = SIZE(Eqn)
+                 END IF
+            END IF
+            !
+            R=R+1
+         END IF 
+    END IF       
+  ELSEIF ('IF' == Eqn(R)%T) THEN
+      CALL PROCESS_INLINE_CONDITIONAL(Eqn,R,ANS,NML,NMV,ERRMSG)
+  ELSEIF ('MIN'==Eqn(R)%T .OR. 'MAX'==Eqn(R)%T) THEN
+      CALL PROCESS_MINMAX(Eqn,R,ANS,NML,NMV,ERRMSG)
+  !ELSEIF (ANY(Eqn(R)%T==MAGICLIST)) THEN
+  !    CALL PROCESS_MAGIC (Eqn,R,ANS,NML,NMV,ERRMSG)
+  ELSE IF(BLNK==Eqn(R)%T)THEN
+    IF(R==1)R=2  
+    ERRMSG = 'EQUATION ERROR:  UNEXPECTED ENDING OF EQUATION AFTER "'//Eqn(R-1)%T//'"'//NL//'FOR EQUATION:'//NL//REMAKE_FUNCTION(Eqn)
+    R = SIZE(Eqn) + 1
+    !
+  ELSE
+    !
+    ! SEARCH FOR VARIABLE NAME
+    MP = Z
+    DO I=1, SIZE(NML)
+      IF(Eqn(R)%T == NML(I))THEN
+        MP=I
+        EXIT
+      END IF
+    END DO
+    !
+    IF(MP > Z) THEN
+                   IF( R<SIZE(Eqn) ) THEN
+                     !
+                     IF ( Eqn(R+ONE)%T == LB ) THEN
+                         !
+                         CALL GET_ARRAY_INDEX(Eqn,R,I,NML,NMV,ERRMSG)
+                         !
+                         I = I - ONE
+                         IF( NML(MP) == NML(MP+I) ) THEN !IS FALSE IF BAD INDEX
+                             !
+                             MP = MP + I
+                         ELSE
+                             BLOCK
+                                 CHARACTER(16):: IDX
+                                 INTEGER:: IERR
+                                 !
+                                 I = I + ONE
+                                 READ(IDX,*,IOSTAT=IERR) I
+                                 !
+                                 IF(IERR.NE.Z) IDX='???'
+                                 !
+                                 IDX= ADJUSTL(IDX)
+                                 !
+                                 IF(RETURN_CHECK(ERRMSG) ) THEN
+                                     ERRMSG = ERRMSG//BLN//'EQUATION ERROR: FOUND "'//Eqn(R-3)%T//Eqn(R-2)%T//Eqn(R-1)%T//Eqn(R)%T//'", WHICH IS A VARIABLE NAME FOLLOWED BY [] INDICATING IT IS AN ARRAY VARIABLE.'//NL//'THE ARRAY INDEX "'//Eqn(R-1)%T//'" RETURNED THE RESULT OF "'//TRIM(IDX)//'" WHICH IS INVALID'//NL//'FOR EQUATION:'//NL//REMAKE_FUNCTION(Eqn)
+                                 ELSE
+                                     ERRMSG =              'EQUATION ERROR: FOUND "'//Eqn(R-3)%T//Eqn(R-2)%T//Eqn(R-1)%T//Eqn(R)%T//'", WHICH IS A VARIABLE NAME FOLLOWED BY [] INDICATING IT IS AN ARRAY VARIABLE.'//NL//'THE ARRAY INDEX "'//Eqn(R-1)%T//'" RETURNED THE RESULT OF "'//TRIM(IDX)//'" WHICH IS INVALID'//NL//'FOR EQUATION:'//NL//REMAKE_FUNCTION(Eqn)
+                                 END IF
+                             END BLOCK
+                             R = SIZE(Eqn)
+                         END IF
+                         !
+                     END IF
+                   END IF
+                                  ANS = NMV( MP )
+    ELSE
+        CALL QUICK_NUM_CHECK(Eqn(R)%T, ANS, VALID) !VALID IS TRUE IF NOT FOUND NUMBER
+        !
+        IF(VALID) THEN
+                    READ(Eqn(R)%T,*,IOSTAT=MP) ANS
+                    !
+                    IF(MP /= Z) THEN
+                        ERRMSG = 'ERROR EVALUATING EQUATION - FALURE TO IDENTIFY VARIABLE NAME AMONG LIST OF PREVIOUSLY DEFINED NAMES'//NL//'OR CONVERT PART OF THE EQUATION TO A NUMBER.'//NL//                                                                                                                                         &
+                                 'THE VARIABLE NAME BEING SEARCHED FOR/CONVERTED TO A NUMBER IS:'//BLN//'     "'//Eqn(R)%T//'"'//BLN//'THE VARIABLE NAME MAY NOT BE DEFINED OR CONTAINS A SPELLING ERROR.'//BLN//                                                                                                  &
+                                 'IF THERE IS AN OPERATOR, + - / * IN THE NAME, THEN THE PARSER HAD AN ISSUE WITH THE EQUATION STRUCTURE'//NL//'MAYBE YOU HAVE TWO OPERATORS IN A ROW, LIKE "X+-Y"'//NL//'OR YOU HAVE A NEGATIVE SYMBOL WHEN YOU SHOULD USE THE NEG FUNCTION "-Y+X" INSTEAD OF "NEG(Y)+X"'//BLN//   &
+                                 'FOR YOUR REFERENCE THE FOLLOWING IS A LIST OF THE VARIABLE NAMES'//NL//'THAT ARE CURRENTLY DEFINED AND WERE WHAT WAS SEARCHED THROUGH:'//PRINT_VARIABLE_NAMES(NML)
+                        ANS = DZ
+                        R = SIZE(Eqn)
+                    END IF
+        END IF
+    END IF
+    !
+    R=R+1  !MOVE TO NEXT TERM
+    !
+  END IF
+END SUBROUTINE
+!
+!######################################################################      
+!
+RECURSIVE PURE SUBROUTINE PROCESS_INLINE_CONDITIONAL(Eqn,R,COND_ANS,NML,NMV,ERRMSG)
+  TYPE (EQN_TERMS), DIMENSION(:), INTENT(IN   )::Eqn                !!ARRAY CONTAINING ALL PARTS OF EQUATION
+  INTEGER,                        INTENT(INOUT)::R                  !CURRENT INDEX OF ARRAY TO OPERATE ON 
+  DOUBLE PRECISION,               INTENT(INOUT)::COND_ANS           !HOLDS EITHER THE TRUE OR FALSE PORTION OF THE IF STATEMENT
+  CHARACTER(*),    DIMENSION(:),  INTENT(IN   )::NML                !ARRAY OF VARIABLE NAMES
+  DOUBLE PRECISION,DIMENSION(:),  INTENT(IN   )::NMV                !ARRAY OF VARIABLE VALUES WITH HIGHEST DIMENSION ONE TO ONE WITH VARIABLE NAME ARRAY (RIGHT MOST DIM) 
+  CHARACTER(:),ALLOCATABLE,       INTENT(INOUT):: ERRMSG            !IS ALLOCATED WHEN THERE IS AN ERROR RAISED
+  CONTIGUOUS:: Eqn,NML,NMV
+  !
+  TYPE (EQN_TERMS),DIMENSION(:),ALLOCATABLE:: SubEqn
+  !
+  INTEGER,DIMENSION(:),ALLOCATABLE:: IDX                             !POINTER ARRAY THAT IS ONLY USED TO POINT TO THE & AND | IN CONDITIONAL PART OF IF
+  INTEGER:: I, J, Rsub, MP, NR
+  !
+  LOGICAL:: COND
+  LOGICAL:: COND2   !TEMPORARY ARRAY THAT IS ONLY USED IF THERE IS AN "OR" OPERATOR, ie "|"
+  !
+  NR = SIZE(Eqn)
+  !
+  !CHARACTER(:), ALLOCATABLE:: TRUE_LN, FALSE_LN
+  !
+  ! 'IF[...'
+  !
+  R = R + TWO   !SKIP THE 'IF' AND THE LEFT BRACKET '['
+  !
+  ! PROCESS CONDITIONAL
+  IF ( INDEX(Eqn(R)%T,'|') > Z ) THEN  !SEARCH IF THERE IS AN "OR" OPERATOR 
+     !
+     I=Z                                     !COUND THE NUMBER OF |'s
+     DO J=1, LEN(Eqn(R)%T)
+         IF ( '|' == Eqn(R)%T(J:J) ) I=I+1
+     END DO
+     !
+     ALLOCATE(IDX(I+2))          !POINTER ARRAY OF THE LOCATION OF ALL |'s
+     IDX(1)=Z                    !START OF LOCATION 
+     IDX(I+2)=LEN(Eqn(R)%T)+1    !END OF LOCATION
+     !
+     I=2
+     DO J=1, LEN(Eqn(R)%T)
+        IF ( '|' == Eqn(R)%T(J:J) ) THEN
+            IDX(I)=J                       !Store the locations from 2 to the last |
+            I=I+1
+        END IF
+     END DO
+     !
+     DO I=1, SIZE(IDX,1)-1
+        IF (I==1) THEN
+           CALL PROCESS_CONDITION(Eqn(R)%T( IDX(I)+1:IDX(I+1)-1 ), COND, NML,NMV,ERRMSG)    !PASS ONLY PORTION BETWEEN MULTIPLE |'s
+        ELSE
+           CALL PROCESS_CONDITION(Eqn(R)%T( IDX(I)+1:IDX(I+1)-1 ), COND2,NML,NMV,ERRMSG)   !PASS ONLY PORTION BETWEEN MULTIPLE |'s
+           COND = COND .OR. COND2
+           IF(COND) EXIT  !OR HAS ONE TRUE, SO NO NEED TO CHECK THE REST
+        END IF
+     END DO
+     DEALLOCATE(IDX)
+     !
+  ELSE
+     CALL PROCESS_CONDITION(Eqn(R)%T, COND,NML,NMV,ERRMSG)  !NO | SO EVALUATE CONDITIONAL (THERE STILL CAN BE &'s)
+  END IF
+  !  
+  !R=R+1  !SKIP TO TRUE LOCATION
+  !TRUE_LN=Eqn(R)%T
+  !!  
+  !R=R+1  !SKIP TO FALSE LOCATION
+  !FALSE_LN=Eqn(R)%T
+  !!
+  !DO WHILE (']' /= Eqn(R)%T)  !MOVE TO WHERE CLOSING BRACKET IS LOCATED
+  !  R=R+1
+  !END DO
+  !R=R+1  !MOVE PAST CLOSING BRACKET SO NEXTATOM EITHER TERMINATES OR PROCESSES THE NEXT OPERATOR
+  !
+  R=R+1  !SKIP TO TRUE LOCATION
+  !
+  IF(RETURN_CHECK(ERRMSG)) THEN
+      COND_ANS = DZ
+      R = NR
+  ELSEIF (COND) THEN  !TRUE CONDITION
+     CALL SplitFunc(Eqn(R)%T, SubEqn, ERRMSG)  !AT TRUE LOCATION EVALUATE WHAT IS THERE
+     Rsub=1
+     MP=1      
+     CALL EqnParser(SubEqn,Rsub,COND_ANS,MP,NML,NMV,ERRMSG)    !SOLVE FOR THE RIGHT SIDE OF THE CONDITINAL
+     DEALLOCATE(SubEqn)
+  ELSE
+     R=R+1  !SKIP TO FALSE LOCATION
+     IF(RB /= Eqn(R)%T) THEN                   !CHECK FALSE LOCATION RB = ']'
+        CALL SplitFunc(Eqn(R)%T, SubEqn,ERRMSG)
+        Rsub=1
+        MP=1      
+        CALL EqnParser(SubEqn,Rsub,COND_ANS,MP,NML,NMV,ERRMSG)  !SOLVE FOR THE RIGHT SIDE OF THE CONDITINAL
+        DEALLOCATE(SubEqn)
+     ELSE
+         COND_ANS = IEEE_VALUE(COND_ANS, IEEE_QUIET_NAN)
+     END IF
+  END IF
+  !
+  DO WHILE (RB /= Eqn(R)%T .AND. R < NR)  !MOVE TO WHERE CLOSING BRACKET IS LOCATED  RB = ']'
+    R=R+1
+  END DO
+  R=R+1  !MOVE PAST CLOSING BRACKET SO NEXTATOM EITHER TERMINATES OR PROCESSES THE NEXT OPERATOR
+  !
+  !DEALLOCATE(LN)
+  !DEALLOCATE(TRUE_LN, FALSE_LN)
+END SUBROUTINE
+!
+!######################################################################      
+!
+!!!!!!!!!!!!!!!!!!!!PURE SUBROUTINE SplitCond(LN,CND,ERRMSG)  !SPLITS LINE BY VARIABLES,OPERATIONS, PARENTHESES, ALLOCATES SPACE REQUIRED FOR EQUATION STORAGE, LN_SETUP=.TRUE. => MAKE LN UPPER CASE AND REMOVE BLANK SPACES
+!!!!!!!!!!!!!!!!!!!!  CHARACTER(*),                             INTENT(IN   ):: LN
+!!!!!!!!!!!!!!!!!!!!  TYPE (EQN_TERMS),DIMENSION(:),ALLOCATABLE,INTENT(INOUT):: CND
+!!!!!!!!!!!!!!!!!!!!  CHARACTER(:),ALLOCATABLE,                 INTENT(INOUT):: ERRMSG
+!!!!!!!!!!!!!!!!!!!!  
+!!!!!!!!!!!!!!!!!!!!  
+!!!!!!!!!!!!!!!!!!!!  
+!!!!!!!!!!!!!!!!!!!!END SUBROUTINE
+!!!!!!!!!!!!!!!!!!!!RECURSIVE PURE SUBROUTINE EVAL_CONDITIONAL(Ln,NML,NMV,COND,ERRMSG)        !Ln='Actual EQUATION',NML='Named Variable List',NMV='Named Variable Values',CHKCASE=OPTIONAL:CONVERT A COPY OF NML TO UPPER,CHKKEY=OPTIONAL:CHECK FOR KEYWORD IN NML,RES='EQUATION Result'
+!!!!!!!!!!!!!!!!!!!!  CHARACTER(*),                 INTENT(IN   ):: Ln      !STRING THAT CONTAINS EQUATION
+!!!!!!!!!!!!!!!!!!!!  CHARACTER(*),    DIMENSION(:),INTENT(INOUT):: NML     !ARRAY OF VARIABLE NAMES
+!!!!!!!!!!!!!!!!!!!!  DOUBLE PRECISION,DIMENSION(:),INTENT(IN   ):: NMV     !ARRAY OF VARIABLE VALUES WITH HIGHEST DIMENSION ONE TO ONE WITH VARIABLE NAME ARRAY (RIGHT MOST DIM) 
+!!!!!!!!!!!!!!!!!!!!  CHARACTER(:),ALLOCATABLE,     INTENT(INOUT):: ERRMSG  !IS ALLOCATED WHEN THERE IS AN ERROR RAISED
+!!!!!!!!!!!!!!!!!!!!  LOGICAL,                      INTENT(  OUT):: COND    !TRUE/FALSE RESULT
+!!!!!!!!!!!!!!!!!!!!  CONTIGUOUS:: NML, NMV
+!!!!!!!!!!!!!!!!!!!!  !
+!!!!!!!!!!!!!!!!!!!!  INTEGER, DIMENSION(:),ALLOCATABLE:: IDX                      !POINTER ARRAY THAT IS ONLY USED TO POINT TO THE & AND | IN CONDITIONAL PART OF IF
+!!!!!!!!!!!!!!!!!!!!  INTEGER::I,J,N B,P
+!!!!!!!!!!!!!!!!!!!!  !INTEGER::NVAR
+!!!!!!!!!!!!!!!!!!!!  LOGICAL::COND2
+!!!!!!!!!!!!!!!!!!!!  !
+!!!!!!!!!!!!!!!!!!!!  COND2=FALSE
+!!!!!!!!!!!!!!!!!!!!  !
+!!!!!!!!!!!!!!!!!!!!  N = LEN_TRIM(LN)
+!!!!!!!!!!!!!!!!!!!!  !
+!!!!!!!!!!!!!!!!!!!!  P = Z
+!!!!!!!!!!!!!!!!!!!!  B = Z
+!!!!!!!!!!!!!!!!!!!!  I = Z                        !COUND THE NUMBER OF |'s
+!!!!!!!!!!!!!!!!!!!!  DO J=ONE, LEN(Ln)
+!!!!!!!!!!!!!!!!!!!!      IF    ( LB  == Ln(J:J) ) THEN
+!!!!!!!!!!!!!!!!!!!!                                    B = B + ONE
+!!!!!!!!!!!!!!!!!!!!      ELSEIF( LP  == Ln(J:J) ) THEN    
+!!!!!!!!!!!!!!!!!!!!                                    P = P + ONE
+!!!!!!!!!!!!!!!!!!!!      ELSEIF( RP  == Ln(J:J) ) THEN    
+!!!!!!!!!!!!!!!!!!!!                                    P = P - ONE
+!!!!!!!!!!!!!!!!!!!!      ELSEIF( RB  == Ln(J:J) ) THEN
+!!!!!!!!!!!!!!!!!!!!                                    B = B - ONE
+!!!!!!!!!!!!!!!!!!!!      ELSEIF(B == Z .AND. P == Z) THEN
+!!!!!!!!!!!!!!!!!!!!          IF( '|' == Ln(J:J) ) I=I+1
+!!!!!!!!!!!!!!!!!!!!      END IF
+!!!!!!!!!!!!!!!!!!!!  END DO
+!!!!!!!!!!!!!!!!!!!!  !
+!!!!!!!!!!!!!!!!!!!!  IF(I > Z) THEN
+!!!!!!!!!!!!!!!!!!!!       ALLOCATE(IDX(I+2))          !POINTER ARRAY OF THE LOCATION OF ALL |'s
+!!!!!!!!!!!!!!!!!!!!       IDX(1)=Z                    !START OF LOCATION 
+!!!!!!!!!!!!!!!!!!!!       IDX(I+2)=LEN(Ln)+1    !END OF LOCATION
+!!!!!!!!!!!!!!!!!!!!       DO J=ONE, LEN(Ln)
+!!!!!!!!!!!!!!!!!!!!           IF    ( LB  == Ln(J:J) ) THEN
+!!!!!!!!!!!!!!!!!!!!                                         B = B + ONE
+!!!!!!!!!!!!!!!!!!!!           ELSEIF( LP  == Ln(J:J) ) THEN    
+!!!!!!!!!!!!!!!!!!!!                                         P = P + ONE
+!!!!!!!!!!!!!!!!!!!!           ELSEIF( RP  == Ln(J:J) ) THEN    
+!!!!!!!!!!!!!!!!!!!!                                         P = P - ONE
+!!!!!!!!!!!!!!!!!!!!           ELSEIF( RB  == Ln(J:J) ) THEN
+!!!!!!!!!!!!!!!!!!!!                                         B = B - ONE
+!!!!!!!!!!!!!!!!!!!!           ELSEIF(B == Z .AND. P == Z) THEN
+!!!!!!!!!!!!!!!!!!!!               IF( '|' == Ln(J:J) ) I=I+1
+!!!!!!!!!!!!!!!!!!!!           END IF
+!!!!!!!!!!!!!!!!!!!!       END DO
+!!!!!!!!!!!!!!!!!!!!  END IF
+!!!!!!!!!!!!!!!!!!!!  
+!!!!!!!!!!!!!!!!!!!!  !
+!!!!!!!!!!!!!!!!!!!!  N = INDEX(Ln,'|')
+!!!!!!!!!!!!!!!!!!!!  ! PROCESS CONDITIONAL
+!!!!!!!!!!!!!!!!!!!!  IF ( N > ONE ) THEN  !SEARCH IF THERE IS AN "OR" OPERATOR 
+!!!!!!!!!!!!!!!!!!!!     !
+!!!!!!!!!!!!!!!!!!!!     N = N + ONE
+!!!!!!!!!!!!!!!!!!!!     I = ONE                        !COUND THE NUMBER OF |'s
+!!!!!!!!!!!!!!!!!!!!     DO J=N, LEN(Ln)
+!!!!!!!!!!!!!!!!!!!!         IF ( '|' == Ln(J:J) ) I=I+1
+!!!!!!!!!!!!!!!!!!!!     END DO
+!!!!!!!!!!!!!!!!!!!!     !
+!!!!!!!!!!!!!!!!!!!!     ALLOCATE(IDX(I+2))          !POINTER ARRAY OF THE LOCATION OF ALL |'s
+!!!!!!!!!!!!!!!!!!!!     IDX(1)=Z                    !START OF LOCATION 
+!!!!!!!!!!!!!!!!!!!!     IDX(I+2)=LEN(Ln)+1    !END OF LOCATION
+!!!!!!!!!!!!!!!!!!!!     !
+!!!!!!!!!!!!!!!!!!!!     I=2
+!!!!!!!!!!!!!!!!!!!!     DO J=1, LEN(Ln)
+!!!!!!!!!!!!!!!!!!!!        IF ( '|' == Ln(J:J) ) THEN
+!!!!!!!!!!!!!!!!!!!!            IDX(I)=J                       !Store the locations from 2 to the last |
+!!!!!!!!!!!!!!!!!!!!            I=I+1
+!!!!!!!!!!!!!!!!!!!!        END IF
+!!!!!!!!!!!!!!!!!!!!     END DO
+!!!!!!!!!!!!!!!!!!!!     !
+!!!!!!!!!!!!!!!!!!!!     DO I=1, SIZE(IDX,1)-1
+!!!!!!!!!!!!!!!!!!!!        IF (I==1) THEN
+!!!!!!!!!!!!!!!!!!!!           CALL PROCESS_CONDITION(Ln( IDX(I)+1:IDX(I+1)-1 ), COND, NML,NMV,ERRMSG)    !PASS ONLY PORTION BETWEEN MULTIPLE |'s
+!!!!!!!!!!!!!!!!!!!!        ELSE
+!!!!!!!!!!!!!!!!!!!!           CALL PROCESS_CONDITION(Ln( IDX(I)+1:IDX(I+1)-1 ), COND2,NML,NMV,ERRMSG)   !PASS ONLY PORTION BETWEEN MULTIPLE |'s
+!!!!!!!!!!!!!!!!!!!!           COND = COND .OR. COND2
+!!!!!!!!!!!!!!!!!!!!           IF(COND) EXIT  !OR HAS ONE TRUE, SO NO NEED TO CHECK THE REST
+!!!!!!!!!!!!!!!!!!!!        END IF
+!!!!!!!!!!!!!!!!!!!!     END DO
+!!!!!!!!!!!!!!!!!!!!     !
+!!!!!!!!!!!!!!!!!!!!     DEALLOCATE(IDX)
+!!!!!!!!!!!!!!!!!!!!  ELSE
+!!!!!!!!!!!!!!!!!!!!     CALL PROCESS_CONDITION(Ln, COND,NML,NMV,ERRMSG)  !NO | SO EVALUATE CONDITIONAL (THERE STILL CAN BE &'s)
+!!!!!!!!!!!!!!!!!!!!  END IF
+!!!!!!!!!!!!!!!!!!!!  !
+!!!!!!!!!!!!!!!!!!!!  CALL CHECK_FOR_ERROR(ERRMSG,LN)
+!!!!!!!!!!!!!!!!!!!!  !
+!!!!!!!!!!!!!!!!!!!!END SUBROUTINE
+!
+!######################################################################      
+!
+RECURSIVE PURE SUBROUTINE PROCESS_CONDITION(COND_LN, COND,NML,NMV,ERRMSG)
+  CHARACTER(*),                   INTENT(IN) :: COND_LN
+  LOGICAL,                        INTENT(OUT):: COND
+  CHARACTER(*),    DIMENSION(:),  INTENT(IN   )::NML                !ARRAY OF VARIABLE NAMES
+  DOUBLE PRECISION,DIMENSION(:),  INTENT(IN   )::NMV                !ARRAY OF VARIABLE VALUES WITH HIGHEST DIMENSION ONE TO ONE WITH VARIABLE NAME ARRAY (RIGHT MOST DIM) 
+  CHARACTER(:),ALLOCATABLE,       INTENT(INOUT):: ERRMSG            !IS ALLOCATED WHEN THERE IS AN ERROR RAISED
+  CONTIGUOUS:: NML,NMV
+  !
+  TYPE (EQN_TERMS),DIMENSION(:),ALLOCATABLE:: SubEqn
+  !
+  DOUBLE PRECISION:: LCOND, RCOND
+  INTEGER,DIMENSION(:),   ALLOCATABLE:: IDX
+  INTEGER:: I, J, MP, Rsub!, LINELEN
+  INTEGER:: OPLOC1, OPLOC2   !LOCATION JUST BEFORE AND JUST AFTER THE LOGICAL OPERATOR
+  !CHARACTER(LEN(COND_LN)):: LCOND_LN, RCOND_LN
+  CHARACTER(2):: REL_OP
+  !
+  !LINELEN=LEN(COND_LN)
+  !ALLOCATE(CHARACTER(LINELEN)::LCOND_LN)
+  !ALLOCATE(CHARACTER(LINELEN)::RCOND_LN)
+  !
+  ! COUNT THE NUMBER OF & AND FIND THEIR LOCATION
+  IF ( INDEX(COND_LN,'&') > Z ) THEN
+     !
+     ! COUNT NUMBER OF &
+     I=Z
+     DO J=1, LEN(COND_LN)
+         IF ( '&' == COND_LN(J:J) ) I=I+1
+     END DO
+     ALLOCATE(IDX(I+2))
+     IDX(1)=Z                   !START OF LOCATION 
+     IDX(I+2)=LEN(COND_LN)+1    !END OF LOCATION
+     I=2
+     DO J=1, LEN(COND_LN)
+         IF ( '&' == COND_LN(J:J) ) THEN
+             IDX(I)=J                    !Store the locations from 2 to the last &
+             I=I+1
+         END IF
+     END DO
+  ELSE
+     ALLOCATE(IDX(2))
+     IDX(1)=Z
+     IDX(2)=LEN(COND_LN)+1
+  END IF
+  ! '5<3&6.1>5&ABC<=8'
+  ! IDX=0,4,10,17
+  DO I=1, SIZE(IDX,1)-1
+     REL_OP=BLNK
+     DO J=IDX(I)+1, IDX(I+1)-1          !SEARCH FOR LOGICAL OPERATOR
+        IF     ( '==' == COND_LN(J:J+1) ) THEN
+            REL_OP='EQ'
+            OPLOC1=J-1
+            OPLOC2=J+2
+            EXIT
+        ELSEIF ( '!=' == COND_LN(J:J+1) ) THEN
+            REL_OP='NE'
+            OPLOC1=J-1
+            OPLOC2=J+2
+            EXIT
+        ELSEIF ( '>=' == COND_LN(J:J+1) .OR. '≥' == COND_LN(J:J) ) THEN
+            REL_OP='GE'
+            OPLOC1=J-1
+            OPLOC2=J+2
+            EXIT
+        ELSEIF ( '<=' == COND_LN(J:J+1) .OR. '≤' == COND_LN(J:J) ) THEN
+            REL_OP='LE'
+            OPLOC1=J-1
+            OPLOC2=J+2
+            EXIT
+        ELSEIF ( '>' == COND_LN(J:J) ) THEN
+            REL_OP='GT'
+            OPLOC1=J-1
+            OPLOC2=J+1
+            EXIT
+        ELSEIF ( '<' == COND_LN(J:J) ) THEN
+            REL_OP='LT'
+            OPLOC1=J-1
+            OPLOC2=J+1
+            EXIT
+        END IF
+     END DO
+     !
+     IF(REL_OP==BLNK) THEN
+          ERRMSG = 'PROCESS_CONDITION ERROR: WHILE PROCESSING A CONDITIONAL LINE,'//NL//'FAILED TO LOCATE ONE OF THE FOLLOWING RELATIONAL OPERATORS: <, <=, >, >=, ==, !='//NL//'WITHOUT THEM THERE IS NO WAY TO RETURN A TRUE OR FALSE EVALUATION.'
+          COND = TRUE
+          EXIT
+          !IF(ASSOCIATED(STOP_ERROR)) THEN
+          !    CALL STOP_ERROR(COND_LN,Z,IOUT,'PROCESS_CONDITION ERROR: WHILE PROCESSING A CONDITIONAL LINE,'//NL//'FAILED TO LOCATE ONE OF THE FOLLOWING RELATIONAL OPERATORS: <, <=, >, >=, =='//NL//'WITHOUT THEM THERE IS NO WAY TO RETURN A TRUE OR FALSE EVALUATION.')
+          !ELSE
+          !    WRITE(*,'(A)')'PROCESS_CONDITION ERROR: WHILE PROCESSING A CONDITIONAL LINE,'//NL//'FAILED TO LOCATE ONE OF THE FOLLOWING RELATIONAL OPERATORS: <, <=, >, >=, =='//NL//'WITHOUT THEM THERE IS NO WAY TO RETURN A TRUE OR FALSE EVALUATION.'//NL//'THE FOLLOWING IS THE LINE THAT WAS BEING PARSED: '//NL//'"'//TRIM(COND_LN)//'"'
+          !    ERROR STOP
+          !END IF
+     END IF
+     !
+     !LCOND_LN=COND_LN(  IDX(I)+1:OPLOC1     )      !STORE THE TWO PARTS OF THE CONDITION  --THIS IS THE PART LEFT  OF THE INEQUALITY SYMBOL REL_OP
+     !RCOND_LN=COND_LN(  OPLOC2  :IDX(I+1)-1 )      !STORE THE TWO PARTS OF THE CONDITION  --THIS IS THE PART RIGHT OF THE INEQUALITY SYMBOL REL_OP
+     !  
+     !FIGURE OUT WHAT IS ON THE LEFT  OF THE LOGICAL OPERATOR
+     !
+     CALL SplitFunc(COND_LN( IDX(I)+1:OPLOC1 ), SubEqn, ERRMSG)
+     Rsub=1
+     MP=1      
+     CALL EqnParser(SubEqn,Rsub,LCOND,MP,NML,NMV,ERRMSG)  !SOLVE FOR THE LEFT SIDE OF THE CONDITINAL  
+     !
+     DEALLOCATE(SubEqn)
+     !
+     !FIGURE OUT WHAT IS ON THE RIGHT OF THE LOGICAL OPERATOR
+     CALL SplitFunc(COND_LN( OPLOC2:IDX(I+1)-1 ), SubEqn, ERRMSG)
+     Rsub=1
+     MP=1      
+     CALL EqnParser(SubEqn,Rsub,RCOND,MP,NML,NMV,ERRMSG)  !SOLVE FOR THE RIGHT SIDE OF THE CONDITINAL
+     !
+     DEALLOCATE(SubEqn)
+     !
+     IF (I==1) THEN   ! SET INITIAL CONDITIONAL       
+        COND = INEQUALITY_EVAL(LCOND, RCOND, REL_OP)
+     ELSE                                    !INTIAL CONDITIONAL WAS SET AND THERE WAS AN & DETECTED, SO COMPUTE COMBINED LOGICAL
+        COND = COND .AND. INEQUALITY_EVAL(LCOND, RCOND, REL_OP) 
+     END IF
+  END DO
+  !
+  DEALLOCATE(IDX)
+  !DEALLOCATE(LCOND_LN, RCOND_LN)
+  !
+END SUBROUTINE
+!
+!######################################################################      
+!
+PURE ELEMENTAL FUNCTION INEQUALITY_EVAL(LCOND, RCOND, REL_OP) RESULT(COND)
+  DOUBLE PRECISION, INTENT(IN)::LCOND, RCOND
+  CHARACTER(*),     INTENT(IN):: REL_OP
+  !
+  LOGICAL:: COND
+  !
+  SELECT CASE (REL_OP)
+    CASE ('GE'); COND = LCOND >= RCOND
+    CASE ('LE'); COND = LCOND <= RCOND
+    CASE ('GT'); COND = LCOND >  RCOND
+    CASE ('LT'); COND = LCOND <  RCOND
+    CASE ('EQ'); COND = ABS(LCOND - RCOND) <= ABS(RCOND)*NEARZERO_10
+    CASE ('NE'); COND = ABS(LCOND - RCOND)  > ABS(RCOND)*NEARZERO_10
+  END SELECT
+  !  
+END FUNCTION
+!
+!######################################################################      
+!
+ELEMENTAL PURE FUNCTION IS_INEQUALITY(STR) 
+  CHARACTER(*), INTENT(IN) :: STR
+  LOGICAL:: IS_INEQUALITY
+  !
+  IS_INEQUALITY = '==' == STR(:TWO) .OR. &
+                  '!=' == STR(:TWO) .OR. &
+                  '>=' == STR(:TWO) .OR. &
+                  '<=' == STR(:TWO) .OR. &
+                  '>'  == STR(:ONE) .OR. &
+                  '<'  == STR(:ONE)
+  !
+END FUNCTION
+!
+!######################################################################      
+!
+RECURSIVE PURE SUBROUTINE PROCESS_MINMAX(Eqn,R,MINMAX_ANS,NML,NMV, ERRMSG)
+  TYPE (EQN_TERMS), DIMENSION(:), INTENT(IN   )::Eqn                !!ARRAY CONTAINING ALL PARTS OF EQUATION
+  INTEGER,                        INTENT(INOUT)::R                  !CURRENT INDEX OF ARRAY TO OPERATE ON 
+  DOUBLE PRECISION,               INTENT(INOUT)::MINMAX_ANS         !HOLDS MIN OR MAX OF ALL THE VALUES WITHIN THE BRACKETS
+  CHARACTER(*),    DIMENSION(:),  INTENT(IN   )::NML                !ARRAY OF VARIABLE NAMES
+  DOUBLE PRECISION,DIMENSION(:),  INTENT(IN   )::NMV                !ARRAY OF VARIABLE VALUES WITH HIGHEST DIMENSION ONE TO ONE WITH VARIABLE NAME ARRAY (RIGHT MOST DIM) 
+  CHARACTER(:),ALLOCATABLE,       INTENT(INOUT):: ERRMSG            !IS ALLOCATED WHEN THERE IS AN ERROR RAISED
+  CONTIGUOUS:: NML,NMV
+  !
+  TYPE (EQN_TERMS),DIMENSION(:),ALLOCATABLE:: SubEqn
+  !
+  INTEGER:: Rsub, MP
+  !
+  DOUBLE PRECISION:: NEXT_VAL
+  LOGICAL:: COND
+  !
+  !CHARACTER(:), ALLOCATABLE:: VAL_LN
+  CHARACTER(3):: OPT
+  
+  OPT=Eqn(R)%T
+  
+  ! 'MAX[...' or 'MIN[...'
+  
+  R = R + TWO   !SKIP THE 'MAX' OR 'MIN' AND THE LEFT BRACKET '['
+  
+  !LINELEN=ONE
+  !DO I=R, SIZE(Eqn)
+  !   IF(Eqn(I)%T==']') EXIT
+  !   J=LEN(Eqn(I)%T)
+  !   IF(LINELEN < J ) LINELEN = J
+  !END DO
+  !ALLOCATE(CHARACTER(LINELEN)::VAL_LN)
+  
+  !GET THE FIRST VALUE IN THE MINMAX SEQUENCE
+  !
+  !VAL_LN(:)=Eqn(R)%T
+  CALL SplitFunc(Eqn(R)%T, SubEqn, ERRMSG)
+  Rsub=1
+  MP=1      
+  CALL EqnParser(SubEqn,Rsub,MINMAX_ANS,MP,NML,NMV,ERRMSG)  !SOLVE FOR THE LEFT SIDE OF THE CONDITINAL  
+  DEALLOCATE(SubEqn)
+  R=R+1
+  !
+  DO WHILE ( RB /= Eqn(R)%T )  ! RB = ']'
+      !VAL_LN(:)=Eqn(R)%T
+      CALL SplitFunc(Eqn(R)%T, SubEqn, ERRMSG)
+      Rsub=1
+      MP=1      
+      CALL EqnParser(SubEqn,Rsub,NEXT_VAL,MP,NML,NMV,ERRMSG)  !SOLVE FOR THE LEFT SIDE OF THE CONDITINAL  
+      DEALLOCATE(SubEqn)
+      !
+      IF(RETURN_CHECK(ERRMSG)) THEN
+          MINMAX_ANS = DZ
+          R = SIZE(Eqn)
+          EXIT
+      END IF
+      !
+      SELECT CASE (OPT)
+      CASE ('MAX'); COND = MINMAX_ANS < NEXT_VAL   !WHERE TRUE MEANS NEXT_VAL IS BIGGER  AND SHOULD REPLACE MINMAX_VAL
+      CASE ('MIN'); COND = MINMAX_ANS > NEXT_VAL   !WHERE TRUE MEANS NEXT_VAL IS SMALLER AND SHOULD REPLACE MINMAX_VAL
+      END SELECT
+      !
+      !DO CONCURRENT(I=1:ROW, J=1:COL, COND(I,J)); MINMAX_ANS(I,J) = NEXT_VAL(I,J)
+      !END DO
+      IF(COND) MINMAX_ANS = NEXT_VAL
+      !    
+      R=R+1
+  END DO
+  !
+  ! MOVE PAST CLOSING BRACKET SO NEXT ATOM EITHER TERMINATES OR PROCESSES THE NEXT OPERATOR
+  R=R+1
+  !
+  !DEALLOCATE(VAL_LN)
+END SUBROUTINE    
+!
+!RECURSIVE PURE SUBROUTINE PROCESS_MAGIC(Eqn,R,MAGIC_ANS,NML,NMV,ERRMSG)
+!  TYPE (EQN_TERMS), DIMENSION(:), INTENT(IN   ):: Eqn                !!ARRAY CONTAINING ALL PARTS OF EQUATION
+!  INTEGER,                        INTENT(INOUT):: R                  !CURRENT INDEX OF ARRAY TO OPERATE ON 
+!  DOUBLE PRECISION,               INTENT(INOUT):: MAGIC_ANS          !HOLDS MIN OR MAX OF ALL THE VALUES WITHIN THE BRACKETS
+!  CHARACTER(*),    DIMENSION(:),  INTENT(IN   ):: NML                !ARRAY OF VARIABLE NAMES
+!  DOUBLE PRECISION,DIMENSION(:),  INTENT(IN   ):: NMV                !ARRAY OF VARIABLE VALUES WITH HIGHEST DIMENSION ONE TO ONE WITH VARIABLE NAME ARRAY (RIGHT MOST DIM) 
+!  CHARACTER(:),ALLOCATABLE,       INTENT(INOUT):: ERRMSG             !IS ALLOCATED WHEN THERE IS AN ERROR RAISED
+!  CONTIGUOUS:: NML,NMV
+!  !
+!  TYPE (EQN_TERMS),DIMENSION(:),ALLOCATABLE:: SubEqn
+!  !
+!  INTEGER:: Rsub, MP, IVAL, I
+!  !
+!  TYPE(DATE_OPERATOR):: DATE
+!  !
+!  SELECT CASE(Eqn(R)%T)
+!  CASE('DATE_DIFF')
+!                   BLOCK
+!                       TYPE(DATE_OPERATOR):: DATE0
+!                       R = R + TWO
+!                       CALL MAKE_DATE_FROM_Eqn(Eqn(R)%T,DATE,SubEqn,Rsub,MP,NML,NMV,ERRMSG)
+!                       R = R + ONE
+!                       CALL MAKE_DATE_FROM_Eqn(Eqn(R)%T,DATE0,SubEqn,Rsub,MP,NML,NMV,ERRMSG)
+!                       R = R + ONE
+!                       !
+!                       MAGIC_ANS = DATE - DATE0
+!                   END BLOCK
+!  CASE('ADD_DAY')
+!                   R = R + TWO
+!                   CALL MAKE_DATE_FROM_Eqn(Eqn(R)%T,DATE,SubEqn,Rsub,MP,NML,NMV,ERRMSG)
+!                   R = R + ONE
+!                   CALL SplitFunc(Eqn(R)%T, SubEqn, ERRMSG)
+!                   R = R + ONE
+!                   Rsub=ONE
+!                   MP=ONE      
+!                   CALL EqnParser(SubEqn,Rsub,MAGIC_ANS,MP,NML,NMV,ERRMSG)  !SOLVE FOR THE LEFT SIDE OF THE CONDITINAL  
+!                   DEALLOCATE(SubEqn)
+!                   !
+!                   CALL DATE%ADD_DAY(MAGIC_ANS)
+!                   MAGIC_ANS = DATE%DYEAR
+!  CASE('ADD_YEAR')
+!                   R = R + TWO
+!                   CALL MAKE_DATE_FROM_Eqn(Eqn(R)%T,DATE,SubEqn,Rsub,MP,NML,NMV,ERRMSG)
+!                   R = R + ONE
+!                   CALL MAKE_INT_FROM_Eqn(Eqn(R)%T,IVAL,SubEqn,Rsub,MP,NML,NMV,ERRMSG,MP)  !SECOND MP IS JUST A PLACE HOLDER FOR INTERNAL ERROR CHECKING OF ROUTINE
+!                   R = R + ONE
+!                   !
+!                   CALL DATE%ADD_YEAR(IVAL)
+!                   MAGIC_ANS = DATE%DYEAR
+!  CASE('ADD_MONTH')
+!                   R = R + TWO
+!                   CALL MAKE_DATE_FROM_Eqn(Eqn(R)%T,DATE,SubEqn,Rsub,MP,NML,NMV,ERRMSG)
+!                   R = R + ONE
+!                   CALL MAKE_INT_FROM_Eqn(Eqn(R)%T,IVAL,SubEqn,Rsub,MP,NML,NMV,ERRMSG,MP)  !SECOND MP IS JUST A PLACE HOLDER FOR INTERNAL ERROR CHECKING OF ROUTINE
+!                   R = R + ONE
+!                   !
+!                   CALL DATE%ADD_MONTH(IVAL)
+!                   MAGIC_ANS = DATE%DYEAR
+!  CASE('MAKE_DATE')
+!                   BLOCK
+!                       INTEGER:: M, D, Y, HH, MM, SS
+!                       DOUBLE PRECISION:: FRAC
+!                       FRAC = DZ
+!                       R = R + TWO
+!                                  CALL MAKE_INT_FROM_Eqn(Eqn(R)%T,Y,SubEqn,Rsub,MP,NML,NMV,ERRMSG,I)
+!                                  R = R + ONE
+!                       IF(I == Z) CALL MAKE_INT_FROM_Eqn(Eqn(R)%T,M,SubEqn,Rsub,MP,NML,NMV,ERRMSG,I)
+!                                  R = R + ONE
+!                       IF(I == Z) CALL MAKE_INT_FROM_Eqn(Eqn(R)%T,D,SubEqn,Rsub,MP,NML,NMV,ERRMSG,I)
+!                                  R = R + ONE
+!                       IF(Eqn(R)%T /= RB) THEN
+!                          IF(I == Z) CALL MAKE_INT_FROM_Eqn(Eqn(R)%T,HH,SubEqn,Rsub,MP,NML,NMV,ERRMSG,I)
+!                                     R = R + ONE
+!                          IF(I == Z) CALL MAKE_INT_FROM_Eqn(Eqn(R)%T,MM,SubEqn,Rsub,MP,NML,NMV,ERRMSG,I)
+!                                     R = R + ONE
+!                          IF(I == Z) CALL MAKE_INT_FROM_Eqn(Eqn(R)%T,SS,SubEqn,Rsub,MP,NML,NMV,ERRMSG,I)
+!                                     R = R + ONE
+!                          IF(I == Z) FRAC = DBLE(HH)/24.D0 + DBLE(MM)/1440.D0 + DBLE(SS)/86400.D0
+!                       END IF
+!                       !
+!                       IF(I == Z) THEN
+!                           CALL DATE%INIT_DMY(D,M,Y,FRAC)
+!                           MAGIC_ANS = DATE%DYEAR
+!                       ELSE
+!                           IF(RETURN_CHECK(ERRMSG)) THEN
+!                                                       ERRMSG = ERRMSG//BLN//'PROCESS_MAGIC FUNCTION ERROR: FOUND MAGIC FUNCTION "MAKE_DATE" BUT FAILED TO CONVERT ONE OF ITS INPUTS TO AN INTEGER'//NL//'e.g.'//NL//'MAKE_DATE[Year,Month,Day]  or'//NL//'MAKE_DATE[Year,Month,Day,Hour,Minute,Second],'//NL//'WHERE THE INPUTS ARE WITHIN THE BRACKETS []'
+!                           ELSE
+!                                                       ERRMSG = 'PROCESS_MAGIC FUNCTION ERROR: FOUND MAGIC FUNCTION "MAKE_DATE" BUT FAILED TO CONVERT ONE OF ITS INPUTS TO AN INTEGER'//NL//'e.g.'//NL//'MAKE_DATE[Year,Month,Day]  or'//NL//'MAKE_DATE[Year,Month,Day,Hour,Minute,Second],'//NL//'WHERE THE INPUTS ARE WITHIN THE BRACKETS []'
+!                           END IF
+!                           R = SIZE(Eqn)
+!                       END IF
+!                   END BLOCK
+!  CASE('JULIAN_DAY')
+!                   R = R + TWO
+!                   CALL MAKE_DATE_FROM_Eqn(Eqn(R)%T,DATE,SubEqn,Rsub,MP,NML,NMV,ERRMSG)
+!                   R = R + ONE
+!                   MAGIC_ANS = DBLE(DATE%JDN) + DATE%FRAC
+!  CASE('GET_DAY')
+!                   R = R + TWO
+!                   CALL MAKE_DATE_FROM_Eqn(Eqn(R)%T,DATE,SubEqn,Rsub,MP,NML,NMV,ERRMSG)
+!                   R = R + ONE
+!                   MAGIC_ANS = DBLE(DATE%DAY)
+!  CASE('GET_MONTH')
+!                   R = R + TWO
+!                   CALL MAKE_DATE_FROM_Eqn(Eqn(R)%T,DATE,SubEqn,Rsub,MP,NML,NMV,ERRMSG)
+!                   R = R + ONE
+!                   MAGIC_ANS = DBLE(DATE%MONTH)
+!  CASE('GEY_YEAR')
+!                   R = R + TWO
+!                   CALL MAKE_DATE_FROM_Eqn(Eqn(R)%T,DATE,SubEqn,Rsub,MP,NML,NMV,ERRMSG)
+!                   R = R + ONE
+!                   MAGIC_ANS = DBLE(DATE%YEAR)
+!  CASE('MONTHDAYS')
+!                   BLOCK
+!                       INTEGER:: MONTH, YEAR
+!                       !TYPE(DATE_OPERATOR):: DATE2
+!                       !
+!                       R = R + TWO
+!                       IVAL = Z
+!                       DO I = R, SIZE(Eqn)
+!                           IF (Eqn(I)%T == RB)  EXIT
+!                           IVAL = IVAL + ONE
+!                       END DO
+!                       !
+!                       IF    (IVAL == ONE) THEN
+!                                                CALL MAKE_DATE_FROM_Eqn(Eqn(R)%T,DATE,SubEqn,Rsub,MP,NML,NMV,ERRMSG)
+!                                                R = R + ONE
+!                                                MAGIC_ANS = DBLE(DATE%MONTHDAYS())
+!                       ELSEIF(IVAL == TWO) THEN
+!                                                 CALL MAKE_INT_FROM_Eqn(Eqn(R)%T,MONTH,SubEqn,Rsub,MP,NML,NMV,ERRMSG,I)
+!                                                 R = R + ONE
+!                                      IF(I == Z) CALL MAKE_INT_FROM_Eqn(Eqn(R)%T,YEAR,SubEqn,Rsub,MP,NML,NMV,ERRMSG,I)
+!                                                 R = R + ONE
+!                                      IF(I == Z) THEN
+!                                                 MAGIC_ANS = DBLE(DATE%MONTHDAYS(MONTH, YEAR))
+!                                      ELSE
+!                                                 MAGIC_ANS = UNO
+!                                      END IF
+!                       END IF
+!                   END BLOCK
+!  CASE('MODULO')   ! MODULO[A,P,INT]
+!                   R = R + TWO  !Move past bracket
+!                   ! 
+!                   IF    (Eqn(R+TWO)%T == RB) THEN
+!                                                       IVAL = ONE ! Make INT - Move One Space
+!                   ELSE
+!                       CALL MAKE_INT_FROM_Eqn(Eqn(R+TWO)%T,IVAL,SubEqn,Rsub,MP,NML,NMV,ERRMSG,I)
+!                       IF(I.NE.Z) THEN
+!                                                       IVAL     = NEG ! Error found
+!                                                       MAGIC_ANS= DZ
+!                                                       R        = SIZE(Eqn) + ONE
+!                       ELSEIF(IVAL > Z) THEN
+!                                                       IVAL = TWO ! Make INT - Move Two Space
+!                       ELSE
+!                                                       IVAL = Z   ! Keep as Float
+!                       END IF
+!                   ENDIF
+!                   !
+!                   IF    (IVAL == Z) THEN  !Solve with Float
+!                    BLOCK
+!                        DOUBLE PRECISION:: A, P
+!                        !
+!                                   CALL MAKE_DBLE_FROM_Eqn(Eqn(R)%T, A ,SubEqn,Rsub,MP,NML,NMV,ERRMSG,I)
+!                        R = R + ONE
+!                        IF(I == Z) CALL MAKE_DBLE_FROM_Eqn(Eqn(R)%T, P ,SubEqn,Rsub,MP,NML,NMV,ERRMSG,I)
+!                        !
+!                        IF(RETURN_CHECK(ERRMSG)) THEN
+!                            MAGIC_ANS=DZ
+!                            R = SIZE(Eqn) + ONE
+!                        ELSEIF(NEGNEARZERO_30 < P .AND. P < NEARZERO_30) THEN
+!                            MAGIC_ANS = DZ
+!                        ELSE
+!                            MAGIC_ANS = MODULO(A,P)
+!                        END IF
+!                        !
+!                        R = R + TWO  !Move to ] location
+!                    END BLOCK
+!                   ELSEIF(IVAL >  Z) THEN  !Solve with Int
+!                    BLOCK
+!                        INTEGER:: A, P
+!                        !
+!                                   CALL MAKE_INT_FROM_Eqn(Eqn(R)%T, A ,SubEqn,Rsub,MP,NML,NMV,ERRMSG,I)
+!                        R = R + ONE
+!                        IF(I == Z) CALL MAKE_INT_FROM_Eqn(Eqn(R)%T, P ,SubEqn,Rsub,MP,NML,NMV,ERRMSG,I)
+!                        !
+!                        IF(RETURN_CHECK(ERRMSG)) THEN
+!                            MAGIC_ANS=DZ
+!                            R = SIZE(Eqn) + ONE
+!                        ELSEIF(P == Z) THEN
+!                            MAGIC_ANS = DZ
+!                        ELSE
+!                            MAGIC_ANS = DBLE(MODULO(A,P))
+!                        END IF
+!                        !
+!                        R = R + IVAL  !Move to ] location -- IVAL set to correct number of spaces (1 or 2)
+!                    END BLOCK
+!                   END IF
+!  CASE('HAS_MONTHDAY')
+!                   BLOCK
+!                       INTEGER:: M, D
+!                       TYPE(DATE_OPERATOR):: DATE2
+!                       !
+!                       R = R + TWO
+!                       IVAL = Z
+!                       DO I = R, SIZE(Eqn)
+!                           IF (Eqn(I)%T == RB)  EXIT
+!                           IVAL = IVAL + ONE
+!                       END DO
+!                       !
+!                       IF    (IVAL == THREE) THEN
+!                                                  CALL MAKE_DATE_FROM_Eqn(Eqn(R)%T,DATE,SubEqn,Rsub,MP,NML,NMV,ERRMSG)
+!                                                  M = DATE%MONTH
+!                                                  D = DATE%DAY
+!                                                  R = R + ONE
+!                                                  I = Z
+!                       ELSEIF(IVAL == FOUR) THEN
+!                                                 CALL MAKE_INT_FROM_Eqn(Eqn(R)%T,M,SubEqn,Rsub,MP,NML,NMV,ERRMSG,I)
+!                                                 R = R + ONE
+!                                      IF(I == Z) CALL MAKE_INT_FROM_Eqn(Eqn(R)%T,D,SubEqn,Rsub,MP,NML,NMV,ERRMSG,I)
+!                                                 R = R + ONE
+!                           
+!                       ELSEIF(RETURN_CHECK(ERRMSG)) THEN
+!                                                       ERRMSG = ERRMSG//BLN//'PROCESS_MAGIC FUNCTION ERROR: FOUND MAGIC FUNCTION "HAS_MONTHDAY" BUT FAILED TO PARSE ITS ARGUMENTS. IT MUST ONLY INCLUDE THREE OR FOUR ARGUMENTS, WHICH ARE [DATE, DATE1, DATE2] OR [MONTH, DAY, DATE1, DATE2].'
+!                       ELSE
+!                                                       ERRMSG = 'PROCESS_MAGIC FUNCTION ERROR: FOUND MAGIC FUNCTION "HAS_MONTHDAY" BUT FAILED TO PARSE ITS ARGUMENTS. IT MUST ONLY INCLUDE THREE OR FOUR ARGUMENTS, WHICH ARE [DATE, DATE1, DATE2] OR [MONTH, DAY, DATE1, DATE2].'
+!                       END IF
+!                       !
+!                       CALL MAKE_DATE_FROM_Eqn(Eqn(R)%T,DATE,SubEqn,Rsub,MP,NML,NMV,ERRMSG)
+!                       R = R + ONE
+!                       CALL MAKE_DATE_FROM_Eqn(Eqn(R)%T,DATE2,SubEqn,Rsub,MP,NML,NMV,ERRMSG)
+!                       R = R + ONE
+!                       !
+!                       IF( DATE%CONTAIN_MD(M, D, DATE2, TRUE)) THEN
+!                           MAGIC_ANS = UNO
+!                       ELSE
+!                           MAGIC_ANS = DZ
+!                       END IF
+!                       !
+!                       IF(RETURN_CHECK(ERRMSG)) THEN
+!                           R = SIZE(Eqn)
+!                           MAGIC_ANS = DZ
+!                       END IF
+!                   END BLOCK
+!  CASE('ADD_HOUR','ADD_MIN','ADD_SEC')
+!                   IVAL = R  !BACK UP LOCATION FOR FINAL CHECK
+!                   R = R + TWO
+!                   CALL MAKE_DATE_FROM_Eqn(Eqn(R)%T,DATE,SubEqn,Rsub,MP,NML,NMV,ERRMSG)
+!                   R = R + ONE
+!                   CALL SplitFunc(Eqn(R)%T, SubEqn, ERRMSG)
+!                   R = R + ONE
+!                   Rsub=ONE
+!                   MP=ONE      
+!                   CALL EqnParser(SubEqn,Rsub,MAGIC_ANS,MP,NML,NMV,ERRMSG)  !SOLVE FOR THE LEFT SIDE OF THE CONDITINAL  
+!                   DEALLOCATE(SubEqn)
+!                   !
+!                   SELECT CASE(Eqn(IVAL)%T)
+!                   CASE('ADD_HOUR'); CALL DATE%ADD_HOUR(MAGIC_ANS)
+!                   CASE('ADD_MIN' ); CALL DATE%ADD_MIN (MAGIC_ANS)
+!                   CASE('ADD_SEC' ); CALL DATE%ADD_SEC (MAGIC_ANS)
+!                   END SELECT
+!                   !
+!                   MAGIC_ANS = DATE%DYEAR
+!  END SELECT
+!  !
+!  ! MOVE PAST CLOSING BRACKET SO NEXT ATOM EITHER TERMINATES OR PROCESSES THE NEXT OPERATOR
+!  R = R + ONE
+!  !
+!END SUBROUTINE
+!
+!######################################################################      
+!
+RECURSIVE PURE SUBROUTINE GET_ARRAY_INDEX(Eqn,R,INDEX,NML,NMV, ERRMSG)
+  TYPE (EQN_TERMS), DIMENSION(:), INTENT(IN   ):: Eqn              !ARRAY CONTAINING ALL PARTS OF EQUATION
+  INTEGER,                        INTENT(INOUT):: R                !CURRENT INDEX OF ARRAY TO OPERATE ON 
+  INTEGER,                        INTENT(INOUT):: INDEX            !HOLDS THE SOLUTION FROM THE ARRAY LOOK UP
+  CHARACTER(*),    DIMENSION(:),  INTENT(IN   ):: NML              !ARRAY OF VARIABLE NAMES
+  DOUBLE PRECISION,DIMENSION(:),  INTENT(IN   ):: NMV              !ARRAY OF VARIABLE VALUES WITH HIGHEST DIMENSION ONE TO ONE WITH VARIABLE NAME ARRAY (RIGHT MOST DIM) 
+  CHARACTER(:),ALLOCATABLE,       INTENT(INOUT):: ERRMSG           !IS ALLOCATED WHEN THERE IS AN ERROR RAISED
+  CONTIGUOUS:: NML,NMV
+  !
+  TYPE (EQN_TERMS),DIMENSION(:),ALLOCATABLE:: SubEqn
+  !
+  INTEGER:: Rsub, MP
+  !
+  DOUBLE PRECISION:: IDX
+  !
+  !
+  R = R + TWO   !SKIP THE 'VARNAM' AND THE LEFT BRACKET '['
+  !
+  !
+  !Solve for index in VARNAM [ INDEX ]
+  !
+  CALL SplitFunc(Eqn(R)%T, SubEqn, ERRMSG)
+  Rsub=1
+  MP=1      
+  CALL EqnParser(SubEqn,Rsub,IDX,MP,NML,NMV,ERRMSG)  !SOLVE FOR THE LEFT SIDE OF THE CONDITINAL  
+  DEALLOCATE(SubEqn)
+  !
+  IF(RETURN_CHECK(ERRMSG)) THEN
+                               INDEX = Z
+  ELSE
+                               INDEX = NINT(IDX)
+  END IF
+  !
+  ! MOVE TO CLOSING BRACKET -- R is at ']' AT EXIT
+  R=R+1
+  !
+END SUBROUTINE    
+!
+!######################################################################      
+!
+!RECURSIVE PURE SUBROUTINE MAKE_DATE_FROM_Eqn(LN,DATE,SubEqn,Rsub,MP,NML,NMV,ERRMSG)
+!  CHARACTER(*),                              INTENT(IN   ):: LN
+!  TYPE(DATE_OPERATOR),                       INTENT(INOUT):: DATE
+!  TYPE (EQN_TERMS),DIMENSION(:),ALLOCATABLE, INTENT(INOUT):: SubEqn
+!  INTEGER,                                   INTENT(INOUT):: Rsub,MP
+!  CHARACTER(*),    DIMENSION(:),             INTENT(IN   ):: NML                !ARRAY OF VARIABLE NAMES
+!  DOUBLE PRECISION,DIMENSION(:),             INTENT(IN   ):: NMV                !ARRAY OF VARIABLE VALUES WITH HIGHEST DIMENSION ONE TO ONE WITH VARIABLE NAME ARRAY (RIGHT MOST DIM) 
+!  CHARACTER(:),ALLOCATABLE,                  INTENT(INOUT):: ERRMSG             !IS ALLOCATED WHEN THERE IS AN ERROR RAISED
+!  CONTIGUOUS:: NML,NMV
+!  !
+!  CALL DATE%INIT(LN)
+!  !
+!  IF(DATE%NOT_SET()) THEN
+!                         CALL SplitFunc(LN, SubEqn, ERRMSG)
+!                         Rsub = ONE
+!                         MP   = ONE
+!                         CALL EqnParser(SubEqn,Rsub,DATE%DYEAR,MP,NML,NMV,ERRMSG)
+!                         !
+!                         DATE%DAY = NEG  ! TELLS NEXT ROUTINE TO REMAKE DATE USING DYEAR
+!                         CALL DATE%DYEAR_MAKE_DATE()
+!  END IF
+!END SUBROUTINE
+!
+!######################################################################      
+!
+RECURSIVE PURE SUBROUTINE MAKE_INT_FROM_Eqn(LN,IVAR,SubEqn,Rsub,MP,NML,NMV,ERRMSG,IERR)
+  CHARACTER(*),                              INTENT(IN   ):: LN
+  INTEGER,                                   INTENT(INOUT):: IVAR
+  TYPE (EQN_TERMS),DIMENSION(:),ALLOCATABLE, INTENT(INOUT):: SubEqn
+  INTEGER,                                   INTENT(INOUT):: Rsub,MP
+  CHARACTER(*),    DIMENSION(:),             INTENT(IN   ):: NML                !ARRAY OF VARIABLE NAMES
+  DOUBLE PRECISION,DIMENSION(:),             INTENT(IN   ):: NMV                !ARRAY OF VARIABLE VALUES WITH HIGHEST DIMENSION ONE TO ONE WITH VARIABLE NAME ARRAY (RIGHT MOST DIM) 
+  CHARACTER(:),ALLOCATABLE,                  INTENT(INOUT):: ERRMSG             !IS ALLOCATED WHEN THERE IS AN ERROR RAISED
+  INTEGER,                                   INTENT(  OUT):: IERR
+  CONTIGUOUS:: NML,NMV
+  DOUBLE PRECISION:: VAL
+  !
+  READ(LN,*, IOSTAT = IERR) IVAR
+  !
+  IF(IERR.NE.Z) THEN
+                         ! First check if just specified as single variable name
+                         MP = Z
+                         DO Rsub=ONE, SIZE(NML)
+                           IF(LN == NML(Rsub))THEN
+                                               MP=Rsub
+                                               EXIT
+                           END IF
+                         END DO
+                         !
+                         IF(MP > Z) THEN   !Variable name found
+                             VAL = NMV(MP)
+                         ELSE
+                             CALL SplitFunc(LN, SubEqn, ERRMSG)  !Solve sub-equation
+                             Rsub = ONE
+                             MP   = ONE
+                             VAL  = DZ
+                             CALL EqnParser(SubEqn,Rsub,VAL,MP,NML,NMV,ERRMSG)
+                         END IF
+                         !
+                         IF(RETURN_CHECK(ERRMSG)) THEN
+                             IERR = NEG
+                             IVAR = ONE
+                         ELSE
+                             IERR = Z
+                             IVAR = NINT(VAL)
+                         END IF
+  END IF
+  !
+  !IF(IERR.NE.Z) THEN
+  !                       CALL SplitFunc(LN, SubEqn, ERRMSG)
+  !                       Rsub = ONE
+  !                       MP   = ONE
+  !                       VAL  = DZ
+  !                       CALL EqnParser(SubEqn,Rsub,VAL,MP,NML,NMV,ERRMSG)
+  !                       !
+  !                       IF(RETURN_CHECK(ERRMSG)) THEN
+  !                           IERR = NEG
+  !                           IVAR = ONE
+  !                       ELSE
+  !                           IERR = Z
+  !                           IVAR = NINT(VAL)
+  !                       END IF
+  !END IF
+END SUBROUTINE    
+!
+RECURSIVE PURE SUBROUTINE MAKE_DBLE_FROM_Eqn(LN,VAR,SubEqn,Rsub,MP,NML,NMV,ERRMSG,IERR)
+  CHARACTER(*),                              INTENT(IN   ):: LN
+  DOUBLE PRECISION,                          INTENT(INOUT):: VAR
+  TYPE (EQN_TERMS),DIMENSION(:),ALLOCATABLE, INTENT(INOUT):: SubEqn
+  INTEGER,                                   INTENT(INOUT):: Rsub,MP
+  CHARACTER(*),    DIMENSION(:),             INTENT(IN   ):: NML                !ARRAY OF VARIABLE NAMES
+  DOUBLE PRECISION,DIMENSION(:),             INTENT(IN   ):: NMV                !ARRAY OF VARIABLE VALUES WITH HIGHEST DIMENSION ONE TO ONE WITH VARIABLE NAME ARRAY (RIGHT MOST DIM) 
+  CHARACTER(:),ALLOCATABLE,                  INTENT(INOUT):: ERRMSG             !IS ALLOCATED WHEN THERE IS AN ERROR RAISED
+  INTEGER,                                   INTENT(  OUT):: IERR
+  CONTIGUOUS:: NML,NMV
+  !
+  READ(LN,*, IOSTAT = IERR) VAR
+  !
+  IF(IERR.NE.Z) THEN
+                         ! First check if just specified as single variable name
+                         MP = Z
+                         DO Rsub=ONE, SIZE(NML)
+                           IF(LN == NML(Rsub))THEN
+                                               MP=Rsub
+                                               EXIT
+                           END IF
+                         END DO
+                         !
+                         IF(MP > Z) THEN   !Variable name found
+                             VAR = NMV(MP)
+                         ELSE
+                             CALL SplitFunc(LN, SubEqn, ERRMSG)  !Solve sub-equation
+                             Rsub = ONE
+                             MP   = ONE
+                             VAR  = DZ
+                             CALL EqnParser(SubEqn,Rsub,VAR,MP,NML,NMV,ERRMSG)
+                         END IF
+                         !
+                         IF(RETURN_CHECK(ERRMSG)) THEN
+                             IERR = NEG
+                         ELSE
+                             IERR = Z
+                         END IF
+  END IF
+  !
+  !IF(IERR.NE.Z) THEN
+  !                       CALL SplitFunc(LN, SubEqn, ERRMSG)
+  !                       Rsub = ONE
+  !                       MP   = ONE
+  !                       VAL  = DZ
+  !                       CALL EqnParser(SubEqn,Rsub,VAL,MP,NML,NMV,ERRMSG)
+  !                       !
+  !                       IF(RETURN_CHECK(ERRMSG)) THEN
+  !                           IERR = NEG
+  !                           VAR = ONE
+  !                       ELSE
+  !                           IERR = Z
+  !                           VAR = NINT(VAL)
+  !                       END IF
+  !END IF
+END SUBROUTINE
+!
+!######################################################################      
+!
+PURE SUBROUTINE REMOVEBLANK(LN)                                   !REMOVE INTERNAL BLANK SPACES IN A STRING
+  CHARACTER(*),INTENT(INOUT)::LN
+  !
+  CHARACTER(LEN(LN))::T
+  INTEGER::I, J
+  !
+  IF(LN(1:1)==BLNK) LN=ADJUSTL(LN)
+  !
+  T=BLNK
+  J=1
+  DO I=1, LEN_TRIM(LN)
+     IF(LN(I:I).NE.BLNK .AND. LN(I:I).NE.TAB) THEN   !IF NOT BLANK AND NOT TAB THEN ADD CHARACTER
+        T(J:J)=LN(I:I)  
+        J=J+1
+     END IF
+  END DO
+  !
+  LN=T
+  !
+END SUBROUTINE
+!
+! OLD VERSION:
+!   PURE SUBROUTINE REMOVEBLANK(LN)                                   !REMOVE INTERNAL BLANK SPACES IN A STRING
+!     CHARACTER(*),INTENT(INOUT)::LN
+!     !
+!     CHARACTER(LEN(LN))::T
+!     CHARACTER:: C
+!     INTEGER::I
+!     !
+!     LN=ADJUSTL(LN)
+!     !
+!     T=' '
+!     DO I=1,LEN(TRIM(LN))
+!       C=LN(I:I)
+!       IF(C.NE.' '.AND.C.NE.ACHAR(9)) T=TRIM(T)//C                     !IF NOT BLANK OR TAB ADD CHARACTER
+!     END DO
+!     !
+!     LN=T
+!     !
+!   END SUBROUTINE
+!
+!######################################################################     
+!
+SUBROUTINE SplitFunc_PREPARE_LINE(LN)
+  CHARACTER(*), INTENT(INOUT)::LN
+  !
+  !MAKE LINE ALL UPPER CASE FOR COMPARISONS
+  !CALL UPPER(LN)
+  !REMOVE ALL INTERNAL BLANK SPACES
+  CALL REMOVEBLANK(LN)
+  !
+END SUBROUTINE
+!
+!######################################################################     
+!
+PURE SUBROUTINE SplitFunc(LN,Eqn,ERRMSG)  !SPLITS LINE BY VARIABLES,OPERATIONS, PARENTHESES, ALLOCATES SPACE REQUIRED FOR EQUATION STORAGE, LN_SETUP=.TRUE. => MAKE LN UPPER CASE AND REMOVE BLANK SPACES
+  CHARACTER(*),                             INTENT(IN   ):: LN
+  TYPE (EQN_TERMS),DIMENSION(:),ALLOCATABLE,INTENT(INOUT):: Eqn
+  CHARACTER(:),ALLOCATABLE,                 INTENT(INOUT):: ERRMSG
+  !
+  !CHARACTER(5),PARAMETER::OP='+-*/^'
+  
+  !CHARACTER(1),PARAMETER::LP='('
+  !CHARACTER(1),PARAMETER::RP=')'
+  !CHARACTER(1),PARAMETER::LB='['
+  !CHARACTER(1),PARAMETER::RB=']'
+  !CHARACTER(1),PARAMETER::CM=','
+  DOUBLE PRECISION:: TMP
+  INTEGER::I,J,G,R,B,SymCnt,LINELEN,ISTART,II,JJ,KK
+  LOGICAL:: CONT, IS_NUM
+  !TYPE(DATE_OPERATOR):: DATE
+  !
+  IF(RETURN_CHECK(ERRMSG)) THEN
+      IF(ALLOCATED(Eqn)) DEALLOCATE(Eqn)
+      ALLOCATE(Eqn(ONE))
+      Eqn(ONE)%T = '0.'
+      RETURN
+  END IF
+  !
+  ISTART = 1
+  IF(LN(1:1)=='-') ISTART = 2 
+  !
+  !COUNT NUMBER OF TOKENS WITH 
+  !R:=PAREN AND KEYWORD COUNT
+  !G:=BRACE GROUP COUNT
+  !J:=OP COUNT
+  !B:=BRACE COUNT --SHOULD BE ZERO
+  !
+  B=Z  ! BRACE COUNT --SHOULD BE ZERO
+  G=Z  ! BRACE GROUP COUNT
+  R=Z  ! PAREN AND KEYWORD COUNT
+  J=Z  ! OP COUNT
+  !
+  LINELEN=LEN_TRIM(LN)
+  !
+  !!!DO I = ONE, LEN_TRIM(LN)  !CHECK FOR BAD ASCII CODES
+  !!!    IF ( ICHAR( LN(I:I) ) > 126 ) THEN
+  !!!        !
+  !!!        ERRMSG = 'EQUATION ERROR: FOUND NON-ASCII CHARACTER IN EQUATION.'//BLN//'THE EQUATION PARSER ONLY ALLOWS FOR STANDARD ENGLISH ASCII CHARACTERS (ASCII CODES 1 TO 126)'//NL//'THE CHARACTER THAT IS A PROBLEM IS "'//LN(I:I)//'".'//BLN//'THIS CAN HAPPEN IF YOU COPY/PAST FROM AN ADVANCED EDITOR LIKE MS-WORD.'//NL//'AN EASY FIX IS TO REWRITE YOUR EQUATION IN AN ASCII/UNICODE BASIC TEXT EDITOR.'
+  !!!        !
+  !!!        RETURN
+  !!!    END IF
+  !!!END DO
+  !
+  II = ISTART                            !PREVIOUS TOKEN LOCATION
+  JJ = Z                                 !Used to determine if MAGIC word is found
+  CONT = FALSE
+  DO I=ISTART,LINELEN                    !FIRST COUNT +,-,*,/,(,) and []
+    !
+    !!!IF( I < JJ ) THEN                    !BY PASS MAGIC WORD ARGUMNENTS
+    !!!    CYCLE
+    !!!ELSEIF( I == JJ) THEN
+    !!!    JJ = Z
+    !!!    II = I
+    !!!END IF
+    !!!!
+    !!!IF(I - II > SIX ) THEN
+    !!!    IF(MAGIC(LN(II:I)) THEN
+    !!!         DO KK = I+TWO, LINELEN
+    !!!             IF(RP==LN(I:I)) THEN
+    !!!                 JJ = KK + ONE
+    !!!                 EXIT
+    !!!             END IF
+    !!!         END DO
+    !!!    END IF
+    !!!END IF
+    !
+    IF(LB==LN(I:I)) THEN                 !FOUND '[' SKIP UNTIL ']' IS FOUND
+      IF (B==Z) G=G+1                    !A [ INDICATES STORAGE OF A KEYWORD AND THE [. KEYWORD IS AUTOMATICALLY COUNTED BY
+      B=B+1
+    END IF
+    IF(CM==LN(I:I) .AND. B==1) G=G+1     !FOUND ',' WITHIN [ and ]
+    IF(RB==LN(I:I)) THEN                 !SEARCHING FOR CLOSING ']'
+      B=B-1
+      IF (B==Z) G=G+2
+      II = I + ONE
+    END IF
+    IF (B > Z) CYCLE                      !WITHIN TWO BRACES [ ... X ... ]
+    !
+    IF(RC==LN(I:I)) THEN                 !FOUND '}' NO LONGER SKIPPING
+      CONT = FALSE
+      II = I + ONE
+      CYCLE
+    END IF
+    IF(LC==LN(I:I)) THEN                 !FOUND '{' SKIP UNTIL '}' IS FOUND
+      CONT = TRUE
+      CYCLE
+    END IF
+    IF(CONT) CYCLE
+    !
+    IF(LP==LN(I:I) .OR. RP==LN(I:I)) THEN  !FOUND A ( OR )
+        R=R+1
+        II = I + ONE
+    ELSEIF(INDEX(OP,LN(I:I))>Z)  THEN
+        !
+        IS_NUM = FALSE  !Check if it is a number with uni-operator such as -1.5 or (-6) or 1e+3 or 1D-4
+        !
+        ! First check if it is a negative uni-operator with a number, such as -1 or -3.5
+        !
+        IF( LN(I:I) == '-' .AND. I < LINELEN) THEN  !.AND. I > ONE <- Always true cause of ISTART check on first -
+            !
+            IS_NUM = INDEX(NEGCHK,LN(I-ONE:I-ONE))>Z .AND. INDEX(NUMPNT,LN(I+ONE:I+ONE))>Z
+            !
+        END IF
+        !
+        ! Check if Scientific Notation 1E-5 pr 1D+4
+        !
+        IF( (LN(I:I)=='+'  .OR.  LN(I:I) == '-') .AND.  &
+             ISTART <= I-2 .AND. I < LINELEN     .AND.  .NOT. IS_NUM  ) THEN  !Need at least two spaces to the left and one space to the right
+             !
+             IS_NUM = INDEX(NUMPNT,LN(I-TWO:I-TWO))>Z .AND. INDEX(ED,LN(I-ONE:I-ONE))>Z .AND. INDEX(NUMBERS,LN(I+ONE:I+ONE))>Z  !eg 1.E-5 would pass on -
+             !             
+        END IF
+        !
+        IF( IS_NUM ) THEN  !If passed number test - try to do a read, as final check
+              READ(LN(II:I+ONE),*, IOSTAT = KK) TMP
+              !
+              IS_NUM = KK == Z
+        END IF
+        !
+        IF(.NOT. IS_NUM) THEN ! ITS AN OPERATOR
+            J=J+1
+            II = I + ONE
+        END IF
+        !IF( LN(I:I)=='+' .OR. LN(I:I) == '-' ) THEN
+        !  !
+        !  IS_NUM = FALSE
+        !  IF(ISTART <= I-2 .AND. I+1 <= LINELEN) IS_NUM = INDEX(NUMPNT,LN(I-TWO:I-TWO))>Z .AND. INDEX(ED,LN(I-ONE:I-ONE))>Z .AND. INDEX(NUMBERS,LN(I+ONE:I+ONE))>Z
+        !  !
+        !  IF( IS_NUM ) THEN !MUST CHECK IF PRECEDED BY ED AND PROCEED BY A NUMBER
+        !        READ(LN(II:I+ONE),*, IOSTAT = KK) TMP
+        !        IF( KK /= Z) THEN
+        !                           J=J+1  !NOT A VALID NUMBER SO TREAT AS OPERATOR
+        !                           II = I + ONE
+        !        END IF
+        !  ELSE
+        !      J=J+1
+        !      II = I + ONE
+        !  END IF
+        !ELSE
+        !    J=J+1
+        !    II = I + ONE
+        !END IF
+    END IF
+    !
+  END DO
+  !
+  I=ISTART
+  DO WHILE (I <= LINELEN-ONE)                !NEXT COUNT KEYWORDS  --NOTE A KEYWORD IS ALWAYS FOLLOWED BY A "("  eg ABS( or EXP( ALSO THE SMALLEST EQUATION WITH A KEYWORD IS LENGTH 6 SO IT SHOULD ALWAYS CHECK FOR IT
+     !
+     IF(LB==LN(I:I)) THEN                 !FOUND '[' SKIP UNTIL ']' IS FOUND
+       I=I+1
+       B=1
+       DO WHILE (B > Z .AND. I <= LINELEN)  !NOTE THAT THIS WILL STOP ONE LESS THAN THE OUTER LOOP.
+         IF(LB==LN(I:I)) B=B+1
+         IF(RB==LN(I:I)) B=B-1
+         I=I+1
+       END DO
+       IF(I >= LINELEN) EXIT
+     END IF
+     !
+     IF(LP==LN(I:I)) THEN
+         JJ = I - ONE
+         !
+         KK = I - KEYLEN
+         IF(KK < ONE) KK = ONE
+         !
+         DO II = JJ-TWO, KK, NEG  ! ABS(  MOVE BACK TO THE "A" SPOT
+             !
+             IF( KEYWORD(LN(II:JJ)) ) THEN
+                 R=R+1
+                 EXIT
+             END IF
+         END DO
+     END IF
+     I=I+1
+  END DO
+  !DO WHILE (I <= LINELEN-4)                !NEXT COUNT KEYWORDS  --NOTE A KEYWORD IS ALWAYS FOLLOWED BY A "("  eg ABS( or EXP( ALSO THE SMALLEST EQUATION WITH A KEYWORD IS LENGTH 6 SO IT SHOULD ALWAYS CHECK FOR IT
+  !   !
+  !   IF(LB==LN(I:I)) THEN                 !FOUND '[' SKIP UNTIL ']' IS FOUND
+  !     I=I+1
+  !     B=1
+  !     DO WHILE (B > Z .AND. I < LINELEN-4)  !NOTE THAT THIS WILL STOP ONE LESS THAN THE OUTER LOOP.
+  !       IF(LB==LN(I:I)) B=B+1
+  !       IF(RB==LN(I:I)) B=B-1
+  !       I=I+1
+  !     END DO
+  !   END IF
+  !   !
+  !   IF     ( KEYWORD(LN(I:I+2))  .AND. LN(I+3:I+3)==LP ) THEN
+  !      R=R+1
+  !      I=I+3
+  !   ELSEIF ( KEYWORD(LN(I:I+3))  .AND. LN(I+4:I+4)==LP ) THEN
+  !      R=R+1
+  !      I=I+4
+  !   END IF
+  !   I=I+1
+  !END DO
+  !
+  SymCnt=2*J+1+R+G  !COUNT OF ALL TOKENS
+  !IF(G>0) SymCnt=SymCnt-1
+  !IF (J==0) SymCnt=SymCnt-1  !THERE ARE NO OPERATORS SO COUNT IS OFF BY 1
+  !
+  IF(ALLOCATED(Eqn)) DEALLOCATE(Eqn)
+  ALLOCATE(Eqn(SymCnt))
+  !
+  R=1
+  I=1
+  J=ISTART  !J IS NOW THE POSITION. WORDS WILL BE FROM I:J-1
+  DO WHILE (J.LE.LINELEN .AND. R.LE.SymCnt)
+    !
+    IF(LB==LN(J:J)) THEN                      ! FOUND A LEFT BRACKET, [, NOW BEGIN SEARCH FOR RIGHT BRACKET
+      IF(I<J) THEN
+        Eqn(R)%T=LN(I:J-1)
+        R=R+1
+      END IF  
+      Eqn(R)%T=LN(J:J)
+      R=R+1
+      J=J+1
+      I=J
+      B=1
+      DO WHILE (B > Z .AND. J.LE.LINELEN)      !BEGIN SEARCH FOR "]", B KEEPS COUNT OF HOW MANY LEFT BRACKETS ARE FOUND
+         IF(CM==LN(J:J) .AND. B==1) THEN
+            Eqn(R)%T=LN(I:J-1)
+            R=R+1
+            I=J+1
+         END IF
+         IF(LB==LN(J:J)) B=B+1
+         IF(RB==LN(J:J)) B=B-1       
+         J=J+1
+      END DO
+      J=J-1                 !DUE TO LOOP DESIGN J IS ONE PAST BRACKET
+      !
+      IF(R>SymCnt) THEN
+                ERRMSG = 'EQUATION ERROR: FAILURE TO PARSE EQUATION LINE'//NL//'THIS MAY BE A RESULT IF THE LINE IS NOT LARGE ENOUGH TO HOLD THE ENTIRE EQUATION,'//NL//'THERE ARE UNMATCHED PARETHESIS (),'//NL//'UNMATCHED BRACKETS [],'//NL//'OR SOME OTHER UNKNOWN FAILURE OF THE EQUATION PARSER THAT I, OneWater, CAN NOT HELP YOU WITH.'
+                !IF(ASSOCIATED(STOP_ERROR)) THEN
+                !    CALL STOP_ERROR(LN,OUTPUT=IOUT,MSG='EQUATION ERROR: FAILURE TO PARSE EQUATION LINE'//NL//'THIS MAY BE A RESULT IF THE LINE IS NOT LARGE ENOUGH TO HOLD THE ENTIRE EQUATION,'//NL//'THERE ARE UNMATCHED PARETHESIS (),'//NL//'UNMATCHED BRACKETS [],'//NL//'OR SOME OTHER UNKNOWN FAILURE OF THE EQUATION PARSER THAT I, OneWater, CAN NOT HELP YOU WITH.')
+                !ELSE
+                !    WRITE(*,'(A)') 'EQUATION ERROR: FAILURE TO PARSE EQUATION LINE'//NL//'THIS MAY BE A RESULT IF THE LINE IS NOT LARGE ENOUGH TO HOLD THE ENTIRE EQUATION,'//NL//'THERE ARE UNMATCHED PARETHESIS (),'//NL//'UNMATCHED BRACKETS [],'//NL//'OR SOME OTHER UNKNOWN FAILURE OF THE EQUATION PARSER.'
+                !    ERROR STOP 
+                !END IF
+      END IF
+      !
+      Eqn(R)%T=LN(I:J-1)
+      R=R+1
+      Eqn(R)%T=LN(J:J)
+      R=R+1
+      J=J+1
+      I=J
+      CYCLE
+    END IF
+    !
+    IF(LC==LN(J:J)) THEN                 !FOUND '{' SKIP UNTIL '}' IS FOUND
+          IF(I<J) THEN                   !STORE PREVIOUS ENTRY
+            Eqn(R)%T=LN(I:J-1)
+            R=R+1
+          END IF  
+          J=J+1
+          I=J
+          DO WHILE (RC.NE.LN(J:J) .AND. J < LINELEN)      !BEGIN SEARCH FOR "}", B KEEPS COUNT OF HOW MANY LEFT BRACKETS ARE FOUND
+              J=J+1
+          END DO
+          !
+          IF(RC.NE.LN(J:J)) THEN
+                    ERRMSG = 'EQUATION ERROR: FAILURE TO PARSE EQUATION LINE'//NL//'THIS MAY BE A RESULT IF THE LINE IS NOT LARGE ENOUGH TO HOLD THE ENTIRE EQUATION,'//NL//'THERE ARE UNMATCHED BRACES {},'//NL//'OR SOME OTHER UNKNOWN FAILURE OF THE EQUATION PARSER THAT I, OneWater, CAN NOT HELP YOU WITH.'
+                    !IF(ASSOCIATED(STOP_ERROR)) THEN
+                    !    CALL STOP_ERROR(LN,OUTPUT=IOUT,MSG='EQUATION ERROR: FAILURE TO PARSE EQUATION LINE'//NL//'THIS MAY BE A RESULT IF THE LINE IS NOT LARGE ENOUGH TO HOLD THE ENTIRE EQUATION,'//NL//'THERE ARE UNMATCHED BRACES {},'//NL//'OR SOME OTHER UNKNOWN FAILURE OF THE EQUATION PARSER THAT I, OneWater, CAN NOT HELP YOU WITH.')
+                    !ELSE
+                    !    WRITE(*,'(A)') 'EQUATION ERROR: FAILURE TO PARSE EQUATION LINE'//NL//'THIS MAY BE A RESULT IF THE LINE IS NOT LARGE ENOUGH TO HOLD THE ENTIRE EQUATION,'//NL//'THERE ARE UNMATCHED BRACES {},'//NL//'OR SOME OTHER UNKNOWN FAILURE OF THE EQUATION PARSER THAT I, OneWater, CAN NOT HELP YOU WITH.'
+                    !    ERROR STOP 
+                    !END IF
+          END IF
+          !
+          !CALL DATE%INIT(LN(I:J-1))
+          !!
+          !IF(DATE%NOT_SET()) THEN
+          !          !
+          !          Eqn(R)%T = '{BAD_DATE}'
+          !          !
+          !          IF(RETURN_CHECK(ERRMSG)) THEN
+          !                                      ERRMSG = ERRMSG//BLN//'EQUATION ERROR: FAILURE TO PARSE EQUATION LINE'//NL//'THIS MAY BE A RESULT OF A POORLY FORMATTED DATE CONTAINED WITHIN {}. THE ACCEPTED FORMS ARE:'//BLN//'   {yyyy-mm-dd}'//NL//'   {yyyy-mm-ddThh:mm:ss}'//NL//'   {mm/dd/yyyy}'//NL//'   {mm/dd/yyyyThh:mm:ss}'//NL//'   {yyyy-mmThh:mm:ss}'//NL//'   {mm/yyyy}'//NL//'   {mm/yyyyThh:mm:ss}'
+          !          ELSE
+          !                                      ERRMSG = 'EQUATION ERROR: FAILURE TO PARSE EQUATION LINE'//NL//'THIS MAY BE A RESULT OF A POORLY FORMATTED DATE CONTAINED WITHIN {}. THE ACCEPTED FORMS ARE:'//BLN//'   {yyyy-mm-dd}'//NL//'   {yyyy-mm-ddThh:mm:ss}'//NL//'   {mm/dd/yyyy}'//NL//'   {mm/dd/yyyyThh:mm:ss}'//NL//'   {yyyy-mmThh:mm:ss}'//NL//'   {mm/yyyy}'//NL//'   {mm/yyyyThh:mm:ss}'
+          !          END IF
+          !          !ERRMSG = 'EQUATION ERROR: FAILURE TO PARSE EQUATION LINE'//NL//'THIS MAY BE A RESULT OF A POORLY FORMATTED DATE CONTAINED WITHIN {}. THE ACCEPTED FORMS ARE:'//NL//'{yyyy-mm-dd}'//NL//'{yyyy-mm-ddThh:mm:ss}'//NL//'{mm/dd/yyyy}'//NL//'{mm/dd/yyyyThh:mm:ss}'//NL//'{yyyy-mmThh:mm:ss}'//NL//'{mm/yyyy}'//NL//'{mm/yyyyThh:mm:ss}'
+          !          !IF(ASSOCIATED(STOP_ERROR)) THEN
+          !          !    CALL STOP_ERROR(LN,OUTPUT=IOUT,MSG='EQUATION ERROR: FAILURE TO PARSE EQUATION LINE'//NL//'THIS MAY BE A RESULT OF A POORLY FORMATTED DATE CONTAINED WITHIN {}. THE ACCEPTED FORMS ARE:'//NL//'{yyyy-mm-dd}'//NL//'{yyyy-mm-ddThh:mm:ss}'//NL//'{mm/dd/yyyy}'//NL//'{mm/dd/yyyyThh:mm:ss}'//NL//'{yyyy-mm}'//NL//'{yyyy-mmThh:mm:ss}'//NL//'{mm/yyyy}'//NL//'{mm/yyyyThh:mm:ss}')
+          !          !ELSE
+          !          !    WRITE(*,'(A)') 'EQUATION ERROR: FAILURE TO PARSE EQUATION LINE'//NL//'THIS MAY BE A RESULT OF A POORLY FORMATTED DATE CONTAINED WITHIN {}. THE ACCEPTED FORMS ARE:'//NL//'{yyyy-mm-dd}'//NL//'{yyyy-mm-ddThh:mm:ss}'//NL//'{mm/dd/yyyy}'//NL//'{mm/dd/yyyyThh:mm:ss}'//NL//'{yyyy-mm}'//NL//'{yyyy-mmThh:mm:ss}'//NL//'{mm/yyyy}'//NL//'{mm/yyyyThh:mm:ss}'
+          !          !    ERROR STOP 
+          !          !END IF
+          !ELSE
+               !ALLOCATE(CHARACTER(19)::Eqn(R)%T)
+               !WRITE(Eqn(R)%T,'(F17.12, A)') DATE%DYEAR, 'D0'
+          !END IF
+          !
+          !WRITE(Eqn(R)%T,'(F17.12)') DATE%DYEAR
+          !Eqn(R)%T = TRIM(ADJUSTL(Eqn(R)%T))//'D0'
+          R=R+1
+          J=J+1
+          I=J
+          CYCLE
+    END IF
+    !
+    IF(INDEX(OP,LN(J:J))>Z)THEN              ! FOUND AN OPERATOR SO STORE PRECEDING INFORMATION AND OPERATOR
+        !
+        IS_NUM = FALSE  !Check if it is a number with uni-operator such as -1.5 or (-6) or 1e+3 or 1D-4
+        !
+        ! First check if it is a negative uni-operator with a number, such as -1 or -3.5
+        !
+        ! Check if start of word and is negative and previous character is NEGCHK and next character is a NUMPNT
+        !
+        IF( LN(J:J) == '-' .AND. I==J .AND. J < LINELEN) THEN  !.AND. J > ONE <- Always true cause of ISTART check on first -
+            !
+            IS_NUM = INDEX(NEGCHK,LN(J-ONE:J-ONE))>Z .AND. INDEX(NUMPNT,LN(J+ONE:J+ONE))>Z
+            !
+        END IF
+        !
+        ! Check if Scientific Notation 1E-5 pr 1D+4
+        !
+        IF( (LN(J:J)=='+'  .OR.  LN(J:J) == '-') .AND.  .NOT. IS_NUM ) THEN
+            !
+            IF(I < J .AND. ISTART <= J-2 .AND. J < LINELEN ) THEN  !Need at least two spaces to the left and one space to the right
+                 !
+                 IS_NUM = INDEX(NUMPNT,LN(J-TWO:J-TWO))>Z .AND. INDEX(ED,LN(J-ONE:J-ONE))>Z .AND. INDEX(NUMBERS,LN(J+ONE:J+ONE))>Z  !eg 1.E-5 would pass on -
+                 !             
+            END IF
+        END IF
+        !
+        IF( IS_NUM ) THEN   !Found starting negative, -.1 or -2.8, or found scientific notation, 1E-5 or 1D+8
+                         ! Search for first non-number
+                         !
+                         J=J+2 !Move past the one number and check if next is still a number
+                         DO WHILE (J .LE. LINELEN)
+                             !
+                             IF( INDEX(NUMPNT,LN(J:J))==Z ) EXIT
+                             J=J+1
+                             !
+                         END DO
+        ELSE                                     !Found Operator, so store previous word and operator, update pointers
+                         IF(I<J) THEN
+                                 Eqn(R)%T=LN(I:J-1)   !Store prevous word or number
+                                 R=R+1
+                         END IF
+                         !
+                         Eqn(R)%T=LN(J:J)
+                         R=R+1
+                         J=J+1
+                         I=J
+        ENDIF
+        !
+        CYCLE  ! Updated position or number/word stored, start loop again
+        !
+        !!!IF( I<J .AND. (LN(J:J)=='+' .OR. LN(J:J) == '-' ) ) THEN
+        !!!      !
+        !!!      IS_NUM = FALSE
+        !!!      IF(ISTART <= J-2 .AND. J+1 <= LINELEN) IS_NUM = INDEX(NUMPNT,LN(J-TWO:J-TWO))>Z .AND. INDEX(ED,LN(J-ONE:J-ONE))>Z .AND. INDEX(NUMBERS,LN(J+ONE:J+ONE))>Z
+        !!!      !
+        !!!      IF( IS_NUM ) THEN !MUST CHECK IF PRECEDED BY ED AND PROCEED BY A NUMBER
+        !!!           !
+        !!!           K = ONE
+        !!!           DO KK = TWO, THREE
+        !!!              IF(J+KK <= LINELEN) THEN
+        !!!                    !
+        !!!                    IF( INDEX(NUMBERS,LN(J+KK:J+KK))==Z ) EXIT
+        !!!                    !
+        !!!                    K = KK
+        !!!              ELSE 
+        !!!                    EXIT
+        !!!              END IF
+        !!!           END DO
+        !!!            !
+        !!!            READ(LN(I:J+K),*, IOSTAT = KK) TMP
+        !!!            IF( KK == Z) THEN
+        !!!                   Eqn(R)%T=LN(I:J+K)
+        !!!                   R=R+1
+        !!!                   J=J+K+ONE
+        !!!                   I=J
+        !!!                   CYCLE
+        !!!            END IF
+        !!!      END IF
+        !!!END IF
+        !!!! 
+        !!!IF(I<J) THEN
+        !!!  Eqn(R)%T=LN(I:J-1)
+        !!!  R=R+1
+        !!!END IF  
+        !!!Eqn(R)%T=LN(J:J)
+        !!!R=R+1
+        !!!J=J+1
+        !!!I=J
+        !!!CYCLE
+    END IF
+    !
+    IF(LP==LN(J:J))THEN                     ! FOUND A LEFT PARENTHESIS STORE AND START LOOP OVER
+      Eqn(R)%T=LN(J:J)
+      R=R+1
+      J=J+1
+      I=J
+      CYCLE
+    END IF
+    !
+    IF(RP==LN(J:J))THEN                    ! FOUND A RIGHT PARENTHESIS STORE AND START LOOP OVER
+      IF (I<J)THEN
+        Eqn(R)%T=LN(I:J-1)
+        R=R+1
+      END IF  
+      Eqn(R)%T=LN(J:J)
+      R=R+1
+      J=J+1
+      I=J
+      CYCLE
+    END IF
+    !
+    !!!IF( KEYWORD(LN(I:J)) )THEN            ! FOUND KEYWORD, STORE AND START LOOP OVER
+    !!!  Eqn(R)%T=LN(I:J)
+    !!!  R=R+1
+    !!!  J=J+1
+    !!!  I=J
+    !!!  CYCLE
+    !!!END IF
+    !
+    IF(J < LINELEN    ) THEN
+    IF(LP==LN(J+1:J+1)) THEN
+        !
+        IF( KEYWORD(LN(I:J)) )THEN            ! FOUND KEYWORD, STORE AND START LOOP OVER
+          !
+          Eqn(R)%T=LN(I:J) ! ADD Keyword
+          R=R+1
+          J=J+1
+          I=J
+          !
+          Eqn(R)%T=LN(J:J)  !Add (
+          R=R+1
+          J=J+1
+          I=J
+          CYCLE
+        END IF
+    END IF
+    END IF
+    !
+    J=J+1  !I a number of character, so move to next location and began check
+    !
+  END DO
+  !
+  IF (I<J)Eqn(R)%T=TRIM(LN(I:))
+  !
+END SUBROUTINE 
+!
+!!!SUBROUTINE SplitFunc(LN,Eqn,LN_SETUP)                           !SPLITS LINE BY VARIABLES,OPERATIONS, PARENTHESES, ALLOCATES SPACE REQUIRED FOR EQUATION STORAGE, LN_SETUP=.TRUE. => MAKE LN UPPER CASE AND REMOVE BLANK SPACES
+!!!  CHARACTER(*),INTENT(INOUT)::LN
+!!!  !CHARACTER(*),DIMENSION(:),ALLOCATABLE,INTENT(INOUT)::Eqn          !Eqn WILL BE ALLOCATED TO APPROPIATE SIZE CONTAINING SPECIFIED STRINGS FROM CALLING ROUTINE
+!!!  TYPE (EQN_TERMS),DIMENSION(:),ALLOCATABLE,INTENT(INOUT)::Eqn
+!!!  LOGICAL, INTENT(IN), OPTIONAL:: LN_SETUP
+!!!  !
+!!!  !CHARACTER(5),PARAMETER::OP='+-*/^'
+!!!  
+!!!  !CHARACTER(1),PARAMETER::LP='('
+!!!  !CHARACTER(1),PARAMETER::RP=')'
+!!!  !CHARACTER(1),PARAMETER::LB='['
+!!!  !CHARACTER(1),PARAMETER::RB=']'
+!!!  !CHARACTER(1),PARAMETER::CM=','
+!!!  DOUBLE PRECISION:: TMP
+!!!  INTEGER::I,J,K,G,R,B,SymCnt,LINELEN,ISTART,II,JJ,KK
+!!!  LOGICAL:: LN_CHECK, CONT
+!!!  TYPE(DATE_OPERATOR):: DATE
+!!!  !
+!!!  LN_CHECK=.TRUE.
+!!!  IF(PRESENT(LN_SETUP)) LN_CHECK=LN_SETUP
+!!!  !
+!!!  IF (LN_CHECK) THEN
+!!!     !MAKE LINE ALL UPPER CASE FOR COMPARISONS
+!!!     CALL UPPER(LN)
+!!!     !REMOVE ALL INTERNAL BLANK SPACES
+!!!     CALL REMOVEBLANK(LN)
+!!!  END IF
+!!!  !
+!!!  ISTART = 1
+!!!  IF(LN(1:1)=='-') ISTART = 2 
+!!!  !
+!!!  !COUNT NUMBER OF TOKENS WITH 
+!!!  !R:=PAREN AND KEYWORD COUNT
+!!!  !G:=BRACE GROUP COUNT
+!!!  !J:=OP COUNT
+!!!  !B:=BRACE COUNT --SHOULD BE ZERO
+!!!  !
+!!!  B=Z
+!!!  G=Z
+!!!  R=Z
+!!!  J=Z
+!!!  LINELEN=LEN_TRIM(LN)
+!!!  !
+!!!  II = ISTART                            !PREVIOUS TOKEN LOCATION
+!!!  JJ = Z                                 !Used to determine if MAGIC word is found
+!!!  CONT = FALSE
+!!!  DO I=ISTART,LINELEN                    !FIRST COUNT +,-,*,/,(,) and []
+!!!    !
+!!!    !!!IF( I < JJ ) THEN                    !BY PASS MAGIC WORD ARGUMNENTS
+!!!    !!!    CYCLE
+!!!    !!!ELSEIF( I == JJ) THEN
+!!!    !!!    JJ = Z
+!!!    !!!    II = I
+!!!    !!!END IF
+!!!    !!!!
+!!!    !!!IF(I - II > SIX ) THEN
+!!!    !!!    IF(MAGIC(LN(II:I)) THEN
+!!!    !!!         DO KK = I+TWO, LINELEN
+!!!    !!!             IF(RP==LN(I:I)) THEN
+!!!    !!!                 JJ = KK + ONE
+!!!    !!!                 EXIT
+!!!    !!!             END IF
+!!!    !!!         END DO
+!!!    !!!    END IF
+!!!    !!!END IF
+!!!    !
+!!!    IF(RC==LN(I:I)) THEN                 !FOUND '}' NO LONGER SKIPPING
+!!!      CONT = FALSE
+!!!      II = I + ONE
+!!!      CYCLE
+!!!    END IF
+!!!    IF(LC==LN(I:I)) THEN                 !FOUND '{' SKIP UNTIL '}' IS FOUND
+!!!      CONT = TRUE
+!!!      CYCLE
+!!!    END IF
+!!!    IF(CONT) CYCLE
+!!!    !
+!!!    IF(LB==LN(I:I)) THEN                 !FOUND '[' SKIP UNTIL ']' IS FOUND
+!!!      IF (B==Z) G=G+1                    !A [ INDICATES STORAGE OF A KEYWORD AND THE [. KEYWORD IS AUTOMATICALLY COUNTED BY
+!!!      B=B+1
+!!!    END IF
+!!!    IF(CM==LN(I:I) .AND. B==1) G=G+1     !FOUND ',' WITHIN [ and ]
+!!!    IF(RB==LN(I:I)) THEN                 !SEARCHING FOR CLOSING ']'
+!!!      B=B-1
+!!!      IF (B==Z) G=G+2
+!!!      II = I + ONE
+!!!    END IF
+!!!    IF (B > Z) CYCLE                      !WITHIN TWO BRACES [ ... X ... ]
+!!!    !
+!!!    IF(LP==LN(I:I) .OR. RP==LN(I:I)) THEN  !FOUND A ( OR )
+!!!        R=R+1
+!!!        II = I + ONE
+!!!    ELSEIF(INDEX(OP,LN(I:I))>Z)  THEN
+!!!        IF( LN(I:I)=='+' .OR. LN(I:I) == '-' ) THEN
+!!!          IF( INDEX(NUMPNT,LN(I-TWO:I-TWO))>Z .AND. INDEX(ED,LN(I-ONE:I-ONE))>Z .AND. INDEX(NUMBERS,LN(I+ONE:I+ONE))>Z ) THEN !MUST CHECK IF PRECEDED BY ED AND PROCEED BY A NUMBER
+!!!                READ(LN(II:I+ONE),*, IOSTAT = KK) TMP
+!!!                IF( KK /= Z) THEN
+!!!                                   J=J+1  !NOT A VALID NUMBER SO TREAT AS OPERATOR
+!!!                                   II = I + ONE
+!!!                END IF
+!!!          ELSE
+!!!              J=J+1
+!!!              II = I + ONE
+!!!          END IF
+!!!        ELSE
+!!!            J=J+1
+!!!            II = I + ONE
+!!!        END IF
+!!!    END IF
+!!!    !
+!!!  END DO
+!!!  !
+!!!  I=ISTART
+!!!  DO WHILE (I <= LINELEN-ONE)                !NEXT COUNT KEYWORDS  --NOTE A KEYWORD IS ALWAYS FOLLOWED BY A "("  eg ABS( or EXP( ALSO THE SMALLEST EQUATION WITH A KEYWORD IS LENGTH 6 SO IT SHOULD ALWAYS CHECK FOR IT
+!!!     !
+!!!     IF(LB==LN(I:I)) THEN                 !FOUND '[' SKIP UNTIL ']' IS FOUND
+!!!       I=I+1
+!!!       B=1
+!!!       DO WHILE (B > Z .AND. I <= LINELEN)  !NOTE THAT THIS WILL STOP ONE LESS THAN THE OUTER LOOP.
+!!!         IF(LB==LN(I:I)) B=B+1
+!!!         IF(RB==LN(I:I)) B=B-1
+!!!         I=I+1
+!!!       END DO
+!!!       IF(I == LINELEN) EXIT
+!!!     END IF
+!!!     !
+!!!     IF(LP==LN(I:I)) THEN
+!!!         JJ = I - ONE
+!!!         !
+!!!         KK = I - KEYLEN
+!!!         IF(KK < ONE) KK = ONE
+!!!         !
+!!!         DO II = JJ-TWO, KK, NEG  ! ABS(  MOVE BACK TO THE "A" SPOT
+!!!             !
+!!!             IF( KEYWORD(LN(II:JJ)) ) THEN
+!!!                 R=R+1
+!!!                 EXIT
+!!!             END IF
+!!!         END DO
+!!!     END IF
+!!!     I=I+1
+!!!  END DO
+!!!  !DO WHILE (I <= LINELEN-4)                !NEXT COUNT KEYWORDS  --NOTE A KEYWORD IS ALWAYS FOLLOWED BY A "("  eg ABS( or EXP( ALSO THE SMALLEST EQUATION WITH A KEYWORD IS LENGTH 6 SO IT SHOULD ALWAYS CHECK FOR IT
+!!!  !   !
+!!!  !   IF(LB==LN(I:I)) THEN                 !FOUND '[' SKIP UNTIL ']' IS FOUND
+!!!  !     I=I+1
+!!!  !     B=1
+!!!  !     DO WHILE (B > Z .AND. I < LINELEN-4)  !NOTE THAT THIS WILL STOP ONE LESS THAN THE OUTER LOOP.
+!!!  !       IF(LB==LN(I:I)) B=B+1
+!!!  !       IF(RB==LN(I:I)) B=B-1
+!!!  !       I=I+1
+!!!  !     END DO
+!!!  !   END IF
+!!!  !   !
+!!!  !   IF     ( KEYWORD(LN(I:I+2))  .AND. LN(I+3:I+3)==LP ) THEN
+!!!  !      R=R+1
+!!!  !      I=I+3
+!!!  !   ELSEIF ( KEYWORD(LN(I:I+3))  .AND. LN(I+4:I+4)==LP ) THEN
+!!!  !      R=R+1
+!!!  !      I=I+4
+!!!  !   END IF
+!!!  !   I=I+1
+!!!  !END DO
+!!!  !
+!!!  SymCnt=2*J+1+R+G  !COUNT OF ALL TOKENS
+!!!  !IF(G>0) SymCnt=SymCnt-1
+!!!  !IF (J==0) SymCnt=SymCnt-1  !THERE ARE NO OPERATORS SO COUNT IS OFF BY 1
+!!!  !
+!!!  IF(ALLOCATED(Eqn)) DEALLOCATE(Eqn)
+!!!  ALLOCATE(Eqn(SymCnt))
+!!!  !
+!!!  R=1
+!!!  I=1
+!!!  J=ISTART  !J IS NOW THE POSITION. WORDS WILL BE FROM I:J-1
+!!!  DO WHILE (J.LE.LINELEN .AND. R.LE.SymCnt)
+!!!    !
+!!!    IF(LB==LN(J:J)) THEN                      ! FOUND A LEFT BRACKET, [, NOW BEGIN SEARCH FOR RIGHT BRACKET
+!!!      IF(I<J) THEN
+!!!        Eqn(R)%T=LN(I:J-1)
+!!!        R=R+1
+!!!      END IF  
+!!!      Eqn(R)%T=LN(J:J)
+!!!      R=R+1
+!!!      J=J+1
+!!!      I=J
+!!!      B=1
+!!!      DO WHILE (B > Z .AND. J.LE.LINELEN)      !BEGIN SEARCH FOR "]", B KEEPS COUNT OF HOW MANY LEFT BRACKETS ARE FOUND
+!!!         IF(CM==LN(J:J) .AND. B==1) THEN
+!!!            Eqn(R)%T=LN(I:J-1)
+!!!            R=R+1
+!!!            I=J+1
+!!!         END IF
+!!!         IF(LB==LN(J:J)) B=B+1
+!!!         IF(RB==LN(J:J)) B=B-1       
+!!!         J=J+1
+!!!      END DO
+!!!      J=J-1                 !DUE TO LOOP DESIGN J IS ONE PAST BRACKET
+!!!      !
+!!!      IF(R>SymCnt) THEN
+!!!                IF(ASSOCIATED(STOP_ERROR)) THEN
+!!!                    CALL STOP_ERROR(LN,OUTPUT=IOUT,MSG='EQUATION ERROR: FAILURE TO PARSE EQUATION LINE'//NL//'THIS MAY BE A RESULT IF THE LINE IS NOT LARGE ENOUGH TO HOLD THE ENTIRE EQUATION,'//NL//'THERE ARE UNMATCHED PARETHESIS (),'//NL//'UNMATCHED BRACKETS [],'//NL//'OR SOME OTHER UNKNOWN FAILURE OF THE EQUATION PARSER THAT I, OneWater, CAN NOT HELP YOU WITH.')
+!!!                ELSE
+!!!                    WRITE(*,'(A)') 'EQUATION ERROR: FAILURE TO PARSE EQUATION LINE'//NL//'THIS MAY BE A RESULT IF THE LINE IS NOT LARGE ENOUGH TO HOLD THE ENTIRE EQUATION,'//NL//'THERE ARE UNMATCHED PARETHESIS (),'//NL//'UNMATCHED BRACKETS [],'//NL//'OR SOME OTHER UNKNOWN FAILURE OF THE EQUATION PARSER.'
+!!!                    ERROR STOP 
+!!!                END IF
+!!!      END IF
+!!!      !
+!!!      Eqn(R)%T=LN(I:J-1)
+!!!      R=R+1
+!!!      Eqn(R)%T=LN(J:J)
+!!!      R=R+1
+!!!      J=J+1
+!!!      I=J
+!!!      CYCLE
+!!!    END IF
+!!!    !
+!!!    IF(LC==LN(J:J)) THEN                 !FOUND '{' SKIP UNTIL '}' IS FOUND
+!!!          IF(I<J) THEN                   !STORE PREVIOUS ENTRY
+!!!            Eqn(R)%T=LN(I:J-1)
+!!!            R=R+1
+!!!          END IF  
+!!!          J=J+1
+!!!          I=J
+!!!          DO WHILE (RC.NE.LN(J:J) .AND. J < LINELEN)      !BEGIN SEARCH FOR "]", B KEEPS COUNT OF HOW MANY LEFT BRACKETS ARE FOUND
+!!!              J=J+1
+!!!          END DO
+!!!          !
+!!!          IF(RC.NE.LN(J:J)) THEN
+!!!                    IF(ASSOCIATED(STOP_ERROR)) THEN
+!!!                        CALL STOP_ERROR(LN,OUTPUT=IOUT,MSG='EQUATION ERROR: FAILURE TO PARSE EQUATION LINE'//NL//'THIS MAY BE A RESULT IF THE LINE IS NOT LARGE ENOUGH TO HOLD THE ENTIRE EQUATION,'//NL//'THERE ARE UNMATCHED BRACES {},'//NL//'OR SOME OTHER UNKNOWN FAILURE OF THE EQUATION PARSER THAT I, OneWater, CAN NOT HELP YOU WITH.')
+!!!                    ELSE
+!!!                        WRITE(*,'(A)') 'EQUATION ERROR: FAILURE TO PARSE EQUATION LINE'//NL//'THIS MAY BE A RESULT IF THE LINE IS NOT LARGE ENOUGH TO HOLD THE ENTIRE EQUATION,'//NL//'THERE ARE UNMATCHED BRACES {},'//NL//'OR SOME OTHER UNKNOWN FAILURE OF THE EQUATION PARSER THAT I, OneWater, CAN NOT HELP YOU WITH.'
+!!!                        ERROR STOP 
+!!!                    END IF
+!!!          END IF
+!!!          !
+!!!          CALL DATE%INIT(LN(I:J-1))
+!!!          IF(DATE%NOT_SET()) THEN
+!!!                    IF(ASSOCIATED(STOP_ERROR)) THEN
+!!!                        CALL STOP_ERROR(LN,OUTPUT=IOUT,MSG='EQUATION ERROR: FAILURE TO PARSE EQUATION LINE'//NL//'THIS MAY BE A RESULT OF A POORLY FORMATTED DATE CONTAINED WITHIN {}. THE ACCEPTED FORMS ARE:'//NL//'{yyyy-mm-dd}'//NL//'{yyyy-mm-ddThh:mm:ss}'//NL//'{mm/dd/yyyy}'//NL//'{mm/dd/yyyyThh:mm:ss}'//NL//'{yyyy-mm}'//NL//'{yyyy-mmThh:mm:ss}'//NL//'{mm/yyyy}'//NL//'{mm/yyyyThh:mm:ss}')
+!!!                    ELSE
+!!!                        WRITE(*,'(A)') 'EQUATION ERROR: FAILURE TO PARSE EQUATION LINE'//NL//'THIS MAY BE A RESULT OF A POORLY FORMATTED DATE CONTAINED WITHIN {}. THE ACCEPTED FORMS ARE:'//NL//'{yyyy-mm-dd}'//NL//'{yyyy-mm-ddThh:mm:ss}'//NL//'{mm/dd/yyyy}'//NL//'{mm/dd/yyyyThh:mm:ss}'//NL//'{yyyy-mm}'//NL//'{yyyy-mmThh:mm:ss}'//NL//'{mm/yyyy}'//NL//'{mm/yyyyThh:mm:ss}'
+!!!                        ERROR STOP 
+!!!                    END IF
+!!!          END IF
+!!!          !
+!!!          ALLOCATE(CHARACTER(19)::Eqn(R)%T)
+!!!          WRITE(Eqn(R)%T,'(F17.12)') DATE%DYEAR
+!!!          Eqn(R)%T = TRIM(ADJUSTL(Eqn(R)%T))//'D0'
+!!!          R=R+1
+!!!          J=J+1
+!!!          I=J
+!!!          CYCLE
+!!!    END IF
+!!!    !
+!!!    IF(INDEX(OP,LN(J:J))>Z)THEN              ! FOUND AN OPERATOR SO STORE PRECEDING INFORMATION AND OPERATOR
+!!!      IF( I<J .AND. (LN(J:J)=='+' .OR. LN(J:J) == '-' ) ) THEN
+!!!            IF( INDEX(NUMPNT,LN(J-TWO:J-TWO))>Z .AND. INDEX(ED,LN(J-ONE:J-ONE))>Z .AND. INDEX(NUMBERS,LN(J+ONE:J+ONE))>Z ) THEN !MUST CHECK IF PRECEDED BY ED AND PROCEED BY A NUMBER
+!!!                 !
+!!!                 K = ONE
+!!!                 DO KK = TWO, THREE
+!!!                    IF(J+KK <= LINELEN) THEN
+!!!                          !
+!!!                          IF( INDEX(NUMBERS,LN(J+KK:J+KK))==Z ) EXIT
+!!!                          !
+!!!                          K = KK
+!!!                    ELSE 
+!!!                          EXIT
+!!!                    END IF
+!!!                 END DO
+!!!                  !
+!!!                  READ(LN(I:J+K),*, IOSTAT = KK) TMP
+!!!                  IF( KK == Z) THEN
+!!!                         Eqn(R)%T=LN(I:J+K)
+!!!                         R=R+1
+!!!                         J=J+K+ONE
+!!!                         I=J
+!!!                         CYCLE
+!!!                  END IF
+!!!            END IF
+!!!      END IF
+!!!      ! 
+!!!      IF(I<J) THEN
+!!!        Eqn(R)%T=LN(I:J-1)
+!!!        R=R+1
+!!!      END IF  
+!!!      Eqn(R)%T=LN(J:J)
+!!!      R=R+1
+!!!      J=J+1
+!!!      I=J
+!!!      CYCLE
+!!!    END IF
+!!!    !
+!!!    IF(LP==LN(J:J))THEN                     ! FOUND A LEFT PARENTHESIS STORE AND START LOOP OVER
+!!!      Eqn(R)%T=LN(J:J)
+!!!      R=R+1
+!!!      J=J+1
+!!!      I=J
+!!!      CYCLE
+!!!    END IF
+!!!    !
+!!!    IF(RP==LN(J:J))THEN                    ! FOUND A RIGHT PARENTHESIS STORE AND START LOOP OVER
+!!!      IF (I<J)THEN
+!!!        Eqn(R)%T=LN(I:J-1)
+!!!        R=R+1
+!!!      END IF  
+!!!      Eqn(R)%T=LN(J:J)
+!!!      R=R+1
+!!!      J=J+1
+!!!      I=J
+!!!      CYCLE
+!!!    END IF
+!!!    !
+!!!    IF( KEYWORD(LN(I:J)) )THEN            ! FOUND KEYWORD, STORE AND START LOOP OVER
+!!!      Eqn(R)%T=LN(I:J)
+!!!      R=R+1
+!!!      J=J+1
+!!!      I=J
+!!!      CYCLE
+!!!    END IF
+!!!    !
+!!!    !IF(' '==LN(J:J)) EXIT                !REACHED END OF EQUATION TERMINATE THE LOOP
+!!!    !
+!!!    J=J+1
+!!!  END DO
+!!!  !
+!!!  IF (I<J)Eqn(R)%T=TRIM(LN(I:))
+!!!  !
+!!!END SUBROUTINE 
+!
+!######################################################################       
+!
+PURE SUBROUTINE PRECEDENCE(OPERATION,DIRECT,PREC,ERRMSG)                      !DETERMINES PRIORITY OF OPERATION ***CAN ADD ADDITION OPERATORS LIKE LOG/EXP
+  CHARACTER(*),             INTENT(IN   ):: OPERATION                    !OPERATION
+  CHARACTER(*),             INTENT(INOUT):: DIRECT                       !DIRECTION OF OPERATION
+  INTEGER,                  INTENT(  OUT):: PREC                         !PRECIDENCE OF CURRENT OPERATOR
+  CHARACTER(:),ALLOCATABLE, INTENT(INOUT):: ERRMSG
+  !
+  !
+  SELECT CASE(OPERATION)
+  CASE ('+', '-')
+                PREC=ONE
+                DIRECT='L'
+  CASE ('*','/')
+                PREC=TWO
+                DIRECT='L'
+  CASE ('^')
+                PREC=THREE
+                DIRECT='R'
+  CASE DEFAULT 
+                ERRMSG = 'EQUATION ERROR WITH FUNCTION OpInfo(OP): UNABLE TO UNDERSTAND OPERATOR "'//OPERATION//'"'//NL//'THE ONLY ACCEPTED OPERATORS ARE + - * / and ^'
+                PREC  = Z
+                DIRECT='L'
+  END SELECT
+END SUBROUTINE
+!
+!######################################################################       
+!
+!FUNCTION PRECEDENCE(OPERATION,ERRMSG,DIRECT)                             !DETERMINES PRIORITY OF OPERATION ***CAN ADD ADDITION OPERATORS LIKE LOG/EXP
+!  INTEGER::PRECEDENCE
+!  CHARACTER(*),             INTENT(IN   ):: OPERATION                    !OPERATION
+!  CHARACTER(:),ALLOCATABLE, INTENT(INOUT):: ERRMSG
+!  CHARACTER(*),OPTIONAL,    INTENT(INOUT):: DIRECT                       !DIRECTION OF OPERATION
+!  !
+!  !
+!  SELECT CASE(OPERATION)
+!  CASE ('+', '-')
+!                PRECEDENCE=ONE
+!                IF(PRESENT(DIRECT))DIRECT='L'
+!  CASE ('*','/')
+!                PRECEDENCE=TWO
+!                IF(PRESENT(DIRECT))DIRECT='L'
+!  CASE ('^')
+!                PRECEDENCE=THREE
+!                IF(PRESENT(DIRECT))DIRECT='R'
+!  CASE DEFAULT 
+!                ERRMSG = 'EQUATION ERROR WITH FUNCTION OpInfo(OP): UNABLE TO UNDERSTAND OPERATOR "'//OPERATION//'"'//NL//'THE ONLY ACCEPTED OPERATORS ARE + - * / and ^'
+!                !IF(ASSOCIATED(STOP_ERROR)) THEN
+!                !    CALL STOP_ERROR(OUTPUT=IOUT,MSG='EQUATION ERROR WITH FUNCTION OpInfo(OP): UNABLE TO UNDERSTAND OPERATOR "'//OPERATION//'"'//NL//'THE ONLY ACCEPTED OPERATORS ARE + - * / and ^')
+!                !ELSE
+!                !    WRITE(*,'(3A)') 'EQUATION ERROR WITH FUNCTION OpInfo(OP): UNABLE TO UNDERSTAND OPERATOR "',OPERATION,'"'//NL//'THE ONLY ACCEPTED OPERATORS ARE + - * / and ^'
+!                !    ERROR STOP 
+!                !END IF
+!  END SELECT
+!END FUNCTION
+!
+!######################################################################
+!
+PURE ELEMENTAL FUNCTION MathOP(OPERATION,L,R) RESULT(ANS)                     !APPLY THE CURRENT OPPORATOR TO THE TWO ADJACENT VARIABLES
+  CHARACTER(*),    INTENT(IN)::OPERATION
+  DOUBLE PRECISION,INTENT(IN)::L,R
+  DOUBLE PRECISION           ::ANS
+  !
+  SELECT CASE(OPERATION)
+              CASE ('+');  ANS =  L+R
+              CASE ('-');  ANS =  L-R
+              CASE ('*');  ANS =  L*R
+              CASE ('/');  ANS =  ROBUST_DIV(L,R)
+              CASE ('^');  ANS =  ROBUST_POW(L,R)
+  END SELECT
+  !
+  !IF(NEGNEARZERO_30 < L .AND. L < NEARZERO_30) THEN
+  !    ANS =  DZ
+  !ELSEIF(NEGNEARZERO_30 < R .AND. R < NEARZERO_30) THEN
+  !    ANS =  DZ
+  !ELSE
+  !    ANS =  L/R
+  !END IF
+  !
+END FUNCTION
+!
+!######################################################################
+!
+PURE ELEMENTAL FUNCTION ROBUST_POW(L,R) RESULT(ANS) 
+  DOUBLE PRECISION,INTENT(IN)::L,R
+  DOUBLE PRECISION           ::ANS
+  !
+  IF(NEGNEARZERO_30 < L .AND. L < NEARZERO_30) THEN
+      ANS =  DZ
+  ELSEIF(NEGNEARZERO_7 < R .AND. R < NEARZERO_7) THEN
+      ANS = UNO
+  ELSEIF(0.999999D0 < R .AND. R < 1.000001D0) THEN
+      ANS = L
+  ELSEIF(L < DZ) THEN
+          BLOCK
+              INTEGER:: IR
+              IR = NINT(R)
+              IF    (ABS(R - DBLE(IR)) < NEARZERO_5) THEN
+                  ANS = L**IR
+              ELSE
+                  ANS = IEEE_VALUE(ANS, IEEE_QUIET_NAN)
+              END IF
+          END BLOCK
+  ELSE
+      ANS =  L**R
+  END IF
+  !
+END FUNCTION
+!
+!######################################################################
+!
+PURE ELEMENTAL FUNCTION ROBUST_DIV(L,R) RESULT(ANS) 
+  DOUBLE PRECISION,INTENT(IN)::L,R
+  DOUBLE PRECISION           ::ANS
+  !
+  IF(NEGNEARZERO_30 < L .AND. L < NEARZERO_30) THEN
+      ANS =  DZ
+  ELSEIF(NEGNEARZERO_30 < R .AND. R < NEGNEARZERO_30) THEN
+      ANS = IEEE_VALUE(ANS, IEEE_QUIET_NAN)
+  ELSE
+      ANS =  L/R
+  END IF
+  !
+END FUNCTION
+!
+!######################################################################       
+! Never Actually Used - Kept just in case
+!
+!!!PURE SUBROUTINE GET_NAME_POS(POS, NAME, NML, ERRMSG)       !RETURNS LOCATION OF MULT ARRAY BASED ON NAME  **ASSUMES MLTNAM HAS BEEN INITIALIZED TO ' '
+!!!  INTEGER,                                INTENT(  OUT):: POS
+!!!  CHARACTER(*),                           INTENT(IN   ):: NAME
+!!!  CHARACTER(*), DIMENSION(:), CONTIGUOUS, INTENT(IN   ):: NML                !ARRAY OF VARIABLE NAMES
+!!!  CHARACTER(:),ALLOCATABLE,               INTENT(INOUT):: ERRMSG
+!!!  !
+!!!  INTEGER:: I,N
+!!!  !
+!!!  N=SIZE(NML)
+!!!  !
+!!!  POS=Z
+!!!  DO I=1, N
+!!!    IF(NAME.EQ.NML(I))THEN
+!!!      POS=I
+!!!      EXIT
+!!!    END IF
+!!!  END DO
+!!!  !
+!!!  IF (POS==Z) THEN
+!!!      ERRMSG = 'ERROR EVALUATING EQUATION DUE TO FAILING TO LOCATE NAME OF VARIABLE IN EQUATION WTIHIN FUNCTION NAME_LOOKUP(NAME).'//NL//                                                                                                                                                    &
+!!!                                        'THE VARIABLE NAME BEING SEARCHED FOR IS:'//BLN//'     "'//NAME//'"'//BLN//'IT MAY NOT BE DEFINED OR CONTAINS A SPELLING ERROR.'//BLN//                                                                                                                                                     &
+!!!                                        'IF THERE IS AN OPERATOR, + - / * IN THE NAME, THEN THE PARSER HAD AN ISSUE WITH THE EQUATION STRUCTURE'//NL//'MAYBE YOU HAVE TWO OPERATORS IN A ROW, LIKE "X+-Y"'//NL//'OR YOU HAVE A NEGATIVE SYMBOL WHEN YOU SHOULD USE THE NEG FUNCTION "-Y+X" INSTEAD OF "NEG(Y)+X"'//BLN//   &
+!!!                                        'FOR YOUR REFERENCE THE FOLLOWING IS A LIST OF THE VARIABLE NAMES THAT ARE CURRENTLY DEFINED AND WERE WHAT WAS SEARCHED THROUGH:'//PRINT_VARIABLE_NAMES(NML)
+!!!    !IF(ASSOCIATED(STOP_ERROR)) THEN
+!!!    !    CALL STOP_ERROR(OUTPUT=IOUT,MSG='ERROR EVALUATING EQUATION DUE TO FAILING TO LOCATE NAME OF VARIABLE IN EQUATION WTIHIN FUNCTION NAME_LOOKUP(NAME).'//NL//                                                                                                                                                    &
+!!!    !                                    'THE VARIABLE NAME BEING SEARCHED FOR IS:'//BLN//'     "'//NAME//'"'//BLN//'IT MAY NOT BE DEFINED OR CONTAINS A SPELLING ERROR.'//BLN//                                                                                                                                                     &
+!!!    !                                    'IF THERE IS AN OPERATOR, + - / * IN THE NAME, THEN THE PARSER HAD AN ISSUE WITH THE EQUATION STRUCTURE...MAYBE YOU HAVE TWO OPERATORS IN A ROW, LIKE "X+-Y"'//NL//'OR YOU HAVE A NEGATIVE SYMBOL WHEN YOU SHOULD USE THE NEG FUNCTION "-Y+X" INSTEAD OF "NEG(Y)+X"'//BLN//   &
+!!!    !                                    'FOR YOUR REFERENCE THE FOLLOWING IS A LIST OF THE VARIABLE NAMES THAT ARE CURRENTLY DEFINED AND WERE WHAT WAS SEARCHED THROUGH:'//PRINT_VARIABLE_NAMES(NML))
+!!!    !ELSE
+!!!    !    WRITE(*,'(3A, *(/A))') 'ERROR EVALUATING EQUATION DUE TO FAILING TO LOCATE NAME OF VARIABLE IN EQUATION WTIHIN FUNCTION NAME_LOOKUP(NAME). THE VARIABLE NAME BEING SEARCHED FOR IS: "',NAME, &
+!!!    !                    '". IT MAY NOT BE DEFINED OR CONTAINS A SPELLING ERROR',   &
+!!!    !                'IF THERE IS AN OPERATOR, + - / * IN THE NAME, THEN THE PARSER HAD AN ISSUE WITH THE EXPRESSION STRUCTURE.','MAYBE YOU HAVE TWO OPERATORS IN A ROW, LIKE "X+-Y"','OR YOU HAVE A NEGATIVE SYMBOL WHEN YOU SHOULD USE THE NEG FUNCTION "-Y+X" INSTEAD OF "NEG(Y)+X"'
+!!!    !    ERROR STOP 
+!!!    !END IF
+!!!  END IF
+!!!  !
+!!!END SUBROUTINE
+!
+!######################################################################       
+!
+FUNCTION NAME_LOOKUP(NAME,NML,ERRMSG)       !RETURNS LOCATION OF MULT ARRAY BASED ON NAME  **ASSUMES MLTNAM HAS BEEN INITIALIZED TO ' '
+  INTEGER::NAME_LOOKUP
+  CHARACTER(*):: NAME
+  CHARACTER(*), DIMENSION(:), CONTIGUOUS::NML                !ARRAY OF VARIABLE NAMES
+  CHARACTER(:),ALLOCATABLE, INTENT(INOUT):: ERRMSG
+  !
+  INTEGER:: I,N
+  !
+  N=SIZE(NML)
+  !
+  NAME_LOOKUP=NEG
+  DO I=1, N
+    IF(NAME.EQ.NML(I))THEN
+      NAME_LOOKUP=I
+      EXIT
+    END IF
+    IF (NAME_LOOKUP==NEG) THEN
+        NAME_LOOKUP = ONE
+        ERRMSG = 'ERROR EVALUATING EQUATION DUE TO FAILING TO LOCATE NAME OF VARIABLE IN EQUATION WTIHIN FUNCTION NAME_LOOKUP(NAME).'//NL//                                                                                                                                                    &
+                                          'THE VARIABLE NAME BEING SEARCHED FOR IS:'//BLN//'     "'//NAME//'"'//BLN//'IT MAY NOT BE DEFINED OR CONTAINS A SPELLING ERROR.'//BLN//                                                                                                                                                     &
+                                          'IF THERE IS AN OPERATOR, + - / * IN THE NAME, THEN THE PARSER HAD AN ISSUE WITH THE EQUATION STRUCTURE'//NL//'MAYBE YOU HAVE TWO OPERATORS IN A ROW, LIKE "X+-Y"'//NL//'OR YOU HAVE A NEGATIVE SYMBOL WHEN YOU SHOULD USE THE NEG FUNCTION "-Y+X" INSTEAD OF "NEG(Y)+X"'//BLN//   &
+                                          'FOR YOUR REFERENCE THE FOLLOWING IS A LIST OF THE VARIABLE NAMES THAT ARE CURRENTLY DEFINED AND WERE WHAT WAS SEARCHED THROUGH:'//PRINT_VARIABLE_NAMES(NML)
+      !IF(ASSOCIATED(STOP_ERROR)) THEN
+      !    CALL STOP_ERROR(OUTPUT=IOUT,MSG='ERROR EVALUATING EQUATION DUE TO FAILING TO LOCATE NAME OF VARIABLE IN EQUATION WTIHIN FUNCTION NAME_LOOKUP(NAME).'//NL//                                                                                                                                                    &
+      !                                    'THE VARIABLE NAME BEING SEARCHED FOR IS:'//BLN//'     "'//NAME//'"'//BLN//'IT MAY NOT BE DEFINED OR CONTAINS A SPELLING ERROR.'//BLN//                                                                                                                                                     &
+      !                                    'IF THERE IS AN OPERATOR, + - / * IN THE NAME, THEN THE PARSER HAD AN ISSUE WITH THE EQUATION STRUCTURE...MAYBE YOU HAVE TWO OPERATORS IN A ROW, LIKE "X+-Y"'//NL//'OR YOU HAVE A NEGATIVE SYMBOL WHEN YOU SHOULD USE THE NEG FUNCTION "-Y+X" INSTEAD OF "NEG(Y)+X"'//BLN//   &
+      !                                    'FOR YOUR REFERENCE THE FOLLOWING IS A LIST OF THE VARIABLE NAMES THAT ARE CURRENTLY DEFINED AND WERE WHAT WAS SEARCHED THROUGH:'//PRINT_VARIABLE_NAMES(NML))
+      !ELSE
+      !    WRITE(*,'(3A, *(/A))') 'ERROR EVALUATING EQUATION DUE TO FAILING TO LOCATE NAME OF VARIABLE IN EQUATION WTIHIN FUNCTION NAME_LOOKUP(NAME). THE VARIABLE NAME BEING SEARCHED FOR IS: "',NAME, &
+      !                    '". IT MAY NOT BE DEFINED OR CONTAINS A SPELLING ERROR',   &
+      !                'IF THERE IS AN OPERATOR, + - / * IN THE NAME, THEN THE PARSER HAD AN ISSUE WITH THE EXPRESSION STRUCTURE.','MAYBE YOU HAVE TWO OPERATORS IN A ROW, LIKE "X+-Y"','OR YOU HAVE A NEGATIVE SYMBOL WHEN YOU SHOULD USE THE NEG FUNCTION "-Y+X" INSTEAD OF "NEG(Y)+X"'
+      !    ERROR STOP 
+      !END IF
+    END IF
+  END DO
+  !
+END FUNCTION
+!
+!######################################################################    
+!
+PURE ELEMENTAL FUNCTION KEYWORD(WORD) RESULT(KEY)                      !LIST OF KEYWORDS
+  CHARACTER(*),INTENT(IN)::WORD
+  
+  LOGICAL:: KEY
+  !
+  KEY=ANY(WORD==KEYWORDLIST)       !KEYWORDLIST IS A GLOBAL VARIABLE THAT CONTAINS ALL DEFINED KEY WORDS (eg LOG)
+  !
+END FUNCTION
+!
+!######################################################################    
+!Never actually used - Kept just in case it might be
+!
+!!!PURE ELEMENTAL FUNCTION MAGIC(WORD) RESULT(KEY)                      !LIST OF KEYWORDS
+!!!  CHARACTER(*),INTENT(IN)::WORD
+!!!  
+!!!  LOGICAL:: KEY
+!!!  !
+!!!  KEY=ANY(WORD==MAGICLIST)       !KEYWORDLIST IS A GLOBAL VARIABLE THAT CONTAINS ALL DEFINED KEY WORDS (eg LOG)
+!!!  !
+!!!END FUNCTION
+!
+!######################################################################    
+!
+PURE ELEMENTAL SUBROUTINE KEYWORDEVAL(WORD,ANS,VALID)
+   CHARACTER(*),     INTENT(IN   )::WORD
+   DOUBLE PRECISION, INTENT(INOUT)::ANS
+   LOGICAL,          INTENT(OUT)::VALID
+   !
+   VALID=.TRUE.
+   !
+   SELECT CASE(WORD)
+   CASE('ABS');  ANS=ABS(ANS)
+   CASE('EXP');  ANS=EXP(ANS)
+   CASE('LOG')
+               IF(ANS<=DZ) THEN
+                 VALID=.FALSE.
+               ELSE
+                 ANS=LOG(ANS)
+               END IF
+   CASE('LOG10')
+               IF(ANS<=DZ) THEN
+                 VALID=.FALSE.
+               ELSE
+                 ANS=LOG10(ANS)
+               END IF
+   CASE('NEG');  ANS=DNEG*ANS
+   CASE('SQRT')
+               IF(ANS<DZ) THEN
+                 VALID=.FALSE.
+               ELSE
+                 ANS=SQRT(ANS)
+               END IF
+   CASE('NEG_TO_ZERO')
+               IF(ANS<DZ) ANS = DZ
+   CASE('POS_TO_ZERO')
+               IF(ANS>DZ) ANS = DZ
+   CASE('ROUND'   ); ANS = DNINT(ANS)
+   CASE('CEILING' ); ANS = CEILING(ANS)
+   CASE('FLOOR'   ); ANS = FLOOR(ANS)
+   CASE('TRUNCATE'); ANS = DINT(ANS)
+! CASE DEFAULT                                                     !FUNCTION CONVERTED TO PURE FOR SPEED, HOWEVER THIS NEGATES THE ABILITY OF I/O AND STOP
+!   WRITE(*,'(3A)')'EQUATION: CODE ERROR - KEYWORD, ',TRIM(WORD), ', IS NOT SPECIFIED IN KEYWORDEVAL() FOR EVALUATION.'
+!   STOP
+  END SELECT
+  !
+END SUBROUTINE
+!
+!######################################################################    
+!
+SUBROUTINE KEYWORDCHECK(LIST)
+  CHARACTER(*),DIMENSION(:), CONTIGUOUS::LIST
+  INTEGER,DIMENSION(SIZE(LIST)):: FOUND
+  INTEGER:: NLIST
+  !
+  INTEGER::I,J,N,NKEY
+  !
+  FOUND=Z
+  N=LEN(LIST(1))
+  NKEY=SIZE(KEYWORDLIST)
+  NLIST=SIZE(LIST)
+  !
+  DO I=1, NLIST
+     DO J=1, NKEY
+        IF( INDEX( LIST(I),TRIM(KEYWORDLIST(J)) ) >Z ) THEN
+           FOUND(I)=J
+           EXIT
+        END IF
+     END DO
+  END DO
+  !
+  IF(ANY( FOUND>Z )) THEN
+      !ERRMSG = 'EQUATION ERROR: KEYWORD FOUND IN VARIABLE NAME LIST (NML)'//NL//'THE FOLLOWING ARE THE VARIABLES AND KEYWORDS THAT WERE FOUND: '//PRINT_KEYWORD_VARIABLE(LIST,FOUND)
+      IF(ASSOCIATED(STOP_ERROR)) THEN
+          CALL STOP_ERROR(OUTPUT=IOUT,MSG='EQUATION ERROR: KEYWORD FOUND IN VARIABLE NAME LIST (NML)'//NL//'THE FOLLOWING ARE THE VARIABLES AND KEYWORDS THAT WERE FOUND: '//PRINT_KEYWORD_VARIABLE(LIST,FOUND))
+      ELSE
+          WRITE(*,'(A,/A)') 'EQUATION ERROR: KEYWORD FOUND IN VARIABLE NAME LIST (NML) THE FOLLOWING ARE THE VARIABLES AND KEYWORDS THAT WERE FOUND:'
+          DO I=1,NLIST
+             IF(FOUND(I)>Z) WRITE(*,'(2(5x,A))') TRIM(LIST(I)), TRIM( KEYWORDLIST( FOUND(I) )  )
+          END DO
+              WRITE(*,'(/A)') '***THIS IS NOT ALLOWED; PROGRAM WILL NOW TERMINATE***'
+              ERROR STOP
+      END IF
+  END IF
+  !
+END SUBROUTINE
+!!######################################################################    
+!
+!!!PURE ELEMENTAL SUBROUTINE UPPER(LN)  !CLONE OF UTIL_INTERFACE SUBROUTINE OF SAME NAME  --ASSUME ALL IS CASE CORRECT
+!!!    CHARACTER(*),INTENT(INOUT):: LN
+!!!    INTEGER, PARAMETER:: IDIFF=ICHAR('a')-ICHAR('A')
+!!!    INTEGER::I
+!!!    !
+!!!    DO CONCURRENT(I=1:LEN(LN), LN(I:I).GE.'a' .AND. LN(I:I).LE.'z');  LN(I:I)=CHAR(ICHAR(LN(I:I))-IDIFF)
+!!!    END DO
+!!!    !
+!!!END SUBROUTINE
+!
+!######################################################################    
+!
+PURE FUNCTION REMAKE_FUNCTION(Eqn) RESULT(LN)
+    TYPE (EQN_TERMS),DIMENSION(:), INTENT(IN)::Eqn
+    CHARACTER(:),                  ALLOCATABLE:: LN
+    INTEGER::R,N
+    !
+    N = SIZE(Eqn)
+    IF(N>Z) THEN
+          LN = Eqn(ONE)%T
+        DO R=TWO, N
+          LN = LN//BLNK//Eqn(R)%T
+        END DO
+    ELSE
+          LN = 'NO EQUATION LOADED??? -- THIS SHOULD NOT HAPPEN!!!'
+    END IF
+    !
+END FUNCTION
+!
+PURE FUNCTION PRINT_VARIABLE_LIST(NML,NMV) RESULT(LN)
+    CHARACTER(*),    DIMENSION(:),INTENT(IN)::NML   !ARRAY OF VARIABLE NAMES
+    DOUBLE PRECISION,DIMENSION(:),INTENT(IN)::NMV   !ARRAY OF VARIABLE VALUES WITH HIGHEST DIMENSION ONE TO ONE WITH VARIABLE NAME ARRAY (RIGHT MOST DIM) 
+    CHARACTER(:),                 ALLOCATABLE:: LN
+    CONTIGUOUS:: NML, NMV
+    INTEGER:: I,N
+    CHARACTER(:),ALLOCATABLE:: HED
+    !
+    ALLOCATE(CHARACTER(LEN(NML))::HED)
+    HED(:) = 'VARNAM'
+    LN = BLN//HED//'   VARVAL'
+    DEALLOCATE(HED)
+    !
+    N = SIZE(NML)
+    IF(N>Z) THEN
+        DO I=ONE, N
+          LN = LN//NL//NML(I)//' = '//DBLE2STR(NMV(I))
+        END DO
+        LN = LN//NL
+    ELSE
+          LN = BLN//'NO VARIABLES LOADED??? -- THIS SHOULD NOT HAPPEN!!!'//BLN
+    END IF
+    !
+  END FUNCTION
+  !
+  PURE FUNCTION PRINT_VARIABLE_NAMES(NML) RESULT(LN)
+    CHARACTER(*),    DIMENSION(:),INTENT(IN)::NML   !ARRAY OF VARIABLE NAMES
+    CHARACTER(:),                 ALLOCATABLE:: LN
+    CONTIGUOUS:: NML
+    INTEGER:: I,N
+    !
+    LN = BLN//'VARNAM'
+    N = SIZE(NML)
+    IF(N>Z) THEN
+        DO I=ONE, N
+          LN = LN//NL//NML(I)
+        END DO
+        LN = LN//NL
+    ELSE
+          LN = BLN//'NO VARIABLES LOADED??? -- THIS SHOULD NOT HAPPEN!!!'//BLN
+    END IF
+    !
+END FUNCTION
+!
+PURE FUNCTION PRINT_KEYWORD_VARIABLE(NML,FOUND) RESULT(LN)
+    CHARACTER(*),    DIMENSION(:),INTENT(IN):: NML   !ARRAY OF VARIABLE NAMES
+    INTEGER,         DIMENSION(:),INTENT(IN):: FOUND
+    CHARACTER(:),                 ALLOCATABLE:: LN
+    CONTIGUOUS:: NML, FOUND
+    INTEGER:: I,N
+    CHARACTER(:),ALLOCATABLE:: HED
+    !
+    ALLOCATE(CHARACTER(LEN(NML))::HED)
+    HED(:) = 'VARNAM'
+    LN = BLN//HED//'   KEYWORD'
+    DEALLOCATE(HED)
+    !
+    N = SIZE(NML)
+    IF(N>Z) THEN
+        DO I=ONE, N
+            IF(FOUND(I)>Z) LN = LN//NL//NML(I)//'   '//KEYWORDLIST( FOUND(I) )
+        END DO
+        LN = LN//NL
+    ELSE
+          LN = BLN//'NO VARIABLES LOADED??? -- THIS SHOULD NOT HAPPEN!!!'//BLN
+    END IF
+    !
+END FUNCTION
+!
+PURE FUNCTION DBLE2STR(DVAL)
+    DOUBLE PRECISION,INTENT(IN):: DVAL
+    CHARACTER(:),  ALLOCATABLE :: DBLE2STR
+    CHARACTER(50)::NUM
+    !
+    NUM=BLNK
+    !
+    IF(DVAL.NE.DVAL) THEN
+        NUM='NaN'
+    ELSEIF(DVAL.GE.D250) THEN
+        NUM = 'inf'
+    ELSEIF(DVAL.LE.negD250) THEN
+        NUM = '-inf'
+    ELSE
+     !
+     IF(DVAL==0.D0)                              THEN
+        WRITE(NUM,'(F3.1)') DVAL
+     ELSEIF(DVAL>=1D100 .OR. DVAL<=-1D100)       THEN
+        WRITE(NUM,'(ES40.7E3)') DVAL
+     ELSEIF(DVAL>=1D10 .OR. DVAL<=-1D10)         THEN
+        WRITE(NUM,'(ES40.7E2)') DVAL
+     ELSEIF(DVAL>=1D6 .OR. DVAL<=-1D6)           THEN
+        WRITE(NUM,'(ES40.7E1)') DVAL
+     ELSEIF(DVAL>=1D2 .OR. DVAL<=-1D2 )          THEN
+        WRITE(NUM,'(F40.5)') DVAL
+     ELSEIF(DVAL>=0.00099D0 .OR. DVAL<=-0.00099D0 )  THEN
+        WRITE(NUM,'(F40.7)') DVAL
+     ELSEIF(DVAL>=1D-9 .OR. DVAL<=-1D-9)         THEN
+        WRITE(NUM,'(ES40.7E1)') DVAL
+     ELSEIF(DVAL>=1D-99 .OR. DVAL<=-1D-99)       THEN
+        WRITE(NUM,'(ES40.7E2)') DVAL
+     ELSEIF(DVAL>0.D0 .OR. DVAL<0.D0)            THEN
+        WRITE(NUM,'(ES40.7E3)') DVAL
+     END IF
+    END IF
+    !
+    DBLE2STR=TRIM(ADJUSTL(NUM))
+    !
+    END FUNCTION 
+    !
+    PURE SUBROUTINE QUICK_NUM_CHECK(LINE, VAL, NOT_NUM)
+    CHARACTER(*),     INTENT(IN   ):: LINE
+    DOUBLE PRECISION, INTENT(INOUT):: VAL
+    LOGICAL,          INTENT(INOUT):: NOT_NUM
+    !
+    NOT_NUM = FALSE
+    !
+    SELECT CASE(LINE)
+      CASE('NAN');   VAL = IEEE_VALUE(VAL, IEEE_QUIET_NAN)
+      CASE('INF');   VAL = inf
+      CASE('-INF');  VAL = ninf
+      CASE('-5','-5.','-5.0');  VAL = -5.D0
+      CASE('-4','-4.','-4.0');  VAL = -4.D0
+      CASE('-3','-3.','-3.0');  VAL = -3.D0
+      CASE('-2','-2.','-2.0');  VAL = -2.D0
+      CASE('-1','-1.','-1.0');  VAL = DNEG
+      CASE('0',  '0.', '0.0');  VAL = DZ
+      CASE('0.001');            VAL = MILLI
+      CASE('0.01');             VAL = CENTI
+      CASE('0.1');              VAL = TENTH
+      CASE('0.2','0.20');       VAL = FIFTH
+      CASE('0.25');             VAL = FOURTH
+      CASE('0.5','0.50');       VAL = HALF
+      CASE('0.75');             VAL = DODRANT
+      CASE('0.9','0.90');       VAL = 0.9D0
+      CASE('0.95');             VAL = 0.95D0
+      CASE('0.98');             VAL = 0.98D0
+      CASE('0.99');             VAL = 0.99D0
+      CASE('1',  '1.', '1.0');  VAL = UNO
+      CASE('1.5','1.50');       VAL = 1.5D0
+      CASE('2',  '2.', '2.0');  VAL = DOS
+      CASE('3',  '3.', '3.0');  VAL = TRES
+      CASE('4',  '4.', '4.0');  VAL = QUAD
+      CASE('5',  '5.', '5.0');  VAL = CINCO
+      CASE('6',  '6.', '6.0');  VAL = 6.D0
+      CASE('7',  '7.', '7.0');  VAL = 7.D0
+      CASE('8',  '8.', '8.0');  VAL = 8.D0
+      CASE('9',  '9.', '9.0');  VAL = 9.D0
+      CASE('10','10.','10.0');  VAL = DIEZ
+      CASE('20','20.','20.0');  VAL = VIGINTI
+      CASE('25','25.','25.0');  VAL = 25.D0
+      CASE('60','60.','60.0');  VAL = SEXAGEN
+      CASE('100','100.','100.0');  VAL = HECTO
+      CASE('1000','1000.','1000.0');  VAL = KILO
+      CASE DEFAULT
+                  NOT_NUM = TRUE
+    END SELECT
+    END SUBROUTINE
+!
+!
+!######################################################################
+!######################################################################    
+!
+END MODULE
+!
+!

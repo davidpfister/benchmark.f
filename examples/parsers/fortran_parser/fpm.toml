@@ -1,0 +1,19 @@
+name = "fortran_parser"
+license = "BSD-3-Clause"
+author = "Stuart Midgley"
+keywords = ["parser"]
+
+[library]
+source-dir = "src"
+
+[install]
+library = false
+
+[preprocess]
+[preprocess.cpp]
+suffixes = ["F90", "f90"]
+
+[build]
+auto-executables = false
+auto-examples = false
+auto-tests = true
