@@ -3,6 +3,8 @@ module benchmark_warning
     
     implicit none
     
+    contains
+    
     subroutine warning_debug()
         write (*, '(A)') new_line('A'), &
                             &                '// * WARNING *', &

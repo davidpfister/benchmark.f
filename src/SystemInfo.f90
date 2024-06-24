@@ -12,10 +12,6 @@ module benchmark_systeminfo
         enumerator :: OS_OPENBSD = 7
     end enum
     
-    public systeminfo
-    
-    private
-    
     contains
     
     subroutine systeminfo()
@@ -39,9 +35,9 @@ module benchmark_systeminfo
         elseif (os == OS_LINUX) then
             cmd = 'uname -a; lscpu | grep -v "Not affected" | grep -v "Flags"'
         elseif (os == OS_WINDOWS) then
-            cmd = "systeminfo | find /V /I 'hotfix' | find /V /I 'network'" //&
-                "| find /V 'Connection Name' | find /V '[' | find /V 'DHCP' " //&
-                "| find /V 'Status' | find /V 'IP address' | find /V 'Hyper-V' "
+            cmd = 'systeminfo | find /V /I "hotfix" | find /V /I "network"' //&
+                '| find /V "Connection Name" | find /V "[" | find /V "DHCP" ' //&
+                '| find /V "Status" | find /V "IP address" | find /V "Hyper-V" '
         else
             return
         end if
@@ -165,7 +161,7 @@ module benchmark_systeminfo
         end if
     end function
     
-    pure function OS_name(os)
+    pure function os_name(os)
         integer, intent(in) :: os
         character(:), allocatable :: OS_name
 

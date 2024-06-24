@@ -8,10 +8,11 @@ module benchmark
     use, intrinsic :: iso_c_binding
     use benchmark_kinds
     use benchmark_timer, only: clock
-    use benchmark_statistics, only: stats
-    use benchmark_version
-    use benchmark_systeminfo
+    use benchmark_statistics, only: stats    
     use benchmark_method
+    use benchmark_workflow
+    use benchmark_steps
+    use benchmark_warning
 #ifdef _OPENMP
 #include <openmp.use>
 #endif
@@ -19,26 +20,33 @@ module benchmark
     implicit none
 
     private
+    
+    type(workflow), allocatable :: benchflow
 
-    type, public :: benchmark_runner
+    type, public :: runner
         private
         integer, public     :: repetitions = 10 !< number of repetitions
         integer, public     :: maxcalls = 10000000 !< maximum number of function calls
         real(r8), public    :: mintime = 100.0_r8 !< minimum sampling time in ms to collect data
-        real(r8), public    :: maxtime = 10.0d5_r8 !< maximum sampling time in ms to collect data
+        real(r8), public    :: maxtime = 100000.0_r8 !< maximum sampling time in ms to collect data
         logical, public     :: skip_warmup = .false. !< option to skip warm up phase
         logical, public     :: skip_dryrun = .false. !< option to skip dry run phase
         integer, public     :: sampling_window = 10 !< option to adjust the size of the sampling window
-        integer, public     :: ssd_threshold = 0.05 !< acceptance threshold for the steady-state detection
+        integer, public     :: ssd_threshold = 0.05_r8 !< acceptance threshold for the steady-state detection
         !private
         integer :: count = 0
-        logical :: firstcall = .true.
         character(80) :: name
         type(stats) :: s
     contains
         procedure, pass(this), public :: load => benchmark_load
-        procedure, pass(this), public :: serialize => benchmark_serialize
-        procedure, pass(this), public :: deserialize => benchmark_deserialize
+        procedure, pass(this), private :: benchmark_serialize_to_unit
+        procedure, pass(this), private :: benchmark_serialize_to_string
+        generic, public :: serialize => benchmark_serialize_to_unit, &
+                                          benchmark_serialize_to_string
+        procedure, nopass, private :: benchmark_deserialize_from_unit
+        procedure, nopass, private :: benchmark_deserialize_from_string
+        generic, public :: deserialize => benchmark_deserialize_from_unit, &
+                                          benchmark_deserialize_from_string
         procedure, pass(this), private :: benchmark_void
         procedure, pass(this), private :: benchmark_a1
         procedure, pass(this), private :: benchmark_a2
@@ -50,43 +58,24 @@ module benchmark
 contains
 
     subroutine benchmark_load(this, path)
-        class(benchmark_runner), intent(inout) :: this
+        class(runner), intent(inout) :: this
         character(*), intent(in) :: path
         !private
         logical :: exists
         integer :: lu, ios
 
-        inquire(file=trim(path), exists = exists)
+        inquire(file=trim(path), exist = exists)
         if (exists) then
             open (newunit=lu, file=trim(path), status='old', action='read', iostat = ios)
             if (ios == 0) then
-                read(lu, *) 
+                call this%deserialize(this, lu)
+                close(lu)
             end if
         end if
     end subroutine
 
-    subroutine setup(this)
-        class(benchmark_runner), intent(inout) :: this
-        if (this%firstcall) then                                                                            
-            write (*, '(A)') new_line('A'), &
-                            &                '// * BENCHMARK *'
-            write (*, '(A)') '        Benchmark execution engine version ' // version
-            
-            write (*, '(A)') new_line('A'), &
-                            &                '// * SYSTEM INFO *'
-            call systeminfo()
-#if  defined (DEBUG)  || !defined (_DEBUG)
-            call warning_debug()
-#endif
-            write (*, '(A)') new_line('A'), &
-    &                '// * STATISTICS *'
-            this%firstcall = .false.
-        end if
-        this%count = this%count + 1
-    end subroutine
-
     subroutine summary(this)
-        class(benchmark_runner), intent(in) :: this
+        class(runner), intent(in) :: this
 
         if (len_trim(this%name) > 0) then
             write (*, '(A,F15.2,A,F15.2)') trim(this%name), 1000_r8 * this%s%mean, ' us  +/- ', 1000_r8 * this%s%stddev
@@ -95,18 +84,29 @@ contains
         end if
     end subroutine
 
-    subroutine benchmark_void(this, f)
-        class(benchmark_runner), intent(inout) :: this
+    subroutine benchmark_void(this, f, name)
+        class(runner), intent(inout) :: this
         procedure() :: f
+        character(*), intent(in), optional :: name
         !private
         integer :: k, count
+        type(workflow), pointer :: p
         real(r8) :: start, finish
         type(method(0)) :: mtd
         
-        call method(f, mtd)
+        if (present(name)) this%name = name
+        
+        if (.not. allocated(benchflow)) then
+            call steps_initialize(benchflow)
+            call benchflow%run()
+        end if
+        
+        p => benchflow%add(start_dryrun)
+        call p%run()
 
-        call setup(this)
-
+        this%count = this%count + 1
+        mtd = method(f)
+        
         count = 0
 
         !warm up
@@ -147,20 +147,28 @@ contains
     end subroutine
 
     subroutine benchmark_a1(this, f, a1, name)
-        class(benchmark_runner), intent(inout) :: this
+        class(runner), intent(inout) :: this
         procedure() :: f
         class(*), intent(in) :: a1
         character(*), optional :: name
         !private
         integer :: j, k, count
+        type(workflow), pointer :: p
         real(r8) :: start, finish
         type(stats) :: s
         type(method(1)) :: mtd
         
-        call method(f, mtd)
-
+        if (.not. allocated(benchflow)) then
+            call steps_initialize(benchflow)
+            call benchflow%run()
+        end if
+        
+        p => benchflow%add(start_dryrun)
+        call p%run()
+        
+        this%count = this%count + 1
+        mtd = method(f)
         if (present(name)) this%name = name
-        call setup(this)
 
         count = 0
 
@@ -202,20 +210,28 @@ contains
     end subroutine
     
     subroutine benchmark_a2(this, f, a1, a2, name)
-        class(benchmark_runner), intent(inout) :: this
+        class(runner), intent(inout) :: this
         procedure() :: f
         class(*), intent(in) :: a1, a2
         character(*), optional :: name
         !private
         integer :: j, k, count
+        type(workflow), pointer :: p
         real(r8) :: start, finish
         type(stats) :: s
         type(method(2)) :: mtd
         
-        call method(f, mtd)
-
+        if (.not. allocated(benchflow)) then
+            call steps_initialize(benchflow)
+            call benchflow%run()
+        end if
+        
+        p => benchflow%add(start_dryrun)
+        call p%run()
+        
+        this%count = this%count + 1
+        mtd = method(f, a1, a2)
         if (present(name)) this%name = name
-        call setup(this)
 
         count = 0
 
@@ -225,7 +241,7 @@ contains
                 call clock(start)
                 finish = start
                 do while (count < this%maxcalls .and. finish - start < this%mintime)
-                    call mtd%invoke(a1, a2)
+                    call mtd%invoke()
                     count = count + 1
                     call clock(finish)
                 end do
@@ -243,7 +259,7 @@ contains
                 block
                     integer :: m
                     do m = 1, count
-                        call mtd%invoke(a1, a2)
+                        call mtd%invoke()
                     end do
                 end block
                 call clock(finish)
@@ -254,32 +270,57 @@ contains
         end associate
 
         call summary(this)
+        deallocate(benchflow)
     end subroutine
 
-    subroutine benchmark_serialize(this, str)
-        class(benchmark_runner), intent(in), target   :: this
+    subroutine benchmark_serialize_to_string(this, str)
+        class(runner), intent(in), target   :: this
         character(:), allocatable, intent(out) :: str
         !private
-        class(benchmark_runner), pointer :: runner => null()
-        namelist / config / runner
+        type(runner), pointer :: bench => null()
+        namelist / config / bench
         allocate(character(100) :: str)
             
-        runner => this
+        bench => this
                  
         write(str, nml=config)
             
         str = trim(str)
-        nullify(runner)
+        nullify(bench)
+    end subroutine
+    
+    subroutine benchmark_serialize_to_unit(this, lu)
+        class(runner), intent(in), target   :: this
+        integer, intent(in) :: lu
+        !private
+        type(runner), pointer :: bench => null()
+        namelist / config / bench
+            
+        bench => this
+                 
+        write(unit=lu, nml=config)
+        nullify(bench)
     end subroutine
         
-    subroutine benchmark_deserialize(this, str)
-        class(benchmark_runner), allocatable, intent(inout)   :: this
+    subroutine benchmark_deserialize_from_string(that, str)
+        type(runner), intent(inout)   :: that
         character(*), intent(in) :: str
         !private
-        class(benchmark_runner) :: runner
-        namelist / config / runner
+        type(runner) :: bench
+        namelist / config / bench
                  
         read(str, nml=config)
-        allocate(this, source=runner)
+        that = bench
+    end subroutine
+    
+    subroutine benchmark_deserialize_from_unit(that, lu)
+        type(runner), intent(inout)   :: that
+        integer, intent(in) :: lu
+        !private
+        type(runner) :: bench
+        namelist / config / bench
+                 
+        read(nml=config, unit=lu)
+        that = bench
     end subroutine
 end module

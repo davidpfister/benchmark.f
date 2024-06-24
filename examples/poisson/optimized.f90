@@ -58,8 +58,8 @@ program poisson
     
     implicit none
     
-    type(benchmark_runner) :: br
+    type(runner) :: br
 
-    call br%run(test_poisson, 1E-6_dp, 300)
+    call br%run(test_poisson, 1.0d-6, 30)
 
 end program
