@@ -8,7 +8,8 @@ module benchmark_steps
         
     implicit none 
     
-    public :: steps_initialize
+    public :: steps_initialize, &
+              benchmark_step
     
     private
     

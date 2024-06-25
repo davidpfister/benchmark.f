@@ -52,6 +52,7 @@ module rhofunc
 
 end module
 
+#include <benchmark.inc>    
 program poisson
     use rhofunc
     use benchmark
@@ -60,6 +61,7 @@ program poisson
     
     type(runner) :: br
 
-    call br%run(test_poisson, 1.0d-6, 30)
+    call br%run(1.0d-6, 30, func(test_poisson))
+    call br%run(1.0d-6, 50, func(test_poisson))
 
 end program

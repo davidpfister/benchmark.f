@@ -7,7 +7,7 @@ module benchmark_workflow
     type, public :: workflow
         character(:), allocatable :: header
         procedure(work), nopass, pointer :: action => null()
-        type(workflow), pointer :: next => null()
+        class(workflow), pointer :: next => null()
     contains
         procedure, pass(this), private :: workflow_add
         procedure, pass(this), private :: workflow_add_action
@@ -37,9 +37,9 @@ module benchmark_workflow
     
     subroutine workflow_add(this, w)
         class(workflow), intent(inout), target :: this
-        type(workflow), intent(in)             :: w
+        class(workflow), intent(in)             :: w
         !private
-        type(workflow), pointer :: p 
+        class(workflow), pointer :: p 
         p => null()
 
         p => this        
@@ -54,7 +54,7 @@ module benchmark_workflow
         class(workflow), intent(inout), target :: this
         procedure(work) :: a
         !private
-        type(workflow), pointer :: p 
+        class(workflow), pointer :: p 
         p => null()
 
         p => this       

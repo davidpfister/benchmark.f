@@ -7,12 +7,10 @@
 module benchmark
     use, intrinsic :: iso_c_binding
     use benchmark_kinds
-    use benchmark_timer, only: clock
-    use benchmark_statistics, only: stats    
     use benchmark_method
     use benchmark_workflow
     use benchmark_steps
-    use benchmark_warning
+    use benchmark_options
 #ifdef _OPENMP
 #include <openmp.use>
 #endif
@@ -22,21 +20,9 @@ module benchmark
     private
     
     type(workflow), allocatable, target :: root
-    type(workflow), pointer             :: current
+    class(workflow), pointer             :: current
 
-    type, public :: runner
-        private
-        integer, public     :: repetitions = 10 !< number of repetitions
-        integer, public     :: maxcalls = 10000000 !< maximum number of function calls
-        real(r8), public    :: mintime = 100.0_r8 !< minimum sampling time in ms to collect data
-        real(r8), public    :: maxtime = 100000.0_r8 !< maximum sampling time in ms to collect data
-        logical, public     :: skip_warmup = .false. !< option to skip warm up phase
-        logical, public     :: skip_dryrun = .false. !< option to skip dry run phase
-        integer, public     :: sampling_window = 10 !< option to adjust the size of the sampling window
-        integer, public     :: ssd_threshold = 0.05_r8 !< acceptance threshold for the steady-state detection
-        !private
-        integer :: count = 0
-        character(80) :: name
+    type, extends(runner_options), public :: runner
     contains
         procedure, pass(this), public :: load => benchmark_load
         procedure, pass(this), private :: benchmark_serialize_to_unit
@@ -50,9 +36,19 @@ module benchmark
         procedure, pass(this), private :: benchmark_void
         procedure, pass(this), private :: benchmark_a1
         procedure, pass(this), private :: benchmark_a2
+        procedure, pass(this), private :: benchmark_a3
+        procedure, pass(this), private :: benchmark_a4
+        procedure, pass(this), private :: benchmark_a5
+        procedure, pass(this), private :: benchmark_a6
+        procedure, pass(this), private :: benchmark_a7
         generic, public :: run => benchmark_void, &
                                   benchmark_a1, &
-                                  benchmark_a2
+                                  benchmark_a2, &
+                                  benchmark_a3, &
+                                  benchmark_a4, &
+                                  benchmark_a5, &
+                                  benchmark_a6, &
+                                  benchmark_a7
         final :: finalize
     end type
 
@@ -75,186 +71,171 @@ contains
         end if
     end subroutine
 
-    subroutine summary(this, s)
-        class(runner), intent(in) :: this
-        class(stats), intent(in) :: s
-
-        if (len_trim(this%name) > 0) then
-            write (*, '(A,F15.2,A,F15.2)') trim(this%name), 1000_r8 * s%mean, ' us  +/- ', 1000_r8 * s%stddev
-        else
-            write (*, '(I20,F15.2,A,F15.2)') this%count, 1000_r8 * s%mean, ' us  +/- ', 1000_r8 * s%stddev
-        end if
-    end subroutine
-
     subroutine benchmark_void(this, f, name)
         class(runner), intent(inout) :: this
         procedure() :: f
         character(*), intent(in), optional :: name
         !private
-        integer :: k, count
-        real(r8) :: start, finish
         type(method(0)) :: mtd
-        type(stats) :: s
-        
+
         if (present(name)) this%name = name
         
         if (.not. allocated(root)) then
             call steps_initialize(root)
             current => root%run()
         end if
-
-        this%count = this%count + 1
+        
         mtd = method(f)
         
-        count = 0
-
-        !warm up
-        if (.not. this%skip_warmup) then
-            block
-                call clock(start)
-                finish = start
-                do while (count <= this%maxcalls .and. finish - start < this%mintime)
-                    call mtd%invoke()
-                    count = count + 1
-                    call clock(finish)
-                end do
-                if (count > this%maxcalls) call warning_maxcalls()
-            end block
-        else
-            count = this%maxcalls
-        end if
-
-        call s%reset()
-        do k = 1, this%repetitions
-            call clock(start)
-            block
-                integer :: m
-                do m = 1, count
-                    call mtd%invoke()
-                end do
-            end block
-            call clock(finish)
-            call s%update(start, finish)
-            s%n = s%n + 1
-        end do
-
-        call s%finalize(count)
-
-        call summary(this, s)
+        call current%add(benchmark_step(this, mtd))
+        current => current%run()
+        
     end subroutine
 
-    subroutine benchmark_a1(this, f, a1, name)
+    subroutine benchmark_a1(this, a1, f, name)
         class(runner), intent(inout) :: this
         procedure() :: f
         class(*), intent(in) :: a1
         character(*), optional :: name
         !private
-        integer :: j, k, count
-        real(r8) :: start, finish
-        type(stats) :: s
         type(method(1)) :: mtd
+        
+        if (present(name)) this%name = name
         
         if (.not. allocated(root)) then
             call steps_initialize(root)
             current => root%run()
         end if
-        
-        this%count = this%count + 1
         mtd = method(f, a1)
-        if (present(name)) this%name = name
-
-        count = 0
-
-        !warm up
-        if (.not. this%skip_warmup) then
-            block
-                call clock(start)
-                finish = start
-                do while (count < this%maxcalls .and. finish - start < this%mintime)
-                    call mtd%invoke()
-                    count = count + 1
-                    call clock(finish)
-                end do
-                if (count == this%maxcalls) call warning_maxcalls()
-            end block
-        else
-            count = this%maxcalls
-        end if
-
-        call s%reset()
-
-        do k = 1, this%repetitions
-            call clock(start)
-            block
-                integer :: m
-                do m = 1, count
-                    call mtd%invoke()
-                end do
-            end block
-            call clock(finish)
-            call s%update(start, finish)
-            s%n = s%n + 1
-        end do
-        call s%finalize(count)
-
-        call summary(this, s)
+        
+        call current%add(benchmark_step(this, mtd))
+        current => current%run()
     end subroutine
     
-    subroutine benchmark_a2(this, f, a1, a2, name)
+    subroutine benchmark_a2(this, a1, a2, f, name)
         class(runner), intent(inout) :: this
         procedure() :: f
         class(*), intent(in) :: a1, a2
         character(*), optional :: name
         !private
-        integer :: j, k, count
-        real(r8) :: start, finish
-        type(stats) :: s
         type(method(2)) :: mtd
+        
+        if (present(name)) this%name = name
         
         if (.not. allocated(root)) then
             call steps_initialize(root)
             current => root%run()
         end if
-        
-        this%count = this%count + 1
-        mtd = method(f, a1, a2)
         if (present(name)) this%name = name
-
-        count = 0
-
-        !warm up
-        if (.not. this%skip_warmup) then
-            block
-                call clock(start)
-                finish = start
-                do while (count < this%maxcalls .and. finish - start < this%mintime)
-                    call mtd%invoke()
-                    count = count + 1
-                    call clock(finish)
-                end do
-                if (count == this%maxcalls) call warning_maxcalls()
-            end block
-        else
-            count = this%maxcalls
+        mtd = method(f, a1, a2)
+        
+        call current%add(benchmark_step(this, mtd))
+        current => current%run()
+    end subroutine
+    
+    subroutine benchmark_a3(this, a1, a2, a3, f, name)
+        class(runner), intent(inout) :: this
+        procedure() :: f
+        class(*), intent(in) :: a1, a2, a3
+        character(*), optional :: name
+        !private
+        type(method(3)) :: mtd
+        
+        if (present(name)) this%name = name
+        
+        if (.not. allocated(root)) then
+            call steps_initialize(root)
+            current => root%run()
         end if
-
-        call s%reset()
-
-        do k = 1, this%repetitions
-            call clock(start)
-            block
-                integer :: m
-                do m = 1, count
-                    call mtd%invoke()
-                end do
-            end block
-            call clock(finish)
-            call s%update(start, finish)
-            s%n = s%n + 1
-        end do
-        call s%finalize(count)
-
-        call summary(this, s)
+        if (present(name)) this%name = name
+        mtd = method(f, a1, a2, a3)
+        
+        call current%add(benchmark_step(this, mtd))
+        current => current%run()
+    end subroutine
+    
+    subroutine benchmark_a4(this, a1, a2, a3, a4, f, name)
+        class(runner), intent(inout) :: this
+        procedure() :: f
+        class(*), intent(in) :: a1, a2, a3, a4
+        character(*), optional :: name
+        !private
+        type(method(4)) :: mtd
+        
+        if (present(name)) this%name = name
+        
+        if (.not. allocated(root)) then
+            call steps_initialize(root)
+            current => root%run()
+        end if
+        if (present(name)) this%name = name
+        mtd = method(f, a1, a2, a3, a4)
+        
+        call current%add(benchmark_step(this, mtd))
+        current => current%run()
+    end subroutine
+    
+    subroutine benchmark_a5(this, a1, a2, a3, a4, a5, f, name)
+        class(runner), intent(inout) :: this
+        procedure() :: f
+        class(*), intent(in) :: a1, a2, a3, a4, a5
+        character(*), optional :: name
+        !private
+        type(method(5)) :: mtd
+        
+        if (present(name)) this%name = name
+        
+        if (.not. allocated(root)) then
+            call steps_initialize(root)
+            current => root%run()
+        end if
+        if (present(name)) this%name = name
+        mtd = method(f, a1, a2, a3, a4, a5)
+        
+        call current%add(benchmark_step(this, mtd))
+        current => current%run()
+    end subroutine
+    
+    subroutine benchmark_a6(this, a1, a2, a3, a4, a5, a6, f, name)
+        class(runner), intent(inout) :: this
+        procedure() :: f
+        class(*), intent(in) :: a1, a2, a3, a4, a5, a6
+        character(*), optional :: name
+        !private
+        type(method(6)) :: mtd
+        
+        if (present(name)) this%name = name
+        
+        if (.not. allocated(root)) then
+            call steps_initialize(root)
+            current => root%run()
+        end if
+        if (present(name)) this%name = name
+        mtd = method(f, a1, a2, a3, a4, a5, a6)
+        
+        call current%add(benchmark_step(this, mtd))
+        current => current%run()
+    end subroutine
+    
+    subroutine benchmark_a7(this, a1, a2, a3, a4, a5, a6, a7, f, name)
+        class(runner), intent(inout) :: this
+        procedure() :: f
+        class(*), intent(in) :: a1, a2, a3, a4, a5, a6, a7
+        character(*), optional :: name
+        !private
+        type(method(7)) :: mtd
+        
+        if (present(name)) this%name = name
+        
+        if (.not. allocated(root)) then
+            call steps_initialize(root)
+            current => root%run()
+        end if
+        if (present(name)) this%name = name
+        mtd = method(f, a1, a2, a3, a4, a5, a6, a7)
+        
+        call current%add(benchmark_step(this, mtd))
+        current => current%run()
     end subroutine
 
     subroutine benchmark_serialize_to_string(this, str)
