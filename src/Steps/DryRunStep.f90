@@ -1,15 +1,30 @@
 module benchmark_steps_dryrunstep
+    use benchmark_workflow, only: workflow
     use benchmark_timer, only: clock
     use benchmark_kinds
     use benchmark_method
     
     implicit none
     
+    private
+    
+    public :: dryrun_step
+       
+    interface dryrun_step
+        module procedure :: dryrun_step_new
+    end interface
+    
     real(r8), parameter :: MINTIME = 100.0_r8
     
     contains
     
-    subroutine start_dryrun()
+    type(workflow) function dryrun_step_new() result(step)
+        step%header = '// * DRY RUN *'
+        step%action => start_dryrun
+    end function
+    
+    subroutine start_dryrun(step)
+        class(workflow), intent(inout) :: step
         !private
         integer :: k, count
         real(r8) :: start, finish

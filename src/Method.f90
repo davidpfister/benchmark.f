@@ -566,6 +566,8 @@ module benchmark_method
                 if (allocated(lhs%args(i)%value)) deallocate(lhs%args(i)%value)
                 allocate(lhs%args(i)%value, source = rhs%args(i)%value)
             end do
+        else
+            error stop 'Assignment not supported'
         end if
     end subroutine
 end module

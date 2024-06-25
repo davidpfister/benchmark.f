@@ -4,13 +4,11 @@ module benchmark_steps
     use benchmark_steps_compiler_step
     use benchmark_steps_dryrunstep
     use benchmark_steps_benchmark_step
-    use benchmark_workflow
-    
+    use benchmark_workflow, only: workflow
+        
     implicit none 
     
-    public :: steps_initialize, &
-              start_dryrun, &
-              start_benchmark
+    public :: steps_initialize
     
     private
     
@@ -18,15 +16,13 @@ module benchmark_steps
     
     subroutine steps_initialize(wf)
         type(workflow), allocatable, intent(inout), target :: wf
-        !private 
-        class(workflow), pointer :: p => null()
-        
+
         if(.not. allocated(wf)) allocate(wf)
 
-        p => wf%add(get_setup)
-        p => p%add(get_systeminfo)
-        p => p%add(get_compilerinfo)
-        nullify(p)
+        call wf%add(setup_step())
+        call wf%add(system_step())
+        call wf%add(compiler_step())
+        call wf%add(dryrun_step())
     end subroutine
     
 end module

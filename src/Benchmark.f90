@@ -21,7 +21,8 @@ module benchmark
 
     private
     
-    type(workflow), allocatable :: benchflow
+    type(workflow), allocatable, target :: root
+    type(workflow), pointer             :: current
 
     type, public :: runner
         private
@@ -36,7 +37,6 @@ module benchmark
         !private
         integer :: count = 0
         character(80) :: name
-        type(stats) :: s
     contains
         procedure, pass(this), public :: load => benchmark_load
         procedure, pass(this), private :: benchmark_serialize_to_unit
@@ -53,6 +53,7 @@ module benchmark
         generic, public :: run => benchmark_void, &
                                   benchmark_a1, &
                                   benchmark_a2
+        final :: finalize
     end type
 
 contains
@@ -74,13 +75,14 @@ contains
         end if
     end subroutine
 
-    subroutine summary(this)
+    subroutine summary(this, s)
         class(runner), intent(in) :: this
+        class(stats), intent(in) :: s
 
         if (len_trim(this%name) > 0) then
-            write (*, '(A,F15.2,A,F15.2)') trim(this%name), 1000_r8 * this%s%mean, ' us  +/- ', 1000_r8 * this%s%stddev
+            write (*, '(A,F15.2,A,F15.2)') trim(this%name), 1000_r8 * s%mean, ' us  +/- ', 1000_r8 * s%stddev
         else
-            write (*, '(I20,F15.2,A,F15.2)') this%count, 1000_r8 * this%s%mean, ' us  +/- ', 1000_r8 * this%s%stddev
+            write (*, '(I20,F15.2,A,F15.2)') this%count, 1000_r8 * s%mean, ' us  +/- ', 1000_r8 * s%stddev
         end if
     end subroutine
 
@@ -90,19 +92,16 @@ contains
         character(*), intent(in), optional :: name
         !private
         integer :: k, count
-        type(workflow), pointer :: p
         real(r8) :: start, finish
         type(method(0)) :: mtd
+        type(stats) :: s
         
         if (present(name)) this%name = name
         
-        if (.not. allocated(benchflow)) then
-            call steps_initialize(benchflow)
-            call benchflow%run()
+        if (.not. allocated(root)) then
+            call steps_initialize(root)
+            current => root%run()
         end if
-        
-        p => benchflow%add(start_dryrun)
-        call p%run()
 
         this%count = this%count + 1
         mtd = method(f)
@@ -125,25 +124,23 @@ contains
             count = this%maxcalls
         end if
 
-        associate (s => this%s)
-            call s%reset()
-            do k = 1, this%repetitions
-                call clock(start)
-                block
-                    integer :: m
-                    do m = 1, count
-                        call mtd%invoke()
-                    end do
-                end block
-                call clock(finish)
-                call s%update(start, finish)
-                s%n = s%n + 1
-            end do
+        call s%reset()
+        do k = 1, this%repetitions
+            call clock(start)
+            block
+                integer :: m
+                do m = 1, count
+                    call mtd%invoke()
+                end do
+            end block
+            call clock(finish)
+            call s%update(start, finish)
+            s%n = s%n + 1
+        end do
 
-            call s%finalize(count)
-        end associate
+        call s%finalize(count)
 
-        call summary(this)
+        call summary(this, s)
     end subroutine
 
     subroutine benchmark_a1(this, f, a1, name)
@@ -153,21 +150,17 @@ contains
         character(*), optional :: name
         !private
         integer :: j, k, count
-        type(workflow), pointer :: p
         real(r8) :: start, finish
         type(stats) :: s
         type(method(1)) :: mtd
         
-        if (.not. allocated(benchflow)) then
-            call steps_initialize(benchflow)
-            call benchflow%run()
+        if (.not. allocated(root)) then
+            call steps_initialize(root)
+            current => root%run()
         end if
         
-        p => benchflow%add(start_dryrun)
-        call p%run()
-        
         this%count = this%count + 1
-        mtd = method(f)
+        mtd = method(f, a1)
         if (present(name)) this%name = name
 
         count = 0
@@ -178,7 +171,7 @@ contains
                 call clock(start)
                 finish = start
                 do while (count < this%maxcalls .and. finish - start < this%mintime)
-                    call mtd%invoke(a1)
+                    call mtd%invoke()
                     count = count + 1
                     call clock(finish)
                 end do
@@ -188,25 +181,23 @@ contains
             count = this%maxcalls
         end if
 
-        associate (s => this%s)
-            call s%reset()
+        call s%reset()
 
-            do k = 1, this%repetitions
-                call clock(start)
-                block
-                    integer :: m
-                    do m = 1, count
-                        call mtd%invoke(a1)
-                    end do
-                end block
-                call clock(finish)
-                call s%update(start, finish)
-                s%n = s%n + 1
-            end do
-            call s%finalize(count)
-        end associate
+        do k = 1, this%repetitions
+            call clock(start)
+            block
+                integer :: m
+                do m = 1, count
+                    call mtd%invoke()
+                end do
+            end block
+            call clock(finish)
+            call s%update(start, finish)
+            s%n = s%n + 1
+        end do
+        call s%finalize(count)
 
-        call summary(this)
+        call summary(this, s)
     end subroutine
     
     subroutine benchmark_a2(this, f, a1, a2, name)
@@ -216,18 +207,14 @@ contains
         character(*), optional :: name
         !private
         integer :: j, k, count
-        type(workflow), pointer :: p
         real(r8) :: start, finish
         type(stats) :: s
         type(method(2)) :: mtd
         
-        if (.not. allocated(benchflow)) then
-            call steps_initialize(benchflow)
-            call benchflow%run()
+        if (.not. allocated(root)) then
+            call steps_initialize(root)
+            current => root%run()
         end if
-        
-        p => benchflow%add(start_dryrun)
-        call p%run()
         
         this%count = this%count + 1
         mtd = method(f, a1, a2)
@@ -251,26 +238,23 @@ contains
             count = this%maxcalls
         end if
 
-        associate (s => this%s)
-            call s%reset()
+        call s%reset()
 
-            do k = 1, this%repetitions
-                call clock(start)
-                block
-                    integer :: m
-                    do m = 1, count
-                        call mtd%invoke()
-                    end do
-                end block
-                call clock(finish)
-                call s%update(start, finish)
-                s%n = s%n + 1
-            end do
-            call s%finalize(count)
-        end associate
+        do k = 1, this%repetitions
+            call clock(start)
+            block
+                integer :: m
+                do m = 1, count
+                    call mtd%invoke()
+                end do
+            end block
+            call clock(finish)
+            call s%update(start, finish)
+            s%n = s%n + 1
+        end do
+        call s%finalize(count)
 
-        call summary(this)
-        deallocate(benchflow)
+        call summary(this, s)
     end subroutine
 
     subroutine benchmark_serialize_to_string(this, str)
@@ -322,5 +306,12 @@ contains
                  
         read(nml=config, unit=lu)
         that = bench
+    end subroutine
+    
+    subroutine finalize(this)
+        type(runner), intent(inout) :: this
+        
+        nullify(current)
+        if (allocated(root)) deallocate(root)
     end subroutine
 end module

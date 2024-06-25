@@ -2,11 +2,16 @@ module benchmark_workflow
 
     implicit none
     
-    type workflow
-        procedure(), nopass, pointer :: action => null()
+    private
+    
+    type, public :: workflow
+        character(:), allocatable :: header
+        procedure(work), nopass, pointer :: action => null()
         type(workflow), pointer :: next => null()
     contains
-        procedure, pass(this), public :: add => workflow_add
+        procedure, pass(this), private :: workflow_add
+        procedure, pass(this), private :: workflow_add_action
+        generic, public :: add => workflow_add, workflow_add_action
         procedure, pass(this), public :: run => workflow_run
         final :: dispose
     end type
@@ -16,55 +21,76 @@ module benchmark_workflow
     end interface
     
     interface
-        subroutine void()
+        subroutine work(step)
+            import
+            class(workflow), intent(inout) :: step
         end subroutine
     end interface
     
     contains
     
     type(workflow) function workflow_new(a) result(w)
-        procedure(void) :: a
+        procedure(work) :: a
 
         w%action => a
     end function
     
-    function workflow_add(this, a) result(p)
+    subroutine workflow_add(this, w)
         class(workflow), intent(inout), target :: this
-        procedure(void) :: a
+        type(workflow), intent(in)             :: w
         !private
         type(workflow), pointer :: p 
         p => null()
-        
-        p => this
-        if (.not. associated(p%action)) then 
-            p%action => a
-            return 
-        end if
-        
+
+        p => this        
+        do while (associated(p%next))
+            p => p%next
+        end do
+        allocate(p%next, source = w)
+        p => p%next
+    end subroutine
+    
+    subroutine workflow_add_action(this, a)
+        class(workflow), intent(inout), target :: this
+        procedure(work) :: a
+        !private
+        type(workflow), pointer :: p 
+        p => null()
+
+        p => this       
         do while (associated(p%next))
             p => p%next
         end do
         allocate(p%next)
         p => p%next
         p%action => a 
-    end function
+    end subroutine
     
-    subroutine workflow_run(this)
+    function workflow_run(this) result(p)
         class(workflow), intent(inout), target :: this
         !private
         class(workflow), pointer :: p
-        p => this
-        do while (associated(p))
-            if (associated(p%action)) call p%action()
-            p => p%next
+        p => this%next
+        do while (.true.)
+            if (associated(p)) then
+                if (associated(p%action)) call p%action(p)
+                if (associated(p%next)) then
+                    p => p%next
+                else
+                    exit
+                end if
+            else
+                exit
+            end if
         end do
-    end subroutine
+    end function
     
     recursive subroutine dispose(this)
         type(workflow), intent(inout) :: this
         
         if (associated(this%next)) then
             call dispose(this%next)
+            deallocate(this%header)
             deallocate(this%next)
             nullify(this%next)
         end if
