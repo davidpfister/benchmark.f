@@ -1,25 +1,20 @@
-!'██████╗ ███████╗███╗   ██╗ ██████╗██╗  ██╗███╗   ███╗ █████╗ ██████╗ ██╗  ██╗'
-!'██╔══██╗██╔════╝████╗  ██║██╔════╝██║  ██║████╗ ████║██╔══██╗██╔══██╗██║ ██╔╝'
-!'██████╔╝█████╗  ██╔██╗ ██║██║     ███████║██╔████╔██║███████║██████╔╝█████╔╝ '
-!'██╔══██╗██╔══╝  ██║╚██╗██║██║     ██╔══██║██║╚██╔╝██║██╔══██║██╔══██╗██╔═██╗ '
-!'██████╔╝███████╗██║ ╚████║╚██████╗██║  ██║██║ ╚═╝ ██║██║  ██║██║  ██║██║  ██╗'
-!'╚═════╝ ╚══════╝╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝'
-module benchmark
+module benchmark_library
     use, intrinsic :: iso_c_binding
     use benchmark_kinds
     use benchmark_method
     use benchmark_workflow
     use benchmark_steps
     use benchmark_options
+    use benchmark_string
 #ifdef _OPENMP
-#include <openmp.use>
+    use omp_lib
 #endif
 
     implicit none
 
     private
     
-    type(workflow), allocatable, target :: root
+    type(workflow), allocatable, target  :: root
     class(workflow), pointer             :: current
 
     type, extends(runner_options), public :: runner
@@ -71,176 +66,180 @@ contains
         end if
     end subroutine
 
-    subroutine benchmark_void(this, f, name)
-        class(runner), intent(inout) :: this
-        procedure() :: f
-        character(*), intent(in), optional :: name
+    subroutine benchmark_void(this, f)
+        class(runner), intent(inout)        :: this
+        procedure()                         :: f
         !private
-        type(method(0)) :: mtd
-
-        if (present(name)) this%name = name
+        type(method) :: mtd
+        type(string) :: names(0)
+        
+        names = parse_names(this, size(names))
         
         if (.not. allocated(root)) then
-            call steps_initialize(root)
+            call steps_initialize(root, this)
             current => root%run()
         end if
         
         mtd = method(f)
         
-        call current%add(benchmark_step(this, mtd))
+        call current%add(benchmark_run(this, mtd))
         current => current%run()
         
     end subroutine
 
-    subroutine benchmark_a1(this, a1, f, name)
-        class(runner), intent(inout) :: this
-        procedure() :: f
-        class(*), intent(in) :: a1
-        character(*), optional :: name
+    subroutine benchmark_a1(this, a1, f)
+        class(runner), intent(inout)        :: this
+        class(*), intent(in)                :: a1
+        procedure()                         :: f
         !private
-        type(method(1)) :: mtd
+        type(method) :: mtd
+        type(string) :: names(1)
         
-        if (present(name)) this%name = name
+        names = parse_names(this, size(names))
         
         if (.not. allocated(root)) then
-            call steps_initialize(root)
+            call steps_initialize(root, this)
             current => root%run()
         end if
-        mtd = method(f, a1)
+        mtd = method(f, arg(a1, names(1)))
         
-        call current%add(benchmark_step(this, mtd))
+        call current%add(benchmark_run(this, mtd))
         current => current%run()
     end subroutine
     
-    subroutine benchmark_a2(this, a1, a2, f, name)
-        class(runner), intent(inout) :: this
-        procedure() :: f
-        class(*), intent(in) :: a1, a2
-        character(*), optional :: name
+    subroutine benchmark_a2(this, a1, a2, f)
+        class(runner), intent(inout)        :: this
+        class(*), intent(in)                :: a1, a2
+        procedure()                         :: f
         !private
-        type(method(2)) :: mtd
-        
-        if (present(name)) this%name = name
+        type(method) :: mtd
+        type(string) :: names(2)
+
+        names = parse_names(this, size(names))
         
         if (.not. allocated(root)) then
-            call steps_initialize(root)
+            call steps_initialize(root, this)
             current => root%run()
         end if
-        if (present(name)) this%name = name
-        mtd = method(f, a1, a2)
-        
-        call current%add(benchmark_step(this, mtd))
+
+        mtd = method(f, arg(a1, names(1)), arg(a2, names(2)))
+    
+        call current%add(benchmark_run(this, mtd))
         current => current%run()
     end subroutine
     
-    subroutine benchmark_a3(this, a1, a2, a3, f, name)
-        class(runner), intent(inout) :: this
-        procedure() :: f
-        class(*), intent(in) :: a1, a2, a3
-        character(*), optional :: name
+    subroutine benchmark_a3(this, a1, a2, a3, f)
+        class(runner), intent(inout)        :: this
+        class(*), intent(in)                :: a1, a2, a3
+        procedure()                         :: f  
         !private
-        type(method(3)) :: mtd
+        type(method) :: mtd
+        type(string) :: names(3)
         
-        if (present(name)) this%name = name
+        names = parse_names(this, size(names))
         
         if (.not. allocated(root)) then
-            call steps_initialize(root)
+            call steps_initialize(root, this)
             current => root%run()
         end if
-        if (present(name)) this%name = name
-        mtd = method(f, a1, a2, a3)
+
+        mtd = method(f, arg(a1, names(1)), arg(a2, names(2)), arg(a3, names(3)))
         
-        call current%add(benchmark_step(this, mtd))
+        call current%add(benchmark_run(this, mtd))
         current => current%run()
     end subroutine
     
-    subroutine benchmark_a4(this, a1, a2, a3, a4, f, name)
-        class(runner), intent(inout) :: this
-        procedure() :: f
-        class(*), intent(in) :: a1, a2, a3, a4
-        character(*), optional :: name
+    subroutine benchmark_a4(this, a1, a2, a3, a4, f)
+        class(runner), intent(inout)        :: this
+        class(*), intent(in)                :: a1, a2, a3, a4
+        procedure()                         :: f
         !private
-        type(method(4)) :: mtd
+        type(method) :: mtd
+        type(string) :: names(4)
         
-        if (present(name)) this%name = name
+        names = parse_names(this, size(names))
         
         if (.not. allocated(root)) then
-            call steps_initialize(root)
+            call steps_initialize(root, this)
             current => root%run()
         end if
-        if (present(name)) this%name = name
-        mtd = method(f, a1, a2, a3, a4)
+
+        mtd = method(f, arg(a1, names(1)), arg(a2, names(2)), arg(a3, names(3)), &
+                        arg(a4, names(4)))
         
-        call current%add(benchmark_step(this, mtd))
+        call current%add(benchmark_run(this, mtd))
         current => current%run()
     end subroutine
     
-    subroutine benchmark_a5(this, a1, a2, a3, a4, a5, f, name)
-        class(runner), intent(inout) :: this
-        procedure() :: f
-        class(*), intent(in) :: a1, a2, a3, a4, a5
-        character(*), optional :: name
+    subroutine benchmark_a5(this, a1, a2, a3, a4, a5, f)
+        class(runner), intent(inout)        :: this
+        class(*), intent(in)                :: a1, a2, a3, a4, a5
+        procedure()                         :: f
         !private
-        type(method(5)) :: mtd
+        type(method) :: mtd
+        type(string) :: names(5)
         
-        if (present(name)) this%name = name
+        names = parse_names(this, size(names))
         
         if (.not. allocated(root)) then
-            call steps_initialize(root)
+            call steps_initialize(root, this)
             current => root%run()
         end if
-        if (present(name)) this%name = name
-        mtd = method(f, a1, a2, a3, a4, a5)
+
+        mtd = method(f, arg(a1, names(1)), arg(a2, names(2)), arg(a3, names(3)), &
+                        arg(a4, names(4)), arg(a5, names(5)))
         
-        call current%add(benchmark_step(this, mtd))
+        call current%add(benchmark_run(this, mtd))
         current => current%run()
     end subroutine
     
-    subroutine benchmark_a6(this, a1, a2, a3, a4, a5, a6, f, name)
-        class(runner), intent(inout) :: this
-        procedure() :: f
-        class(*), intent(in) :: a1, a2, a3, a4, a5, a6
-        character(*), optional :: name
+    subroutine benchmark_a6(this, a1, a2, a3, a4, a5, a6, f)
+        class(runner), intent(inout)        :: this
+        class(*), intent(in)                :: a1, a2, a3, a4, a5, a6
+        procedure()                         :: f
         !private
-        type(method(6)) :: mtd
+        type(method) :: mtd
+        type(string) :: names(6)
         
-        if (present(name)) this%name = name
+        names = parse_names(this, size(names))
         
         if (.not. allocated(root)) then
-            call steps_initialize(root)
+            call steps_initialize(root, this)
             current => root%run()
         end if
-        if (present(name)) this%name = name
-        mtd = method(f, a1, a2, a3, a4, a5, a6)
+
+        mtd = method(f, arg(a1, names(1)), arg(a2, names(2)), arg(a3, names(3)), &
+                        arg(a4, names(4)), arg(a5, names(5)), arg(a6, names(6)))
         
-        call current%add(benchmark_step(this, mtd))
+        call current%add(benchmark_run(this, mtd))
         current => current%run()
     end subroutine
     
-    subroutine benchmark_a7(this, a1, a2, a3, a4, a5, a6, a7, f, name)
-        class(runner), intent(inout) :: this
-        procedure() :: f
-        class(*), intent(in) :: a1, a2, a3, a4, a5, a6, a7
-        character(*), optional :: name
+    subroutine benchmark_a7(this, a1, a2, a3, a4, a5, a6, a7, f)
+        class(runner), intent(inout)        :: this
+        class(*), intent(in)                :: a1, a2, a3, a4, a5, a6, a7
+        procedure()                         :: f
         !private
-        type(method(7)) :: mtd
+        type(method) :: mtd
+        type(string) :: names(7)
         
-        if (present(name)) this%name = name
+        names = parse_names(this, size(names))
         
         if (.not. allocated(root)) then
-            call steps_initialize(root)
+            call steps_initialize(root, this)
             current => root%run()
         end if
-        if (present(name)) this%name = name
-        mtd = method(f, a1, a2, a3, a4, a5, a6, a7)
+
+        mtd = method(f, arg(a1, names(1)), arg(a2, names(2)), arg(a3, names(3)), &
+                        arg(a4, names(4)), arg(a5, names(5)), arg(a6, names(6)), arg(a7, names(7)))
         
-        call current%add(benchmark_step(this, mtd))
+        call current%add(benchmark_run(this, mtd))
         current => current%run()
     end subroutine
 
     subroutine benchmark_serialize_to_string(this, str)
-        class(runner), intent(in), target   :: this
-        character(:), allocatable, intent(out) :: str
+        class(runner), intent(in), target       :: this
+        character(:), allocatable, intent(out)  :: str
         !private
         type(runner), pointer :: bench => null()
         namelist / config / bench
@@ -256,7 +255,7 @@ contains
     
     subroutine benchmark_serialize_to_unit(this, lu)
         class(runner), intent(in), target   :: this
-        integer, intent(in) :: lu
+        integer, intent(in)                 :: lu
         !private
         type(runner), pointer :: bench => null()
         namelist / config / bench
@@ -268,8 +267,8 @@ contains
     end subroutine
         
     subroutine benchmark_deserialize_from_string(that, str)
-        type(runner), intent(inout)   :: that
-        character(*), intent(in) :: str
+        type(runner), intent(inout)     :: that
+        character(*), intent(in)        :: str
         !private
         type(runner) :: bench
         namelist / config / bench
@@ -279,8 +278,8 @@ contains
     end subroutine
     
     subroutine benchmark_deserialize_from_unit(that, lu)
-        type(runner), intent(inout)   :: that
-        integer, intent(in) :: lu
+        type(runner), intent(inout) :: that
+        integer, intent(in)         :: lu
         !private
         type(runner) :: bench
         namelist / config / bench
@@ -288,6 +287,50 @@ contains
         read(nml=config, unit=lu)
         that = bench
     end subroutine
+    
+    function parse_names(this, n, name) result(names)
+        class(runner), intent(inout)        :: this
+        integer, intent(in)                 :: n
+        character(*), intent(in), optional  :: name
+        !private
+        type(string) :: names(n)
+        character(:), allocatable :: func
+        character(:), allocatable :: substr
+        integer :: i, j
+        
+        if (present(name)) then
+            this%name = name
+        else
+            if (len_trim(this%name) == 0) return
+            i = index(this%name, ',', back = .true.)
+            if (i > 0) then
+                func = this%name(i+1: len_trim(this%name)-1)
+            else
+                i = index(this%name, '(', back = .false.)
+                if (i > 0) then
+                    this%name = this%name(i+1: len_trim(this%name)-1)
+                    return
+                end if
+            end if
+            j = n
+            do while (i > 0)
+                substr = this%name(:i-1)
+                i = index(substr, ',', back = .true.)
+                if (i > 0)  then
+                    names(j) = substr(i+1:)
+                    j = j - 1
+                else
+                    exit
+                end if
+            end do
+            i = index(this%name, '(', back = .false.)
+            if (i > 0) then
+                names(1) = this%name(i+1:index(this%name, ',', back = .false.)-1)
+                this%name = func
+                return
+            end if
+        end if
+    end function
     
     subroutine finalize(this)
         type(runner), intent(inout) :: this

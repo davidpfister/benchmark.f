@@ -50,22 +50,22 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Steps">
-		<File RelativePath=".\Steps\BenchmarkStep.f90"/>
-		<File RelativePath=".\Steps\CompilerStep.f90"/>
-		<File RelativePath=".\Steps\DryRunStep.f90"/>
-		<File RelativePath=".\Steps\SetupStep.f90"/>
+		<File RelativePath=".\Steps\Compiler.f90"/>
+		<File RelativePath=".\Steps\DryRun.f90"/>
+		<File RelativePath=".\Steps\Run.f90"/>
+		<File RelativePath=".\Steps\Setup.f90"/>
 		<File RelativePath=".\Steps\Steps.f90"/>
-		<File RelativePath=".\Steps\SystemStep.f90"/></Filter>
+		<File RelativePath=".\Steps\System.f90"/></Filter>
 		<File RelativePath=".\Argument.f90"/>
 		<File RelativePath=".\Benchmark.f90"/>
 		<File RelativePath=".\Caller.f90"/>
 		<File RelativePath=".\CompilerInfo.f90"/>
 		<File RelativePath=".\Kinds.f90"/>
-		<File RelativePath=".\Logger.f90"/>
 		<File RelativePath=".\Method.f90"/>
 		<File RelativePath=".\Options.f90"/>
 		<File RelativePath=".\Statistics.f90"/>
 		<File RelativePath=".\SteadyStateDetection.f90"/>
+		<File RelativePath=".\String.f90"/>
 		<File RelativePath=".\SystemInfo.f90"/>
 		<File RelativePath=".\Timer.f90"/>
 		<File RelativePath=".\Version.f90"/>

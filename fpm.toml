@@ -1,0 +1,33 @@
+name = "benchmark"
+version = "1.0.0"
+maintainer = "David Pfister"
+author = "David Pfister"
+description = "benchmarking framework"
+categories = ["benchmark"]
+keywords = ["benchmark", "timer"]
+homepage = "https://github.com/davidpfister/benchmark.f"
+
+[build]
+auto-executables = true
+auto-tests = true
+auto-examples = true
+external-modules = ["omp_lib"]
+
+[preprocess]
+cpp.suffixes = ["F90", "f90"]
+cpp.macros = ["_WIN32", "_FPM"]
+
+[library]
+source-dir = "src"
+include-dir = ["include"]
+
+[fortran]
+implicit-external = true
+
+[install]
+library = false
+
+[[example]]
+name = "poisson"
+source-dir = "examples/poisson"
+main = "Poisson.f90"

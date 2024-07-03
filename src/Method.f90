@@ -1,3 +1,6 @@
+#include <concat.inc>
+#define ADD_ARGUMENT(n) \
+that%args(n) = MACRO_CAT2(a,n)
 module benchmark_method
     use iso_c_binding
     use benchmark_kinds
@@ -6,14 +9,15 @@ module benchmark_method
     
     implicit none
     
-    public method
+    public method, arg
+    
     private
     
        
-    type :: method(nargs)
-        integer, len :: nargs
+    type :: method
+        integer                         :: nargs
         procedure(), nopass, pointer    :: f => null()
-        type(argument)                  :: args(nargs)
+        type(arg), allocatable          :: args(:)
     contains
         procedure, pass(this), private :: invoke_a0
         procedure, pass(this), private :: invoke_a1
@@ -52,43 +56,60 @@ module benchmark_method
     end type
     
     interface method
-        module procedure method_create_0, &
-                        method_create_1, &
-                        method_create_2, &
-                        method_create_3, &
-                        method_create_4, &
-                        method_create_5, &
-                        method_create_6, &
-                        method_create_7
+        module procedure :: method_create, & 
+                            method_create_0, &
+                            method_create_1, &
+                            method_create_2, &
+                            method_create_3, &
+                            method_create_4, &
+                            method_create_5, &
+                            method_create_6, &
+                            method_create_7
     end interface
  
     contains
+
+    function method_create(nargs, f) result(that)
+        integer, intent(in)             :: nargs
+        procedure()                     :: f
+        type(method)                    :: that        
+        
+        that%f => f
+        that%nargs = nargs
+        allocate(that%args(nargs))
+    end function
     
     function method_create_0(f) result(that)
         procedure()                     :: f
-        type(method(0))                 :: that        
+        type(method)                    :: that        
         
         that%f => f
+        that%nargs = 0
+        allocate(that%args(0))
     end function
     
     function method_create_1(f, a1) result(that)
         procedure()                     :: f
         class(*), intent(in)            :: a1
-        type(method(1))                 :: that
+        type(method)                    :: that
         
         that%f => f
-        allocate(that%args(1)%value, source = a1)
+        that%nargs = 1
+        allocate(that%args(1))
+        ADD_ARGUMENT(1)
     end function
     
     function method_create_2(f, a1, a2) result(that)
         procedure()                     :: f
         class(*), intent(in)            :: a1
         class(*), intent(in)            :: a2
-        type(method(2))                 :: that
+        type(method)                    :: that
         
         that%f => f
-        allocate(that%args(1)%value, source = a1)
-        allocate(that%args(2)%value, source = a2)
+        that%nargs = 2
+        allocate(that%args(2))
+        ADD_ARGUMENT(1)
+        ADD_ARGUMENT(2)
     end function
     
     function method_create_3(f, a1, a2, a3) result(that)
@@ -96,12 +117,14 @@ module benchmark_method
         class(*), intent(in)            :: a1
         class(*), intent(in)            :: a2
         class(*), intent(in)            :: a3
-        type(method(3))                 :: that
+        type(method)                    :: that
         
         that%f => f
-        allocate(that%args(1)%value, source = a1)
-        allocate(that%args(2)%value, source = a2)
-        allocate(that%args(3)%value, source = a3)
+        that%nargs = 3
+        allocate(that%args(3))
+        ADD_ARGUMENT(1)
+        ADD_ARGUMENT(2)
+        ADD_ARGUMENT(3)
     end function
     
     function method_create_4(f, a1, a2, a3, a4) result(that)
@@ -110,13 +133,15 @@ module benchmark_method
         class(*), intent(in)            :: a2
         class(*), intent(in)            :: a3
         class(*), intent(in)            :: a4
-        type(method(4))                 :: that
+        type(method)                    :: that
         
         that%f => f
-        allocate(that%args(1)%value, source = a1)
-        allocate(that%args(2)%value, source = a2)
-        allocate(that%args(3)%value, source = a3)
-        allocate(that%args(4)%value, source = a4)
+        that%nargs = 4
+        allocate(that%args(4))
+        ADD_ARGUMENT(1)
+        ADD_ARGUMENT(2)
+        ADD_ARGUMENT(3)
+        ADD_ARGUMENT(4)
     end function
     
     function method_create_5(f, a1, a2, a3, a4, a5) result(that)
@@ -126,14 +151,16 @@ module benchmark_method
         class(*), intent(in)            :: a3
         class(*), intent(in)            :: a4
         class(*), intent(in)            :: a5
-        type(method(5))                 :: that
+        type(method)                    :: that
         
         that%f => f
-        allocate(that%args(1)%value, source = a1)
-        allocate(that%args(2)%value, source = a2)
-        allocate(that%args(3)%value, source = a3)
-        allocate(that%args(4)%value, source = a4)
-        allocate(that%args(5)%value, source = a5)
+        that%nargs = 5
+        allocate(that%args(5))
+        ADD_ARGUMENT(1)
+        ADD_ARGUMENT(2)
+        ADD_ARGUMENT(3)
+        ADD_ARGUMENT(4)
+        ADD_ARGUMENT(5)
     end function
     
     function method_create_6(f, a1, a2, a3, a4, a5, a6) result(that)
@@ -144,15 +171,17 @@ module benchmark_method
         class(*), intent(in)            :: a4
         class(*), intent(in)            :: a5
         class(*), intent(in)            :: a6
-        type(method(6))                 :: that
+        type(method)                    :: that
         
         that%f => f
-        allocate(that%args(1)%value, source = a1)
-        allocate(that%args(2)%value, source = a2)
-        allocate(that%args(3)%value, source = a3)
-        allocate(that%args(4)%value, source = a4)
-        allocate(that%args(5)%value, source = a5)
-        allocate(that%args(6)%value, source = a6)
+        that%nargs = 6
+        allocate(that%args(6))
+        ADD_ARGUMENT(1)
+        ADD_ARGUMENT(2)
+        ADD_ARGUMENT(3)
+        ADD_ARGUMENT(4)
+        ADD_ARGUMENT(5)
+        ADD_ARGUMENT(6)
     end function
     
     function method_create_7(f, a1, a2, a3, a4, a5, a6, a7) result(that)
@@ -164,20 +193,22 @@ module benchmark_method
         class(*), intent(in)            :: a5
         class(*), intent(in)            :: a6
         class(*), intent(in)            :: a7
-        type(method(7))                 :: that
+        type(method)                    :: that
         
         that%f => f
-        allocate(that%args(1)%value, source = a1)
-        allocate(that%args(2)%value, source = a2)
-        allocate(that%args(3)%value, source = a3)
-        allocate(that%args(4)%value, source = a4)
-        allocate(that%args(5)%value, source = a5)
-        allocate(that%args(6)%value, source = a6)
-        allocate(that%args(7)%value, source = a7)
+        that%nargs = 7
+        allocate(that%args(7))
+        ADD_ARGUMENT(1)
+        ADD_ARGUMENT(2)
+        ADD_ARGUMENT(3)
+        ADD_ARGUMENT(4)
+        ADD_ARGUMENT(5)
+        ADD_ARGUMENT(6)
+        ADD_ARGUMENT(7)
     end function
     
     subroutine invoke_a0(this)
-        class(method(*)), intent(inout) :: this
+        class(method), intent(inout) :: this
         select case (this%nargs)
         case (0)
             call this%f()
@@ -264,7 +295,7 @@ module benchmark_method
     end subroutine
     
     subroutine invoke_a0_with_caller(this, caller)
-        class(method(*)), intent(inout) :: this
+        class(method), intent(inout) :: this
         procedure(caller_a0_x) :: caller
         !private
         procedure(), pointer :: f => null()
@@ -276,7 +307,7 @@ module benchmark_method
     end subroutine
     
     subroutine invoke_a1(this, a1)
-        class(method(*)), intent(inout) :: this
+        class(method), intent(inout) :: this
         class(*), intent(in) :: a1
 
         if (this%nargs /= 1) stop -1
@@ -288,7 +319,7 @@ module benchmark_method
     end subroutine
     
     subroutine invoke_a1_with_caller(this, a1, caller)
-        class(method(*)), intent(inout) :: this
+        class(method), intent(inout) :: this
         class(*), intent(in) :: a1
         procedure(caller_a1_x) :: caller
         !private
@@ -302,7 +333,7 @@ module benchmark_method
     end subroutine
     
     subroutine invoke_a2(this, a1, a2)
-        class(method(*)), intent(inout) :: this
+        class(method), intent(inout) :: this
         class(*), intent(in) :: a1
         class(*), intent(in) :: a2
 
@@ -316,7 +347,7 @@ module benchmark_method
     end subroutine
     
     subroutine invoke_a2_with_caller(this, a1, a2, caller)
-        class(method(*)), intent(inout) :: this
+        class(method), intent(inout) :: this
         class(*), intent(in) :: a1
         class(*), intent(in) :: a2
         procedure(caller_a2_x) :: caller
@@ -332,7 +363,7 @@ module benchmark_method
     end subroutine
     
     subroutine invoke_a3(this, a1, a2, a3)
-        class(method(*)), intent(inout) :: this
+        class(method), intent(inout) :: this
         class(*), intent(in) :: a1
         class(*), intent(in) :: a2
         class(*), intent(in) :: a3
@@ -350,7 +381,7 @@ module benchmark_method
     end subroutine
     
     subroutine invoke_a3_with_caller(this, a1, a2, a3, caller)
-        class(method(*)), intent(inout) :: this
+        class(method), intent(inout) :: this
         class(*), intent(in) :: a1
         class(*), intent(in) :: a2
         class(*), intent(in) :: a3
@@ -369,7 +400,7 @@ module benchmark_method
     end subroutine
     
     subroutine invoke_a4(this, a1, a2, a3, a4)
-        class(method(*)), intent(inout) :: this
+        class(method), intent(inout) :: this
         class(*), intent(in) :: a1, a2, a3, a4
 
         if (this%nargs /= 4) stop -1
@@ -388,7 +419,7 @@ module benchmark_method
     end subroutine
     
     subroutine invoke_a4_with_caller(this, a1, a2, a3, a4, caller)
-        class(method(*)), intent(inout) :: this
+        class(method), intent(inout) :: this
         class(*), intent(in) :: a1
         class(*), intent(in) :: a2
         class(*), intent(in) :: a3
@@ -409,7 +440,7 @@ module benchmark_method
     end subroutine
     
     subroutine invoke_a5(this, a1, a2, a3, a4, a5)
-        class(method(*)), intent(inout) :: this
+        class(method), intent(inout) :: this
         class(*), intent(in) :: a1, a2, a3, a4, a5
 
         if (this%nargs /= 5) stop -1
@@ -430,7 +461,7 @@ module benchmark_method
     end subroutine
     
     subroutine invoke_a5_with_caller(this, a1, a2, a3, a4, a5, caller)
-        class(method(*)), intent(inout) :: this
+        class(method), intent(inout) :: this
         class(*), intent(in) :: a1
         class(*), intent(in) :: a2
         class(*), intent(in) :: a3
@@ -453,7 +484,7 @@ module benchmark_method
     end subroutine
     
     subroutine invoke_a6(this, a1, a2, a3, a4, a5, a6)
-        class(method(*)), intent(inout) :: this
+        class(method), intent(inout) :: this
         class(*), intent(in) :: a1, a2, a3, a4, a5, a6
 
         if (this%nargs /= 6) stop -1
@@ -476,7 +507,7 @@ module benchmark_method
     end subroutine
     
     subroutine invoke_a6_with_caller(this, a1, a2, a3, a4, a5, a6, caller)
-        class(method(*)), intent(inout) :: this
+        class(method), intent(inout) :: this
         class(*), intent(in) :: a1
         class(*), intent(in) :: a2
         class(*), intent(in) :: a3
@@ -501,7 +532,7 @@ module benchmark_method
     end subroutine
     
     subroutine invoke_a7(this, a1, a2, a3, a4, a5, a6, a7)
-        class(method(*)), intent(inout) :: this
+        class(method), intent(inout) :: this
         class(*), intent(in) :: a1, a2, a3, a4, a5, a6, a7
 
         if (this%nargs /= 7) stop -1
@@ -527,7 +558,7 @@ module benchmark_method
     end subroutine
     
     subroutine invoke_a7_with_caller(this, a1, a2, a3, a4, a5, a6, a7, caller)
-        class(method(*)), intent(inout) :: this
+        class(method), intent(inout) :: this
         class(*), intent(in) :: a1
         class(*), intent(in) :: a2
         class(*), intent(in) :: a3
@@ -554,20 +585,17 @@ module benchmark_method
     end subroutine
     
     subroutine method_assign_method(lhs, rhs)
-        type(method(*)), intent(inout)  :: lhs
-        type(method(*)), intent(in)     :: rhs
+        class(method), intent(inout)  :: lhs
+        type(method), intent(in)      :: rhs
         !private
         integer :: i
-        
+
         nullify(lhs%f)
         lhs%f => rhs%f
-        if (lhs%nargs == rhs%nargs) then
-            do i = 1, lhs%nargs
-                if (allocated(lhs%args(i)%value)) deallocate(lhs%args(i)%value)
-                allocate(lhs%args(i)%value, source = rhs%args(i)%value)
-            end do
-        else
-            error stop 'Assignment not supported'
-        end if
+        lhs%nargs = rhs%nargs
+        if (allocated(lhs%args)) deallocate(lhs%args)
+        allocate(lhs%args(rhs%nargs), source = rhs%args)
+        !
     end subroutine
+    
 end module

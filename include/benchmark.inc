@@ -1,11 +1,5 @@
-#ifdef __GFORTRAN__
-#define MACRO_SAME(A) A
-#define MACRO_CAT2(A,B) MACRO_SAME(A)B
-#define MACRO_CAT3(A,B,C) MACRO_CAT2(A,B)C
-#define MACRO_STRINGIFY(A) "A"
-#else
-#define MACRO_CAT2(A,B) A ## B
-#define MACRO_CAT3(A,B,C) A ## B ## C
-#define MACRO_STRINGIFY(A) #A
-#endif
+#include <concat.inc>
 #define func(f) f, name = MACRO_STRINGIFY(f)
+#define benchmark(x, f) \
+x%name = MACRO_STRINGIFY(f);\
+call x%f

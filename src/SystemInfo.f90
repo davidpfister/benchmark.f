@@ -14,30 +14,31 @@ module benchmark_systeminfo
     
     contains
     
-    subroutine systeminfo()
+    subroutine get_systeminfo()
+        !private
         character(:), allocatable   :: tmpout, output, cmsg
         character(:), allocatable   :: cmd
-        integer :: os, lu
+        integer :: os, lu, ios
         integer :: ierr,  cstat
+        character(200) :: line
         
-        allocate(character(256) :: tmpout)
         allocate(character(256) :: cmsg)
         
-        open(newunit = lu, status='scratch'); inquire(unit = lu, name = tmpout); close(lu)
-        open(newunit = lu, status='new', file = tmpout)
+        tmpout = 'sysinfo.tmp'
+        open(newunit = lu, status='new', file = tmpout); close(lu)
         output = " 1> "//tmpout
         ierr = 0
         
         os = get_os_type()
         ! Define the shell command.
         if (os == OS_MACOS) then
-            cmd = 'uname -a; sysctl -a | grep machdep.cpu; system_profiler SPHardwareDataType'
+            cmd = 'uname -a '//output//'; sysctl -a | grep machdep.cpu '//output//'; system_profiler SPHardwareDataType '//output
         elseif (os == OS_LINUX) then
-            cmd = 'uname -a; lscpu | grep -v "Not affected" | grep -v "Flags"'
+            cmd = 'uname -a '//output//'; lscpu | grep -v "Not affected" | grep -v "Flags"'//output
         elseif (os == OS_WINDOWS) then
             cmd = 'systeminfo | find /V /I "hotfix" | find /V /I "network"' //&
                 '| find /V "Connection Name" | find /V "[" | find /V "DHCP" ' //&
-                '| find /V "Status" | find /V "IP address" | find /V "Hyper-V" '
+                '| find /V "Status" | find /V "IP address" | find /V "Hyper-V" ' // output
         else
             return
         end if
@@ -45,10 +46,20 @@ module benchmark_systeminfo
         call execute_command_line(cmd, wait=.true., exitstat=ierr, cmdstat=cstat, cmdmsg=cmsg)
         if (ierr /= 0) then
             write (*, *) cmd
-            write (*, *) 'exitstat', ierr
-            write (*, *) 'cmdstat', cstat
-            write (*, *) 'cmdmsg', cmsg
+            write (*, *) 'exitstat: ', ierr
+            write (*, *) 'cmdstat:  ', cstat
+            write (*, *) 'cmdmsg:   ', cmsg
+            return
         end if
+
+        open(newunit = lu, status='old', file = tmpout)
+        do
+            read(lu, '(A)', iostat=ios) line
+            if (ios /= 0) exit
+            if (len_trim(line) > 0) write(*, '(A)') '                           '//trim(line)
+        end do
+
+        close(lu, status = 'delete')
     end subroutine
     
     !> @brief Returns the OS type.
@@ -56,8 +67,9 @@ module benchmark_systeminfo
     !! found on Windows. Then, `OSTYPE` is read in and compared with common
     !! names. If this fails too, check the existence of files that can be
     !! found on specific system types only.
-    !! @returns an integer. Returns OS_UNKNOWN if the operating system cannot be determined.
+    !> @returns an integer. Returns OS_UNKNOWN if the operating system cannot be determined.
     integer function get_os_type() result(r)
+        !private        
         character(len=255)          :: val
         integer                     :: length, rc
         logical                     :: file_exists
@@ -163,6 +175,7 @@ module benchmark_systeminfo
     
     pure function os_name(os)
         integer, intent(in) :: os
+        !private
         character(:), allocatable :: OS_name
 
         select case (os)
@@ -174,7 +187,7 @@ module benchmark_systeminfo
             case (OS_FREEBSD); OS_NAME =  "FreeBSD"
             case (OS_OPENBSD); OS_NAME =  "OpenBSD"
             case (OS_UNKNOWN); OS_NAME =  "Unknown"
-            case default     ; OS_NAME =  "UNKNOWN"
+            case default     ; OS_NAME =  "Unknown"
         end select
     end function
 end module

@@ -14,12 +14,12 @@ module benchmark_steady_state_detection
         real(r8), intent(in)    :: t_crit
         !private
         real(r8), allocatable   :: p(:)
-        integer :: n, k, from, to, m, t, y
+        integer :: i, n, k, from, to, m, t, y
         logical :: should_break
         real(r8) :: mu, sd
         real(r8), pointer    :: x_active(:)
         
-        allocate(p(size(x)), source = 0.0d0)
+        allocate(p(size(x)), source = 0.0_r8)
         n = nin
         
         if (n > size(x)) then
@@ -45,7 +45,7 @@ module benchmark_steady_state_detection
             end do
             m = m/n
             
-            mu = (sum(x_active) - sum([1:n])*m)/n
+            mu = (sum(x_active) - sum([(i, i =1,n)])*m)/n
 
             sd = 0;
             do t = 1, n

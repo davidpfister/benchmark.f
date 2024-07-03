@@ -55,13 +55,13 @@ end module
 #include <benchmark.inc>    
 program poisson
     use rhofunc
-    use benchmark
+    use benchmark_library
     
     implicit none
     
     type(runner) :: br
 
-    call br%run(1.0d-6, 30, func(test_poisson))
-    call br%run(1.0d-6, 50, func(test_poisson))
+    benchmark(br, run(1.0d-6, 30, test_poisson))
+    benchmark(br, run(1.0d-6, 50, test_poisson))
 
 end program

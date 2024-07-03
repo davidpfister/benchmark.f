@@ -1,29 +1,31 @@
 module benchmark_steps
-    use benchmark_steps_setup_step
-    use benchmark_steps_system_step
-    use benchmark_steps_compiler_step
-    use benchmark_steps_dryrunstep
-    use benchmark_steps_benchmark_step
+    use benchmark_steps_setup
+    use benchmark_steps_system
+    use benchmark_steps_compiler
+    use benchmark_steps_dryrun
+    use benchmark_steps_benchmark_run
     use benchmark_workflow, only: workflow
-        
+    use benchmark_options
+    
     implicit none 
     
     public :: steps_initialize, &
-              benchmark_step
+              benchmark_run
     
     private
     
     contains
     
-    subroutine steps_initialize(wf)
+    subroutine steps_initialize(wf, options)
         type(workflow), allocatable, intent(inout), target :: wf
-
+        class(runner_options), intent(in) :: options
+        
         if(.not. allocated(wf)) allocate(wf)
 
-        call wf%add(setup_step())
-        call wf%add(system_step())
-        call wf%add(compiler_step())
-        call wf%add(dryrun_step())
+        call wf%add(setup())
+        call wf%add(system())
+        call wf%add(compiler())
+        call wf%add(dryrun(options))
     end subroutine
     
 end module
