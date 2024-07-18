@@ -3,131 +3,77 @@ module benchmark_steady_state_detection
     
     implicit none
     
+    private 
+    
+    public :: ssd
+    
     contains
     
     !> @reference R. R. Rhinehart, Automated steady and transient state identification in
     !> noisy processes, in Proceedings of the American Control Conference, 2013,
     !> no. June 2013, pp. 4477–4493.
-    function ssd(x, nin, t_crit) result(p)
-        real(r8), intent(in), target    :: x(:)
-        integer, intent(in)     :: nin
-        real(r8), intent(in)    :: t_crit
+    real(r8) function ssd(x, offset, alpha)
+        real(r8), intent(in)            :: x(:)
+        integer, intent(in)             :: offset
+        real(r8), intent(in)            :: alpha
         !private
-        real(r8), allocatable   :: p(:)
-        integer :: i, n, k, from, to, m, t, y
-        logical :: should_break
+        integer  :: i, j, k, n, ierr
         real(r8) :: mu, sd
-        real(r8), pointer    :: x_active(:)
+        real(r8) :: y(size(x))
+        integer df
+        real(r8) fx, fx2
+        real(r8) lambda
+        integer n_data
+        real(r8) z
         
-        allocate(p(size(x)), source = 0.0_r8)
-        n = nin
-        
-        if (n > size(x)) then
-            n = size(x)
-        end if
-        
-        k = 1
-        should_break = .false.
-        
-        do while (.true.)
-            from = k
-            to = from + n - 1
-            if (to > size(x)) then
-                to = size(x)
-                n = to - from + 1
-                should_break = .true.
-            end if
+        n = size(y)
+        y(1:n-offset) = x(offset+1:n)
+        y(n-offset+1:) = x(:offset)
             
-            x_active => x(from:to)
-            m = 0
-            do t = 2, n
-                m = m + (x_active(t)-x_active(t-1))
-            end do
-            m = m/n
-            
-            mu = (sum(x_active) - sum([(i, i =1,n)])*m)/n
+        mu = sum(y)/real(n, r8)
 
-            sd = 0;
-            do t = 1, n
-                sd = sd + (x_active(t) - m*t-mu)**2
+        sd = 0.0_r8;
+        do j = 1, n
+            sd = sd + (y(j) - mu)**2
+        end do
+        sd = sqrt(sd/real(n-2, r8))
+
+        ssd = 0.0_r8
+        associate(t_crit => student(n, alpha))
+            do j = 1, n
+                if (abs(y(j)-mu) <=  t_crit * sd) ssd = ssd + 1.0_r8
             end do
-            sd = sqrt(sd/(n-2))
+        end associate
+        ssd = ssd/real(n, r8)
             
-            y = 0
-            do t = 1, n
-                if (abs(x_active(t)-mu) <= t_crit * sd) then
-                    y = y + 1
-                end if
-            end do
-            y = y/n
-            
-            p = y;
+    end function
     
-            if (should_break) exit
-    
-            k = k + n
+    real(r8) function student(dof, a) result(t)
+        integer, intent(in)     :: dof
+        real(r8), intent(in)    :: a
+        !private
+        real(r8) :: f, fold, x, p, integral
+        real(r8), parameter :: dt = 1.0e-2
+        
+        f(x) = (1+x**2/real(dof, r8))**(-(dof+1)/2.0_r8)*gamma((dof+1)/2.0_r8)/sqrt(3.14*dof)/gamma(dof/2.0_r8)
+        
+        integral = 0.0_r8
+        fold = 0.0_r8
+        p = 0.5*a
+        t = 1.0e3
+        
+        do while (f(t) > 1.0e-20)
+            t = t * 2
+        end do
+        
+        do while (integral < p)
+            associate(fnew => f(t+dt))
+                integral = integral + 0.5*(fold+fnew)*dt
+                t = t - dt
+                fold = fnew
+                if (t < 0) stop
+            end associate
         end do
     end function
 
-!function P = ssd(x, n, t_crit)
-!
-!P = zeros(length(x),1);
-!
-!if n > length(x)
-!    n = length(x);
-!end
-!
-!k = 1;
-!should_break = 0;
-!while 1 
-!    from = k;
-!    to = from + n - 1; 
-!    
-!    if to > length(x)
-!        to = length(x);
-!        n = to -from  + 1;
-!        should_break = 1;
-!    end
-!    
-!    x_active = x(from:to);
-!   
-!    % By first differencing xt it is possible to unbiasedly1 estimate the slope
-!    % m of the drift component mt as the arithmetic average of xt − xt−1 with
-!    % n sampled values of xt in the window which areequally spaced in time
-!    % i.e., given a uniform sampling period or cycle.
-!    m = 0;
-!    for t = 2 : n
-!        m = m + (x_active(t)-x_active(t-1));
-!    end
-!    m = m/n;
-!    
-!    % eq. 3
-!    mu = (sum(x_active) - sum(1:n)*m)/n;
-!    
-!    % eq. 4
-!    sd = 0;
-!    for t = 1 : n
-!        sd = sd + (x_active(t) - m*t-mu)^2;
-!    end
-!    sd = sqrt(sd/(n-2));
-!    
-!    % eq. 5
-!    y = 0;
-!    for t = 1 : n
-!        if abs(x_active(t)-mu) <= t_crit * sd
-!            y = y + 1;
-!        end
-!    end
-!    y = y/n;
-!    
-!    P(from:to,1) = y;
-!    
-!    if should_break == 1
-!        break;
-!    end
-!    
-!    k = k + n;
-!end
-!
-!end
 end module

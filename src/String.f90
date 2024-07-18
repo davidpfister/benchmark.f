@@ -31,7 +31,7 @@ module benchmark_string
         lhs = rhs%chars
     end subroutine
     
-    function str(value, fmt) result(chars)
+    pure function str(value, fmt) result(chars)
         class(*), intent(in)        :: value
         character(*), intent(in), optional :: fmt
         character(:), allocatable   :: chars

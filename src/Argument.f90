@@ -5,11 +5,13 @@ module benchmark_method_argument
     implicit none
     
     type, public :: arg
+        private
         character(:), allocatable :: display
-        class(*), allocatable     :: value
+        class(*), allocatable, public :: value
     contains
         procedure, pass(lhs), private   :: any_assign_argument
-        generic, public :: assignment(=) => any_assign_argument
+        generic :: assignment(=) => any_assign_argument
+        procedure, pass(this), public :: to_string
     end type
     
     interface assignment(=)
@@ -25,33 +27,28 @@ module benchmark_method_argument
     contains
     
     type(arg) function arg_new(value) result(a)
-        class(*), intent(in)                :: value
-        a%display = str(value)
+        class(*), intent(in)        :: value
         
         allocate(a%value, source = value)
     end function
     
     type(arg) function arg_new_from_chars(value, display) result(a)
-        class(*), intent(in)                :: value
-        character(*), intent(in)            :: display
+        class(*), intent(in)        :: value
+        character(*), intent(in)    :: display
         
         if (len_trim(display) > 0) then
             a%display = trim(adjustl(display))
-        else
-            a%display = str(value)
         end if
         
         allocate(a%value, source = value)
     end function
     
     type(arg) function arg_new_from_string(value, display) result(a)
-        class(*), intent(in)                :: value
-        type(string), intent(in)            :: display
+        class(*), intent(in)        :: value
+        class(string), intent(in)   :: display
         
         if (len_trim(display%chars) > 0) then
             a%display = trim(adjustl(display%chars))
-        else
-            a%display = str(value)
         end if
         
         allocate(a%value, source = value)
@@ -64,37 +61,52 @@ module benchmark_method_argument
         if (allocated(lhs%value)) deallocate(lhs%value)
         select type (rhs)
         type is (arg)
-            lhs%display = rhs%display
-            if (allocated(lhs%value)) deallocate(lhs%value) 
+            if (allocated(lhs%display)) deallocate(lhs%display)
+            if (allocated(rhs%display)) allocate(lhs%display, source = rhs%display)
             allocate(lhs%value, source = rhs%value)
         class default
-            lhs%display = str(rhs)
-            if (allocated(lhs%display)) deallocate(lhs%display) 
+            if (allocated(lhs%display)) deallocate(lhs%display)
             allocate(lhs%value, source = rhs)
         end select
     end subroutine
     
     subroutine argument_assign_any(lhs, rhs)
-#ifdef __GFORTRAN__
-       class(*), allocatable, intent(inout) :: lhs
-#else
-       class(*), intent(inout) :: lhs
-#endif
-        type(arg), intent(in)   :: rhs
-        
+        use iso_c_binding
+        class(*), intent(inout)       :: lhs
+        type(arg), intent(in), target :: rhs
+        !private
+        interface
+            subroutine memcpy(dest, src, n) bind(c, name='memcpy')
+                import
+                integer(c_intptr_t), intent(in), value :: dest
+                integer(c_intptr_t), intent(in), value :: src
+                integer(c_size_t), value :: n
+            end subroutine
+        end interface
+      
         select type (lhs)
         type is (arg)
-            lhs%display = rhs%display
+            if (allocated(lhs%display)) deallocate(lhs%display)
+            if (allocated(rhs%display)) allocate(lhs%display, source = rhs%display)
             if (allocated(lhs%value)) deallocate(lhs%value) 
             allocate(lhs%value, source = rhs%value)
         class default
-#ifdef __GFORTRAN__
-            if (allocated(lhs)) deallocate(lhs)
-            allocate(lhs, source = rhs%value)
-#else
-            lhs = rhs%value
-#endif
+            if (same_type_as(lhs, rhs%value)) then
+                call memcpy(loc(lhs), loc(rhs%value), storage_size(lhs, kind=c_size_t)/8_c_size_t)
+            else
+                stop 'Not supported assignment'
+            end if
         end select
     end subroutine
 
+    pure function to_string(this) result(s)
+        class(arg), intent(in) :: this
+        character(:), allocatable :: s
+
+        if (allocated(this%display)) then
+            s = this%display
+        else
+            s = str(this%value)
+        end if
+    end function
 end module

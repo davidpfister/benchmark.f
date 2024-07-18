@@ -1,4 +1,5 @@
 module benchmark_steps_benchmark_run
+    use benchmark_steady_state_detection, only: ssd
     use benchmark_workflow, only: workflow
     use benchmark_options
     use benchmark_method
@@ -6,6 +7,7 @@ module benchmark_steps_benchmark_run
     use benchmark_statistics, only: stats   
     use benchmark_warning
     use benchmark_string
+    use benchmark_kinds
     
     implicit none
     
@@ -39,50 +41,48 @@ module benchmark_steps_benchmark_run
     subroutine step_run(step)
         class(workflow), intent(inout) :: step
         !private
-        integer :: k, count
+        integer :: k
         real(r8) :: start, finish
         type(stats) :: s
+        real(r8), allocatable :: times(:)
+        real(r8) :: treshold
         
         select type(step)
         type is (benchmark_run)
-            if (first_call) then
-                write (*, '(A)') new_line('A'), step%header
-                first_call = .false.
-            end if
+            treshold = step%options%ssd_threshold
+            if (first_call)  write (*, '(A)') new_line('A'), step%header, new_line('A')
+
             step%options%count = step%options%count + 1
-        
-            count = 0
-
-            !warm up
-            if (.not. step%options%skip_warmup) then
+            allocate(times(step%options%sampling_window), source=0.0_r8)
+            
+            block
+                integer     ::icount, jcount, count
+                real(r8)    :: crit, t
+                
+                crit = 0.0_r8; icount = 0; jcount = 0; count = 0
                 call clock(start)
-                finish = start
-                do while (count <= step%options%maxcalls .and. finish - start < step%options%mintime)
-                    call step%method%invoke()
+                do while (crit <= (1.0_r8 - treshold))
+                    call step%method%invoke(); call clock(finish)
+                    t = finish - start
+                    icount = icount + 1
+                    if (t > 0.0_r8) then 
+                        times(1 + modulo(jcount, step%options%sampling_window)) = t / real(icount, r8)
+                        jcount = jcount + 1
+                        icount = 0
+                        call clock(start)
+                    end if
                     count = count + 1
-                    call clock(finish)
+                    
+                    if (jcount >= step%options%sampling_window) crit = ssd(times, modulo(jcount, step%options%sampling_window), treshold)
+                
+                    if (count >= step%options%maxcalls) then 
+                        call warning_maxcalls()
+                        exit
+                    end if
                 end do
-                if (count > step%options%maxcalls) call warning_maxcalls()
-            else
-                count = step%options%maxcalls
-            end if
-
-            call s%reset()
-            do k = 1, step%options%repetitions
-                call clock(start)
-                block
-                    integer :: m
-                    do m = 1, count
-                        call step%method%invoke()
-                    end do
-                end block
-                call clock(finish)
-                call s%update(start, finish)
-                s%n = s%n + 1
-            end do
-
-            call s%finalize(count)
-
+            end block
+            
+            call s%compute(times)
             call summary(step, s)
             nullify(step%method)
             nullify(step%options)
@@ -93,12 +93,32 @@ module benchmark_steps_benchmark_run
         class(benchmark_run), intent(in) :: step
         class(stats), intent(in) :: s
         !private
-        character(60) :: column
+        character(48) :: column
         character(:), allocatable :: c
         character(:), allocatable :: row
         integer :: i
         
-        row = ' '
+        if (first_call) then
+            row = ''
+        
+            c = '|              Method Name'
+            column = c
+            row = '     ' // column // '|'
+            column = '          Mean'
+            row = row // column(1:24) // '|'
+            column = '    Standard Deviation'
+            row = row // column(1:24) // '|'
+        
+             write (*, '(A)') row
+            row = '     '//'|'//repeat('_', 47)//'|'
+            row = row // repeat('_', 24) // '|'
+            row = row // repeat('_', 24) // '|'
+        
+             write (*, '(A)') row
+             first_call = .false.
+        end if
+        
+        row = ''
         
         c = '|'
         if (len_trim(step%options%name) > 0) then
@@ -110,20 +130,20 @@ module benchmark_steps_benchmark_run
         c = c //'('
         do i = 1, step%method%nargs
             if (i == 1) then
-                c = c // step%method%args(i)%display
+                c = c // step%method%args(i)%to_string()
             else
-                c = c // ','// step%method%args(i)%display
+                c = c // ','// step%method%args(i)%to_string()
             end if
         end do
         c = c // ')'
         column = c
-        row = '         ' // column // '|'
+        row = '     ' // column // '|'
         column = str(1000_r8 * s%mean, '(f12.3)') // ' us'
         row = row // adjustr(column(1:24)) // '|'
         column = ' +/- '//str(1000_r8 * s%stddev, '(f12.3)')
         row = row // adjustr(column(1:24)) // '|'
         
-         write (*, '(A)') row
+        write (*, '(A)') row
     end subroutine
     
 end module

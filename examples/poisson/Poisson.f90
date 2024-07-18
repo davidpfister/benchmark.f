@@ -61,7 +61,31 @@ program poisson
     
     type(runner) :: br
 
+    !calling using preprocessor macro
     benchmark(br, run(1.0d-6, 30, test_poisson))
-    benchmark(br, run(1.0d-6, 50, test_poisson))
+    
+    !calling using the derived type and the 'full' name
+    br%name = '(1.0d-6, 30, test_poisson)'
+    call br%run(1.0d-6, 30, test_poisson)
+    
+    !calling using the derived type and the 'full' name without brackets
+    br%name = '1.0d-6, 30, test_poisson'
+    call br%run(1.0d-6, 30, test_poisson)
+    
+    !calling using the derived type and partial name
+    br%name = '30, test_poisson'
+    call br%run(1.0d-6, 30, test_poisson)
+    
+    !calling using the derived type and derived type
+    br%name = '1.0d-6,, test_poisson'
+    call br%run(1.0d-6, 30, test_poisson)
+    
+    !calling using the derived type and only the function name
+    br%name = 'test_poisson'
+    call br%run(1.0d-6, 30, test_poisson)
+    
+    !calling using the derived type and and empty name
+    br%name = ''
+    call br%run(1.0d-6, 30, test_poisson)
 
 end program

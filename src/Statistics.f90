@@ -1,60 +1,31 @@
 module benchmark_statistics
-    use iso_fortran_env, only: i1 => int8, &
-                               i2 => int16, &
-                               i4 => int32, &
-                               i8 => int64, &
-                               r4 => real32, &
-                               r8 => real64, &
-                               r16 => real128
+    use benchmark_kinds
     
     implicit none
     
     public :: stats
     
     type stats
-        integer :: n = 0
-        integer(i4) :: sum = 0_r8
-        integer(i4) :: sum2 = 0_r8
-        double precision :: mean
-        double precision :: stddev
-        double precision :: variance
+        integer     :: n
+        real(r8)    :: mean     = 0.0_r8
+        real(r8)    :: stddev   = 0.0_r8
+        real(r8)    :: variance = 0.0_r8
     contains
-        procedure, pass(this) :: reset => stats_reset
-        procedure, pass(this) :: update => stats_update
-        procedure, pass(this) :: finalize => stats_finalize
+        procedure, pass(this) :: compute => stats_compute
     end type
     
     private
     
     contains
     
-    subroutine stats_reset(this)
+    subroutine stats_compute(this, y)
         class(stats), intent(inout) :: this
+        real(r8), intent(in) :: y(:)
 
-        this%n = 0
-        this%mean = 0_r8
-        this%variance = 0_r8
-        this%stddev = 1_r8
-        this%sum = 0_r8
-        this%sum2 = 0_r8
-    end subroutine
-
-    subroutine stats_update(this, start, finish)
-        class(stats), intent(inout) :: this
-        real(r8), intent(in) :: start
-        real(r8), intent(in) :: finish
-
-        this%sum = this%sum + (finish - start)
-        this%sum2 = this%sum2 + (finish - start)**2
-    end subroutine
-
-    subroutine stats_finalize(this, count)
-        class(stats), intent(inout) :: this
-        integer, intent(in) :: count
-
-        this%mean = this%sum / dble(this%n) / dble(count)
-        if (this%n > 1) this%variance = (this%sum2 - this%sum * this%sum / dble(this%n)) / dble(this%n - 1) / dble(count)**2
-        this%stddev = sqrt(abs(this%variance))
+        this%n = size(y)
+        this%mean = sum(y)/this%n
+        this%variance = sum(y**2)/this%n - this%mean**2
+        this%stddev = sqrt(this%variance)
     end subroutine
     
 end module

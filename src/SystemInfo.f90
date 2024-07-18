@@ -21,37 +21,42 @@ module benchmark_systeminfo
         integer :: os, lu, ios
         integer :: ierr,  cstat
         character(200) :: line
+        logical :: exists
         
         allocate(character(256) :: cmsg)
         
-        tmpout = 'sysinfo.tmp'
-        open(newunit = lu, status='new', file = tmpout); close(lu)
-        output = " 1> "//tmpout
-        ierr = 0
+        tmpout = 'info.sys'
+        inquire(file=tmpout, exist=exists)
         
-        os = get_os_type()
-        ! Define the shell command.
-        if (os == OS_MACOS) then
-            cmd = 'uname -a '//output//'; sysctl -a | grep machdep.cpu '//output//'; system_profiler SPHardwareDataType '//output
-        elseif (os == OS_LINUX) then
-            cmd = 'uname -a '//output//'; lscpu | grep -v "Not affected" | grep -v "Flags"'//output
-        elseif (os == OS_WINDOWS) then
-            cmd = 'systeminfo | find /V /I "hotfix" | find /V /I "network"' //&
-                '| find /V "Connection Name" | find /V "[" | find /V "DHCP" ' //&
-                '| find /V "Status" | find /V "IP address" | find /V "Hyper-V" ' // output
-        else
-            return
-        end if
+        if (.not. exists) then
+            open(newunit = lu, status='new', file = tmpout); close(lu)
+            output = " 1> "//tmpout
+            ierr = 0
+        
+            os = get_os_type()
+            ! Define the shell command.
+            if (os == OS_MACOS) then
+                cmd = 'uname -a '//output//'; sysctl -a | grep machdep.cpu '//output//'; system_profiler SPHardwareDataType '//output
+            elseif (os == OS_LINUX) then
+                cmd = 'uname -a '//output//'; lscpu | grep -v "Not affected" | grep -v "Flags"'//output
+            elseif (os == OS_WINDOWS) then
+                cmd = 'systeminfo | find /V /I "hotfix" | find /V /I "network"' //&
+                    '| find /V "Connection Name" | find /V "[" | find /V "DHCP" ' //&
+                    '| find /V "Status" | find /V "IP address" | find /V "Hyper-V" ' // output
+            else
+                return
+            end if
 
-        call execute_command_line(cmd, wait=.true., exitstat=ierr, cmdstat=cstat, cmdmsg=cmsg)
-        if (ierr /= 0) then
-            write (*, *) cmd
-            write (*, *) 'exitstat: ', ierr
-            write (*, *) 'cmdstat:  ', cstat
-            write (*, *) 'cmdmsg:   ', cmsg
-            return
+            call execute_command_line(cmd, wait=.true., exitstat=ierr, cmdstat=cstat, cmdmsg=cmsg)
+            if (ierr /= 0) then
+                write (*, *) cmd
+                write (*, *) 'exitstat: ', ierr
+                write (*, *) 'cmdstat:  ', cstat
+                write (*, *) 'cmdmsg:   ', cmsg
+                return
+            end if
         end if
-
+        
         open(newunit = lu, status='old', file = tmpout)
         do
             read(lu, '(A)', iostat=ios) line
@@ -59,7 +64,7 @@ module benchmark_systeminfo
             if (len_trim(line) > 0) write(*, '(A)') '                           '//trim(line)
         end do
 
-        close(lu, status = 'delete')
+        !close(lu, status = 'delete')
     end subroutine
     
     !> @brief Returns the OS type.

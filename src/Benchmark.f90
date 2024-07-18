@@ -296,21 +296,22 @@ contains
         type(string) :: names(n)
         character(:), allocatable :: func
         character(:), allocatable :: substr
-        integer :: i, j
+        integer :: i, j, k, l
         
         if (present(name)) then
             this%name = name
         else
+            l = len_trim(this%name)
             if (len_trim(this%name) == 0) return
             i = index(this%name, ',', back = .true.)
             if (i > 0) then
-                func = this%name(i+1: len_trim(this%name)-1)
+                k = index(this%name, ')', back = .true.)
+                func = this%name(i+1:merge(k-1, l, k/=0))
             else
                 i = index(this%name, '(', back = .false.)
-                if (i > 0) then
-                    this%name = this%name(i+1: len_trim(this%name)-1)
-                    return
-                end if
+                k = index(this%name, ')', back = .true.)
+                this%name = this%name(i+1:merge(k-1, l, k/=0))
+                return
             end if
             j = n
             do while (i > 0)
@@ -325,6 +326,11 @@ contains
             end do
             i = index(this%name, '(', back = .false.)
             if (i > 0) then
+                names(1) = this%name(i+1:index(this%name, ',', back = .false.)-1)
+                this%name = func
+                return
+            else
+                i = index(this%name, ' ', back = .false.)
                 names(1) = this%name(i+1:index(this%name, ',', back = .false.)-1)
                 this%name = func
                 return
