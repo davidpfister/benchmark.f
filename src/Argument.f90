@@ -12,6 +12,9 @@ module benchmark_method_argument
         procedure, pass(lhs), private   :: any_assign_argument
         generic :: assignment(=) => any_assign_argument
         procedure, pass(this), public :: to_string
+        procedure, pass(rhs), private   :: any_equal_argument
+        procedure, pass(lhs), private   :: argument_equal_any
+        generic :: operator(==) => any_equal_argument, argument_equal_any
     end type
     
     interface assignment(=)
@@ -73,7 +76,7 @@ module benchmark_method_argument
     subroutine argument_assign_any(lhs, rhs)
         use iso_c_binding
         class(*), intent(inout)       :: lhs
-        type(arg), intent(in), target :: rhs
+        type(arg), intent(in)         :: rhs
         !private
         interface
             subroutine memcpy(dest, src, n) bind(c, name='memcpy')
@@ -99,6 +102,26 @@ module benchmark_method_argument
         end select
     end subroutine
 
+    
+    logical function any_equal_argument(lhs, rhs) result(res)
+        class(*), intent(in)       :: lhs
+        class(arg), intent(in)     :: rhs
+        !private
+        integer(kind=1), allocatable :: mold(:)
+        
+        res = all(transfer(lhs, mold) == transfer(rhs, mold))
+        
+    end function
+    
+    logical function argument_equal_any(lhs, rhs) result(res)
+        class(arg), intent(in)     :: lhs
+        class(*), intent(in)       :: rhs
+        !private
+        integer(kind=1), allocatable :: mold(:)
+        
+        res = all(transfer(lhs, mold) == transfer(rhs, mold))
+    end function
+    
     pure function to_string(this) result(s)
         class(arg), intent(in) :: this
         character(:), allocatable :: s

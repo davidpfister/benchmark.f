@@ -60,6 +60,7 @@
 		<File RelativePath=".\Benchmark.f90"/>
 		<File RelativePath=".\Caller.f90"/>
 		<File RelativePath=".\CompilerInfo.f90"/>
+		<File RelativePath=".\IntegerProperty.f90"/>
 		<File RelativePath=".\Kinds.f90"/>
 		<File RelativePath=".\Method.f90"/>
 		<File RelativePath=".\Options.f90"/>

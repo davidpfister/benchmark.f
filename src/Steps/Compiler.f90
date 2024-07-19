@@ -1,6 +1,7 @@
 module benchmark_steps_compiler
     use benchmark_compilerinfo
     use benchmark_workflow, only: workflow
+    use benchmark_output_unit
     
     implicit none
     
@@ -22,7 +23,7 @@ module benchmark_steps_compiler
     subroutine step_run(step)
         class(workflow), intent(inout) :: step
         
-        write (*, '(A)') new_line('A'), step%header
+        write (output_unit, '(A)') new_line('A'), step%header
         call get_compilerinfo()
     end subroutine
 end module

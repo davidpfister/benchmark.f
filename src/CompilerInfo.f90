@@ -119,11 +119,9 @@ module benchmark_compilerinfo
         options = compiler_options()
         i = 1
         k = 1
-        
-        write(*,'(A)') '                           Name:                      '//trim(ci%name)
-        write(*,'(A)') '                           Vendor:                    '//trim(ci%vendor)
-        write(*,'(A)') '                           Version:                   '//trim(ci%version)
-        
+        write(output_unit,'(A)') '                           Name:                      '//trim(ci%name)
+        write(output_unit,'(A)') '                           Vendor:                    '//trim(ci%vendor)
+        write(output_unit,'(A)') '                           Version:                   '//trim(ci%version)
         do while (i < len(options))
             k = index(options(i:), ' ')
             if (k > 0) then
@@ -145,15 +143,15 @@ module benchmark_compilerinfo
             end if
 
             if (i == 1) then
-                write(*,'(A)') '                           Options:                   '//options(i:j)
+                write(output_unit,'(A)') '                           Options:                   '//options(i:j)
             else
-                write(*,'(A)') '                                                      '//options(i:j)
+                write(output_unit,'(A)') '                                                      '//options(i:j)
             end if
             i = j + 1
             k = 0
         end do
         associate(isdebug => compiler_is_debug(compiler, options))
-            write(*,'(A)') '                           Profile:                   '//trim(merge('Debug  ', 'Release', isdebug))
+            write(output_unit,'(A)') '                           Profile:                   '//trim(merge('Debug  ', 'Release', isdebug))
             if (isdebug) then 
                 call warning_debug()
             end if

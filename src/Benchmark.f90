@@ -6,6 +6,7 @@ module benchmark_library
     use benchmark_steps
     use benchmark_options
     use benchmark_string
+    use benchmark_output_unit
 #ifdef _OPENMP
     use omp_lib
 #endif
@@ -18,6 +19,7 @@ module benchmark_library
     class(workflow), pointer             :: current
 
     type, extends(runner_options), public :: runner
+        type(iproperty), public :: unit
     contains
         procedure, pass(this), public :: load => benchmark_load
         procedure, pass(this), private :: benchmark_serialize_to_unit

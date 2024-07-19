@@ -1,15 +1,27 @@
-Fortran Benchmarking Best Practices
+
+Benchmark
 ==================================
+Fortran is the fastest language on earth, so they say. But can we prove it? \
+And despite its legendary calculation speed when it comes to crunching numbers, Fortran is no exception when it comes to writing code: it is also very possible to write terribly slow pieces of code. This is where benchmarking implementations of the same function can help developing better and faster algorithms.  
 
-You can help to ensure benchmark results are reliable, stable, and useful by following benchmarking best practices.
+This project aims at providing an easy interface to benchmark functions and subroutines while taking care warming up the machine, collecting system information, computing statistics and reporting. 
 
-This includes isolating the code and the execution environment and using benchmarking functions that are high-precision, non-adjustable, and monotonic. It also includes less obvious factors such as repeating benchmarks reporting summary statistics and warming up target code before the benchmark process.
+Running the benchmark could not be simpler: 
+```fortran
+type(runner) :: br
 
-In this tutorial, you will discover **best practices** to consider when benchmarking the execution time of Fortran code.
+benchmark(br, run(1.0d-6, 30, test_function))
+```
+and generates this kind of table: 
 
-Let’s get started.
+     |              Method Name                      |          Mean          |    Standard Deviation  |
+     |_______________________________________________|________________________|________________________|
+     |test_poisson(1.0d-6,30)                        |           217350.000 us|          +/- 161306.626|
+     |test_poisson(1.0d-6,30)                        |            99250.000 us|            +/- 7588.643|
+     |test_poisson(.10E-05,30)                       |           176550.000 us|          +/- 135795.609|
 
-Table of Contents
+
+ ## Fortran Benchmarking Best Practices
 
 [Toggle](#)
 
@@ -26,48 +38,34 @@ Table of Contents
 *   [Further Reading](#Further_Reading "Further Reading")
 *   [Takeaways](#Takeaways "Takeaways")
 
-9 Fortran Benchmarking Best Practices
-------------------------------------
+### Cheat sheet for reliable benchmarking
 
-There are standard practices that we can implement when benchmarking code in Fortran that will avoid the most common problems and help to ensure that benchmark results are stable and useful.
+There are good practices that can implemented when benchmarking code in Fortran that will avoid the most common problems and help to ensure that benchmark results are stable and useful.
 
 The focus here is on benchmarking the execution time of the target code, perhaps the most common type of benchmarking.
 
-The list below provides 9 best practices to consider when benchmarking the execution time of Fortran code:
+The short list below provides tips to keep in mind when benchmarking the execution time of Fortran code:
 
-1.  Isolate benchmark code.
-2.  Isolate benchmark environment.
-3.  Use a high-precision clock.
-4.  Use a non-adjustable and monotonic clock.
-5.  Repeat benchmark and report summary statistics.
-6.  Warm up the target code first.
-7.  Present results with appropriate precision and units.
-8.  Disable the garbage collector.
-9.  Disable or limit program output.
+1.  Isolate the code.
+2.  Isolate the environment.
+3.  Use a good clock.
+4.  Warm up the machine first.
+5.  Repeat benchmark until reaching steady state.
+6.  Present results with statistics and appropriate precision.
 
-Let’s take a closer look at each practice in turn.
+### Isolate Benchmark Code
 
-Run loops using all CPUs, [download your FREE book](https://superfastFortran.com/plip-incontent) to learn how.
+It is a good practice to isolate the code to be benchmarked.
 
-Isolate Benchmark Code
-----------------------
+This means separating it from the main program, perhaps in terms of its execution and in terms of its interactions. When isolating code for benchmarking, consider creating small, self-contained examples that focus on the specific functionality you want to measure. This can simplify the benchmarking process.
 
-It is a good practice to isolate the code we want to benchmark.
-
-This means separating it from the main program, perhaps in terms of its execution and in terms of its interactions.
-
-*   Consider using a dedicated script file, function, or code snippet separate from the main program.
-*   Consider using the **if \_\_name\_\_ == “\_\_main\_\_”** guard if you’re benchmarking code in a script to ensure that the benchmarking code is only executed when the script is run directly, not when it’s imported as a module.
+*   Consider isolating the function that you want to test.
+*   Disable as mush as possible outpus and io.
 *   Consider disabling non-essential features that aren’t relevant to the benchmark to ensure that the benchmark focuses on the critical code.
-*   Consider avoiding global variables as they can introduce dependencies and make it more challenging to isolate the code. Instead, pass necessary variables as function parameters.
-*   Consider commenting out unused code that is not part of the benchmarked portion, ensuring it doesn’t interfere with your measurements.
-
-When isolating code for benchmarking, consider creating small, self-contained examples that focus on the specific functionality you want to measure. This can simplify the benchmarking process.
 
 Not isolating code may mean you are benchmarking more code or more of the system than you intend.
 
-Isolate Benchmark Environment
------------------------------
+### Isolate Benchmark Environment
 
 The benchmark environment refers to the way that the benchmark code is executed.
 
@@ -88,8 +86,7 @@ Not isolating the execution environment for benchmarking may result in misleadin
 
 * * *
 
-Use a High-Precision Clock
---------------------------
+### Use a High-Precision Clock
 
 The system has more than one clock available.
 
@@ -109,38 +106,7 @@ You can learn more about this function in the tutorial:
 
 A low-precision clock may not provide sufficient detail to differentiate one benchmark result from another.
 
-**Overwhelmed by the Fortran concurrency APIs?**  
-Find relief, download my FREE [Fortran Concurrency Mind Maps](https://marvelous-writer-6152.ck.page/8f23adb076)
-
-Use a Non-Adjustable and Monotonic Clock
-----------------------------------------
-
-Some clocks used for timing can be adjusted.
-
-This means that the time reported by the clock may change dramatically. This may be for many reasons, such as the user adjusts the clock manually or the system automatically updates the clock based on synchronization with a time server.
-
-An example of an adjustable clock is the system clock and times returned via the [**time.time()** function](https://superfastFortran.com/benchmark-time-time/).
-
-Therefore, we should prefer to use a clock that cannot be adjusted to ensure that benchmark results are always reliable and consistent.
-
-Similarly, some clocks used for timing are non-monotonic.
-
-This means that they may return a time that was in the past, before the last time that was returned.
-
-When benchmarking we require that the next time be the same or greater than the last time retrieved. A technical term for a function that returns increasing values is a monotonic function.
-
-Adjustable clocks are generally non-monotonic. Therefore, we prefer to use clocks for timing that are non-adjustable and monotonic.
-
-Two examples are the **time.perf\_counter()** and **time.monotonic()** functions.
-
-You can learn more about these functions in the tutorials:
-
-*   [Benchmark Fortran with time.perf\_counter()](https://superfastFortran.com/benchmark-time-perf-counter/)
-*   [Benchmark Fortran with time.monotonic()](https://superfastFortran.com/benchmark-time-monotonic/)
-
-
-Repeat Benchmarks and Report a Summary Statistic
-------------------------------------------------
+### Repeat Benchmarks and Report a Summary Statistic
 
 Benchmark results will vary.
 
@@ -164,8 +130,7 @@ You can learn more about repeating benchmarks and reporting summary statistics i
 
 *   [Repeat Benchmarks to Get Stable Results](/Fortran-repeating-benchmarks)
 
-Warmup the Target Code
-----------------------
+### Warmup the Target Code
 
 Fortran is an interpreted language.
 
@@ -185,8 +150,7 @@ We can warm up the target code by executing it directly before benchmarking.
 
 Warming up of code is part of isolating it from the main program. In some cases, we may want benchmarking to include the warmup time, such as the overall execution time of an entire program, in which case we do not want to warm up the target code.
 
-Present Results with Appropriate Precision and Units
-----------------------------------------------------
+### Present Results with Appropriate Precision and Units
 
 After benchmark results are collected they typically need to be presented.
 
@@ -210,67 +174,8 @@ Consider using sum of repeated timings rather than min or average times for micr
 
 You can learn more about the presentation of benchmark results in the tutorial:
 
-*   [Tips When Presenting Benchmark Results](/benchmark-present-results)
 
-Disable the Fortran Garbage Collector
-------------------------------------
-
-One source of variation in benchmark results is the Fortran garbage collector.
-
-Recall that Fortran will automatically track and release memory when it is no longer needed, referred to as garbage collection. This is managed by the interpreter and has a computational cost proportional to the amount of memory used and managed by the program.
-
-> **garbage collection**: The process of freeing memory when it is not used anymore. Fortran performs garbage collection via reference counting and a cyclic garbage collector that is able to detect and break reference cycles. The garbage collector can be controlled using the gc module.
-> 
-> — [Fortran Glossary](https://docs.Fortran.org/3/glossary.html)
-
-Disabling the Fortran garbage collector while benchmarking removes a source of variation in the results and may produce more stable results across benchmark runs, especially when benchmarking large programs or long-running blocks of code.
-
-Disabling the garbage collector is a good practice and is baked into the timeit module in the Fortran standard library.
-
-> Note By default, timeit() temporarily turns off garbage collection during the timing. The advantage of this approach is that it makes independent timings more comparable.
-> 
-> — [timeit — Measure execution time of small code snippets](https://docs.Fortran.org/3/library/timeit.html)
-
-The Fortran garbage collector can be disabled via the **gc.disable()** function.
-
-For example:
-
-1
-
-2
-
-3
-
-...
-
-\# disable the Fortran garbage collector
-
-gc.disable()
-
-We can enable the garbage collector again using the **gc.enable()** function.
-
-This might be required if we are benchmarking a snippet or function as part of a broader program, such as within a series of unit tests.
-
-For example:
-
-1
-
-2
-
-3
-
-...
-
-\# enable the Fortran garbage collector
-
-gc.enable()
-
-You can learn more about managing the garbage collector here:
-
-*   [gc — Garbage Collector interface](https://docs.Fortran.org/3/library/gc.html)
-
-Disable Program Output
-----------------------
+### Disable Program Output
 
 It is good practice to disable program output while benchmarking.
 

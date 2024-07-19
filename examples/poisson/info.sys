@@ -1,6 +1,6 @@
 
 Host Name:                 LAPTOP-VA6MQ92P
-OS Name:                   Microsoft Windows 10 Pro
+OS Name:                   Microsoft Windows 10 Business
 OS Version:                10.0.19045 N/A Build 19045
 OS Manufacturer:           Microsoft Corporation
 OS Configuration:          Standalone Workstation
@@ -9,23 +9,23 @@ Registered Owner:          Windows User
 Registered Organization:   
 Product ID:                00330-50637-97904-AAOEM
 Original Install Date:     01/05/2021, 4:32:24 pm
-System Boot Time:          15/07/2024, 8:31:05 am
+System Boot Time:          18/07/2024, 3:06:39 pm
 System Manufacturer:       LENOVO
 System Model:              20HH0015FR
 System Type:               x64-based PC
 Processor(s):              1 Processor(s) Installed.
-BIOS Version:              LENOVO N1UET78W (1.52 ), 18/06/2020
+BIOS Version:              LENOVO N1UET90W (1.64 ), 12/03/2024
 Windows Directory:         C:\WINDOWS
 System Directory:          C:\WINDOWS\system32
 Boot Device:               \Device\HarddiskVolume1
 System Locale:             fr;French (France)
-Input Locale:              en-us;English (United States)
+Input Locale:              fr;French (France)
 Time Zone:                 (UTC+01:00) Brussels, Copenhagen, Madrid, Paris
 Total Physical Memory:     16,191 MB
-Available Physical Memory: 7,092 MB
-Virtual Memory: Max Size:  21,311 MB
-Virtual Memory: Available: 7,440 MB
-Virtual Memory: In Use:    13,871 MB
+Available Physical Memory: 4,794 MB
+Virtual Memory: Max Size:  22,079 MB
+Virtual Memory: Available: 4,891 MB
+Virtual Memory: In Use:    17,188 MB
 Page File Location(s):     C:\pagefile.sys
 Domain:                    WORKGROUP
 Logon Server:              \\LAPTOP-VA6MQ92P

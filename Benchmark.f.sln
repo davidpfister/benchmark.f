@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.33214.272
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "Benchmark.f", "src\Benchmark.f.vfproj", "{AA3CCEFA-E58B-402E-889C-694760AA01FC}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "Benchmark.Poisson", "examples\poisson\Benchmark.Poisson.vfproj", "{50EE234E-EF8E-44E9-BF7A-6AB5CD4515E3}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "Poisson", "examples\poisson\Poisson.vfproj", "{50EE234E-EF8E-44E9-BF7A-6AB5CD4515E3}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AA3CCEFA-E58B-402E-889C-694760AA01FC} = {AA3CCEFA-E58B-402E-889C-694760AA01FC}
 	EndProjectSection
@@ -15,6 +15,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{36F70D5D-B6B5-47D8-B555-EFD6A59E5815}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{00373DF6-1850-489C-9240-F529D8C3426A}"
+EndProject
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "Test.Benchmark", "tests\Test.Benchmark.vfproj", "{D53D48E8-21F8-429F-BFFD-996563802E40}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AA3CCEFA-E58B-402E-889C-694760AA01FC} = {AA3CCEFA-E58B-402E-889C-694760AA01FC}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,6 +45,14 @@ Global
 		{50EE234E-EF8E-44E9-BF7A-6AB5CD4515E3}.Release|x64.Build.0 = Release|x64
 		{50EE234E-EF8E-44E9-BF7A-6AB5CD4515E3}.Release|x86.ActiveCfg = Release|Win32
 		{50EE234E-EF8E-44E9-BF7A-6AB5CD4515E3}.Release|x86.Build.0 = Release|Win32
+		{D53D48E8-21F8-429F-BFFD-996563802E40}.Debug|x64.ActiveCfg = Debug|x64
+		{D53D48E8-21F8-429F-BFFD-996563802E40}.Debug|x64.Build.0 = Debug|x64
+		{D53D48E8-21F8-429F-BFFD-996563802E40}.Debug|x86.ActiveCfg = Debug|Win32
+		{D53D48E8-21F8-429F-BFFD-996563802E40}.Debug|x86.Build.0 = Debug|Win32
+		{D53D48E8-21F8-429F-BFFD-996563802E40}.Release|x64.ActiveCfg = Release|x64
+		{D53D48E8-21F8-429F-BFFD-996563802E40}.Release|x64.Build.0 = Release|x64
+		{D53D48E8-21F8-429F-BFFD-996563802E40}.Release|x86.ActiveCfg = Release|Win32
+		{D53D48E8-21F8-429F-BFFD-996563802E40}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -47,6 +60,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{AA3CCEFA-E58B-402E-889C-694760AA01FC} = {237B0922-3F83-403F-AF67-01420AE3D3A4}
 		{50EE234E-EF8E-44E9-BF7A-6AB5CD4515E3} = {00373DF6-1850-489C-9240-F529D8C3426A}
+		{D53D48E8-21F8-429F-BFFD-996563802E40} = {36F70D5D-B6B5-47D8-B555-EFD6A59E5815}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5C796BFB-91B1-48F7-8542-40D131C90786}

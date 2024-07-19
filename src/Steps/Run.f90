@@ -8,6 +8,7 @@ module benchmark_steps_benchmark_run
     use benchmark_warning
     use benchmark_string
     use benchmark_kinds
+    use benchmark_output_unit
     
     implicit none
     
@@ -50,7 +51,7 @@ module benchmark_steps_benchmark_run
         select type(step)
         type is (benchmark_run)
             treshold = step%options%ssd_threshold
-            if (first_call)  write (*, '(A)') new_line('A'), step%header, new_line('A')
+            if (first_call)  write (output_unit, '(A)') new_line('A'), step%header, new_line('A')
 
             step%options%count = step%options%count + 1
             allocate(times(step%options%sampling_window), source=0.0_r8)
@@ -109,12 +110,12 @@ module benchmark_steps_benchmark_run
             column = '    Standard Deviation'
             row = row // column(1:24) // '|'
         
-             write (*, '(A)') row
+            write (output_unit, '(A)') row
             row = '     '//'|'//repeat('_', 47)//'|'
             row = row // repeat('_', 24) // '|'
             row = row // repeat('_', 24) // '|'
         
-             write (*, '(A)') row
+             write (output_unit, '(A)') row
              first_call = .false.
         end if
         
@@ -138,12 +139,25 @@ module benchmark_steps_benchmark_run
         c = c // ')'
         column = c
         row = '     ' // column // '|'
-        column = str(1000_r8 * s%mean, '(f12.3)') // ' us'
-        row = row // adjustr(column(1:24)) // '|'
-        column = ' +/- '//str(1000_r8 * s%stddev, '(f12.3)')
-        row = row // adjustr(column(1:24)) // '|'
+        select case (int(log10(s%mean)))
+            case (1:3)
+                column = str(s%mean, '(f12.3)') // ' ms'
+                row = row // adjustr(column(1:24)) // '|'
+                column = ' +/- '//str(s%stddev, '(f12.3)') // ' ms|'
+                row = row // adjustr(column(1:25))
+            case (4:6)
+                column = str(s%mean / 1000.0_r8, '(f12.3)') // '  s'
+                row = row // adjustr(column(1:24)) // '|'
+                column = ' +/- '//str(s%stddev / 1000.0_r8, '(f12.3)') // '  s|'
+                row = row // adjustr(column(1:25))
+            case default
+                column = str(1000.0_r8 * s%mean, '(f12.3)') // ' us'
+                row = row // adjustr(column(1:24)) // '|'
+                column = ' +/- '//str(1000.0_r8 * s%stddev, '(f12.3)') // ' us|'
+                row = row // adjustr(column(1:25))
+            end select
         
-        write (*, '(A)') row
+        write (output_unit, '(A)') row
     end subroutine
     
 end module

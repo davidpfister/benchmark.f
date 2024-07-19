@@ -5,6 +5,7 @@ module benchmark_steps_dryrun
     use benchmark_method
     use benchmark_options
     use benchmark_string, only: str
+    use benchmark_output_unit
     
     implicit none
     
@@ -39,7 +40,7 @@ module benchmark_steps_dryrun
         type(method) :: mtd
         integer :: repeat
         
-        write (*, '(A)') new_line('A'), step%header
+        write (output_unit, '(A)') new_line('A'), step%header
         
         mtd = method(dummy_empty)
         repeat = 0
@@ -61,7 +62,7 @@ module benchmark_steps_dryrun
             step%options%offset = offset
             nullify(step%options)
         end select
-        write (*, '(A)') new_line('A'), '                            Offset:                   '//str(offset, '(f12.3)') // ' us'
+        write (output_unit, '(A)') new_line('A'), '                            Offset:                   '//str(offset, '(f12.3)') // ' us'
     end subroutine
     
     subroutine dummy_empty()

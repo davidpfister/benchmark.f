@@ -1,4 +1,7 @@
 module benchmark_systeminfo
+    use benchmark_output_unit
+    use benchmark_output_unit
+    
     implicit none
     
     enum, bind(c)
@@ -49,10 +52,10 @@ module benchmark_systeminfo
 
             call execute_command_line(cmd, wait=.true., exitstat=ierr, cmdstat=cstat, cmdmsg=cmsg)
             if (ierr /= 0) then
-                write (*, *) cmd
-                write (*, *) 'exitstat: ', ierr
-                write (*, *) 'cmdstat:  ', cstat
-                write (*, *) 'cmdmsg:   ', cmsg
+                write (output_unit, *) cmd
+                write (output_unit, *) 'exitstat: ', ierr
+                write (output_unit, *) 'cmdstat:  ', cstat
+                write (output_unit, *) 'cmdmsg:   ', cmsg
                 return
             end if
         end if
@@ -61,7 +64,7 @@ module benchmark_systeminfo
         do
             read(lu, '(A)', iostat=ios) line
             if (ios /= 0) exit
-            if (len_trim(line) > 0) write(*, '(A)') '                           '//trim(line)
+            if (len_trim(line) > 0) write(output_unit, '(A)') '                           '//trim(line)
         end do
 
         !close(lu, status = 'delete')
