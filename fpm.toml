@@ -31,3 +31,8 @@ library = false
 name = "poisson"
 source-dir = "examples/poisson"
 main = "Poisson.f90"
+
+[[test]]
+name = "test"
+source-dir = "tests"
+main="main.f90"

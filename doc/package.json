@@ -1,0 +1,21 @@
+{
+    "scripts": {
+      "reload": "browser-sync start --server html/ --port 8080 --files='html/*'",
+      "watch": "start /min npm-watch build & start /min npm run reload",
+      "build": "doxygen .\\Doxyfile.in",
+      "layout": "doxygen -l"
+    },
+    "watch": {
+      "build": {
+        "patterns": [ "./*" ],
+        "extensions": "md,yml,xml",
+        "quiet": false,
+        "ignore": "html/*",
+        "delay": 500
+      }
+    },
+    "devDependencies": {
+      "npm-watch": "^0.11.0",
+      "browser-sync": "^2.27.11"
+    }
+  }

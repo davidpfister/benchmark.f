@@ -1,0 +1,8 @@
+/** @defgroup group_benchmark Benchmark */
+/** @defgroup group_method Method */
+/** @defgroup group_workflow Workflow
+* @{
+ */
+/** @defgroup group_steps Steps */
+/** @} */
+/** @defgroup group_all All */
