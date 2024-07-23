@@ -30,7 +30,7 @@ module benchmark_timer
 #endif
     end subroutine
 
-    subroutine get_time(ctime, option)
+    subroutine get_time(ctime, option)! in milliseconds
         real(r8), intent(out) :: ctime
         integer, intent(in), optional :: option
         !private
@@ -43,7 +43,7 @@ module benchmark_timer
         case (CPUTIME)
             call cpu_time(ctime)
             ctime = ctime * 1000_r8
-        case (DATETIME)
+        case (DATETIME) 
             block
                 integer(i4) :: dt(8)
 

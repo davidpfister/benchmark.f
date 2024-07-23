@@ -167,7 +167,7 @@ END_BLOCK(.false., condition, .true.)
   * values can be compared by the respective operator.
   */
 # define EXPECT_SAME(val1, val2) \
-START_BLOCK(EXPECT_EQ) \
+START_BLOCK(EXPECT_SAME) \
 block ; \
 integer(kind=1), allocatable :: mold(:); \
 logical :: equals_; \
@@ -177,7 +177,7 @@ if(equals_) then ; \
 END_BLOCK(val2, val1, .false.) \
 end block
 # define EXPECT_NSAME(val1, val2) \
-START_BLOCK(EXPECT_NE) \
+START_BLOCK(EXPECT_NSAME) \
 block ; \
 integer(kind=1), allocatable :: mold(:); \
 logical :: equals_; \
@@ -187,7 +187,7 @@ if(.not. equals_) then; \
 END_BLOCK(val2, val1, .false.) \
 end block
 # define EXPECT_EQV(val1, val2) \
-START_BLOCK(EXPECT_EQ) \
+START_BLOCK(EXPECT_EQV) \
 block ; \
 integer(kind=1), allocatable :: mold(:); \
 logical :: equals_; \
@@ -196,7 +196,7 @@ if(equals_) then ; \
 END_BLOCK(val2, val1, .false.) \
 end block
 # define EXPECT_NEQV(val1, val2) \
-START_BLOCK(EXPECT_NE) \
+START_BLOCK(EXPECT_NEQV) \
 block ; \
 integer(kind=1), allocatable :: mold(:); \
 logical :: equals_; \
@@ -205,11 +205,11 @@ if(.not. equals_) then; \
 END_BLOCK(val2, val1, .false.) \
 end block
 # define EXPECT_EQ(val1, val2) \
-START_BLOCK(EXPECT_LE) \
+START_BLOCK(EXPECT_EQ) \
 if(val1 .eq. val2) then; \
 END_BLOCK(val2, val1, .false.)
 # define EXPECT_NE(val1, val2) \
-START_BLOCK(EXPECT_LE) \
+START_BLOCK(EXPECT_NE) \
 if(val1 .ne. val2) then; \
 END_BLOCK(val2, val1, .false.)
 # define EXPECT_LE(val1, val2) \
@@ -267,11 +267,11 @@ if(.not. equals_) then; \
 END_BLOCK(val2, val1, .true.) \
 end block
 # define ASSERT_EQ(val1, val2) \
-START_BLOCK(ASSERT_LE) \
+START_BLOCK(ASSERT_EQ) \
 if(val1 .eq. val2) then; \
 END_BLOCK(val2, val1, .true.)
 # define ASSERT_NE(val1, val2) \
-START_BLOCK(ASSERT_LE) \
+START_BLOCK(ASSERT_NE) \
 if(val1 .ne. val2) then; \
 END_BLOCK(val2, val1, .true.)
 # define ASSERT_LE(val1, val2) \

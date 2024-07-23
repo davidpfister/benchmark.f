@@ -26,8 +26,8 @@ module benchmark_statistics
         real(r8), intent(in) :: y(:)
 
         this%n = size(y)
-        this%mean = sum(y)/this%n
-        this%variance = sum(y**2)/this%n - this%mean**2
+        this%mean = sum(y)/real(this%n, r8)
+        this%variance = sum((y - this%mean)**2)/real(this%n-1, r8)
         this%stddev = sqrt(this%variance)
     end subroutine
     

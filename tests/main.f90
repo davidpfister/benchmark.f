@@ -75,6 +75,8 @@ TESTPROGRAM(main)
         use test_utility
         
         type(runner) :: br
+        logical :: exists
+        integer :: fsize
         
         open(unit=15, file = 'report.csv')
         br%unit = 15
@@ -106,6 +108,16 @@ TESTPROGRAM(main)
         br%name = ''
         call br%run(1.0d-6, 30, test_dummy)
         
-        EXPECT_TRUE(.true.)
+        inquire(unit=15, exist=exists)
+        EXPECT_TRUE(exists)
+        
+        inquire(unit=15, size=fsize)
+#ifdef __GFORTRAN__
+        EXPECT_EQ(7430, fsize)
+#else
+        EXPECT_EQ(7747, fsize)
+#endif
+        
+        close(15, status='delete')
     END_TEST
 END_TESTPROGRAM

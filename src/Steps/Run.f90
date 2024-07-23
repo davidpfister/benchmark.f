@@ -63,7 +63,7 @@ module benchmark_steps_benchmark_run
             allocate(times(step%options%sampling_window), source=0.0_r8)
             
             block
-                integer     ::icount, jcount, count
+                integer     :: icount, jcount, count
                 real(r8)    :: crit, t
                 
                 crit = 0.0_r8; icount = 0; jcount = 0; count = 0
@@ -72,16 +72,17 @@ module benchmark_steps_benchmark_run
                     call step%method%invoke(); call clock(finish)
                     t = finish - start
                     icount = icount + 1
-                    if (t > 0.0_r8) then 
+                    if (t > step%options%mintime) then 
                         times(1 + modulo(jcount, step%options%sampling_window)) = t / real(icount, r8)
                         jcount = jcount + 1
+                        
+                        if (jcount >= step%options%sampling_window) crit = ssd(times, modulo(jcount, step%options%sampling_window), treshold)
+                        
                         icount = 0
                         call clock(start)
                     end if
                     count = count + 1
-                    
-                    if (jcount >= step%options%sampling_window) crit = ssd(times, modulo(jcount, step%options%sampling_window), treshold)
-                
+
                     if (count >= step%options%maxcalls) then 
                         call warning_maxcalls()
                         exit
@@ -95,7 +96,7 @@ module benchmark_steps_benchmark_run
             else
                 call summary(step, s)
             end if
-            
+            deallocate(times)
             nullify(step%method)
             nullify(step%options)
         end select
@@ -162,7 +163,7 @@ module benchmark_steps_benchmark_run
         end if
 
         select case (int(log10(s%mean)))
-            case (1:3)
+            case (1:2)
                 column = str(s%mean, '(f12.3)') // ' ms'
                 if (present(csv_unit)) then
                     csv = csv //';'//str(s%mean, '(f12.3)')
@@ -173,7 +174,7 @@ module benchmark_steps_benchmark_run
                     csv = csv //';'//str(s%stddev, '(f12.3)')
                 end if 
                 row = row // adjustr(column(1:25))
-            case (4:6)
+            case (3:)
                 column = str(s%mean / 1000.0_r8, '(f12.3)') // '  s'
                 if (present(csv_unit)) then
                     csv = csv //';'//str(s%mean, '(f12.3)')

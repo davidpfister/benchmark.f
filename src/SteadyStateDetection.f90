@@ -22,11 +22,6 @@ module benchmark_steady_state_detection
         integer  :: i, j, k, n, ierr
         real(r8) :: mu, sd
         real(r8) :: y(size(x))
-        integer df
-        real(r8) fx, fx2
-        real(r8) lambda
-        integer n_data
-        real(r8) z
         
         n = size(y)
         y(1:n-offset) = x(offset+1:n)
