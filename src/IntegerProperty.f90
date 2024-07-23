@@ -1,3 +1,5 @@
+!> @ingroup group_all
+!> @author davidpfister
 module benchmark_output_unit
     use, intrinsic :: iso_fortran_env, only: stdout => output_unit
     

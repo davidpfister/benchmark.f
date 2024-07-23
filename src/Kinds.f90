@@ -1,3 +1,5 @@
+!> @ingroup group_all
+!> @author davidpfister
 module benchmark_kinds
     use, intrinsic :: iso_fortran_env, only: i1 => int8, &
                                i2 => int16, &

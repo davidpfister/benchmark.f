@@ -1,3 +1,5 @@
+!> @ingroup group_all group_benchmark
+!> @author davidpfister
 module benchmark_library
     use, intrinsic :: iso_c_binding
     use benchmark_kinds
@@ -84,7 +86,7 @@ contains
         
         mtd = method(f)
         
-        call current%add(benchmark_run(this, mtd))
+        call current%add(benchmarker(this, mtd))
         current => current%run()
         
     end subroutine
@@ -105,7 +107,7 @@ contains
         end if
         mtd = method(f, arg(a1, names(1)))
         
-        call current%add(benchmark_run(this, mtd))
+        call current%add(benchmarker(this, mtd))
         current => current%run()
     end subroutine
     
@@ -126,7 +128,7 @@ contains
 
         mtd = method(f, arg(a1, names(1)), arg(a2, names(2)))
     
-        call current%add(benchmark_run(this, mtd))
+        call current%add(benchmarker(this, mtd))
         current => current%run()
     end subroutine
     
@@ -147,7 +149,7 @@ contains
 
         mtd = method(f, arg(a1, names(1)), arg(a2, names(2)), arg(a3, names(3)))
         
-        call current%add(benchmark_run(this, mtd))
+        call current%add(benchmarker(this, mtd))
         current => current%run()
     end subroutine
     
@@ -169,7 +171,7 @@ contains
         mtd = method(f, arg(a1, names(1)), arg(a2, names(2)), arg(a3, names(3)), &
                         arg(a4, names(4)))
         
-        call current%add(benchmark_run(this, mtd))
+        call current%add(benchmarker(this, mtd))
         current => current%run()
     end subroutine
     
@@ -191,7 +193,7 @@ contains
         mtd = method(f, arg(a1, names(1)), arg(a2, names(2)), arg(a3, names(3)), &
                         arg(a4, names(4)), arg(a5, names(5)))
         
-        call current%add(benchmark_run(this, mtd))
+        call current%add(benchmarker(this, mtd))
         current => current%run()
     end subroutine
     
@@ -213,7 +215,7 @@ contains
         mtd = method(f, arg(a1, names(1)), arg(a2, names(2)), arg(a3, names(3)), &
                         arg(a4, names(4)), arg(a5, names(5)), arg(a6, names(6)))
         
-        call current%add(benchmark_run(this, mtd))
+        call current%add(benchmarker(this, mtd))
         current => current%run()
     end subroutine
     
@@ -235,7 +237,7 @@ contains
         mtd = method(f, arg(a1, names(1)), arg(a2, names(2)), arg(a3, names(3)), &
                         arg(a4, names(4)), arg(a5, names(5)), arg(a6, names(6)), arg(a7, names(7)))
         
-        call current%add(benchmark_run(this, mtd))
+        call current%add(benchmarker(this, mtd))
         current => current%run()
     end subroutine
 

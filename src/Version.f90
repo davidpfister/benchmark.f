@@ -1,3 +1,5 @@
+!> @ingroup group_all
+!> @author davidpfister
 module benchmark_version
     implicit none
     

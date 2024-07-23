@@ -1,3 +1,5 @@
+!> @ingroup group_all group_workflow
+!> @author davidpfister
 module benchmark_workflow
 
     implicit none

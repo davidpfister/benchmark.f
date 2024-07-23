@@ -1,3 +1,6 @@
+!> @ingroup group_all group_steps
+!> @author davidpfister
+!> @brief First step to display libray version number
 module benchmark_steps_setup
     use benchmark_workflow, only: workflow
     use benchmark_version, only: version

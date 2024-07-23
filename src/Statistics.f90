@@ -1,3 +1,6 @@
+
+!> @ingroup group_all
+!> @author davidpfister
 module benchmark_statistics
     use benchmark_kinds
     

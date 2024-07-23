@@ -1,13 +1,20 @@
+!> @ingroup group_all group_method
+!> @file
 module benchmark_method_argument
     use benchmark_kinds
+    use benchmark_method_argument_base
     use benchmark_string
     
     implicit none
     
-    type, public :: arg
+    private
+    
+    public :: assignment(=)
+    
+    !> @class arg_base
+    !> @brief Provides an extended class for the method arguments
+    type, extends(arg_base), public :: arg
         private
-        character(:), allocatable :: display
-        class(*), allocatable, public :: value
     contains
         procedure, pass(lhs), private   :: any_assign_argument
         generic :: assignment(=) => any_assign_argument
@@ -22,6 +29,16 @@ module benchmark_method_argument
     end interface
     
     interface arg
+        !> @name Public Constructors
+        !> @par simple constructor
+        !> @verbatim type(arg) function arg(*, char(*)) @endverbatim
+        !> @param[in] value
+        !> @param[in] display
+        !> @n
+        !> @b usage:
+        !> @code{.f90}
+        !> a = arg(5.0d0, 'arg1')
+        !> @endcode
         module procedure :: arg_new, &
                             arg_new_from_chars, &
                             arg_new_from_string
@@ -34,7 +51,7 @@ module benchmark_method_argument
         
         allocate(a%value, source = value)
     end function
-    
+
     type(arg) function arg_new_from_chars(value, display) result(a)
         class(*), intent(in)        :: value
         character(*), intent(in)    :: display
@@ -56,7 +73,7 @@ module benchmark_method_argument
         
         allocate(a%value, source = value)
     end function
-    
+
     subroutine any_assign_argument(lhs, rhs)
         class(arg), intent(inout)   :: lhs
         class(*), intent(in)        :: rhs
@@ -76,7 +93,7 @@ module benchmark_method_argument
     subroutine argument_assign_any(lhs, rhs)
         use iso_c_binding
         class(*), intent(inout)       :: lhs
-        type(arg), intent(in)         :: rhs
+        class(arg_base), intent(in)         :: rhs
         !private
         interface
             subroutine memcpy(dest, src, n) bind(c, name='memcpy')
@@ -94,11 +111,13 @@ module benchmark_method_argument
             if (allocated(lhs%value)) deallocate(lhs%value) 
             allocate(lhs%value, source = rhs%value)
         class default
-            if (same_type_as(lhs, rhs%value)) then
-                call memcpy(loc(lhs), loc(rhs%value), storage_size(lhs, kind=c_size_t)/8_c_size_t)
-            else
-                stop 'Not supported assignment'
-            end if
+            associate(x => rhs%value)
+                if (same_type_as(lhs, x)) then
+                    call memcpy(loc(lhs), loc(x), storage_size(x, kind=c_size_t)/8_c_size_t)
+                else
+                    stop 'Not supported assignment'
+                end if
+            end associate
         end select
     end subroutine
 
@@ -109,7 +128,7 @@ module benchmark_method_argument
         !private
         integer(kind=1), allocatable :: mold(:)
         
-        res = all(transfer(lhs, mold) == transfer(rhs, mold))
+        res = all(transfer(lhs, mold) == transfer(rhs%value, mold))
         
     end function
     
@@ -119,7 +138,7 @@ module benchmark_method_argument
         !private
         integer(kind=1), allocatable :: mold(:)
         
-        res = all(transfer(lhs, mold) == transfer(rhs, mold))
+        res = all(transfer(lhs%value, mold) == transfer(rhs, mold))
     end function
     
     pure function to_string(this) result(s)

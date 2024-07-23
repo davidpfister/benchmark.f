@@ -1,5 +1,8 @@
+!> @ingroup group_all
+!> @author davidpfister
 module benchmark_string
     use benchmark_kinds
+    use benchmark_method_argument_base
     
     implicit none 
     
@@ -31,7 +34,7 @@ module benchmark_string
         lhs = rhs%chars
     end subroutine
     
-    pure function str(value, fmt) result(chars)
+    pure recursive function str(value, fmt) result(chars)
         class(*), intent(in)        :: value
         character(*), intent(in), optional :: fmt
         character(:), allocatable   :: chars
@@ -53,19 +56,21 @@ module benchmark_string
             fmt_ = '(i0)'; if (present(fmt)) fmt_ = fmt
             write(chars, fmt_) x
         type is (real(r4))
-            fmt_ = '(g0.2)'; if (present(fmt)) fmt_ = fmt
+            fmt_ = '(1pg0.3)'; if (present(fmt)) fmt_ = fmt
             write(chars, fmt_) x
         type is (real(r8))
-            fmt_ = '(g0.2)'; if (present(fmt)) fmt_ = fmt
+            fmt_ = '(1pg0.3)'; if (present(fmt)) fmt_ = fmt
             write(chars, fmt_) x
         type is (real(r16))
-            fmt_ = '(g0.2)'; if (present(fmt)) fmt_ = fmt
+            fmt_ = '(1pg0.3)'; if (present(fmt)) fmt_ = fmt
             write(chars, fmt_) x
         type is (logical)
             fmt_ = '(l1)'; if (present(fmt)) fmt_ = fmt
             write(chars, fmt_) x
         type is (character(*))
             chars = x
+        class is (arg_base)
+            chars = str(x%value)
         class is (string)
             chars = x%chars
         class default

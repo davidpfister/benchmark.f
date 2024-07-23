@@ -1,3 +1,5 @@
+!> @ingroup group_all
+!> @author davidpfister
 module benchmark_steady_state_detection
     use benchmark_kinds
     
@@ -9,7 +11,7 @@ module benchmark_steady_state_detection
     
     contains
     
-    !> @reference R. R. Rhinehart, Automated steady and transient state identification in
+    !> @brief R. R. Rhinehart, Automated steady and transient state identification in
     !> noisy processes, in Proceedings of the American Control Conference, 2013,
     !> no. June 2013, pp. 4477–4493.
     real(r8) function ssd(x, offset, alpha)

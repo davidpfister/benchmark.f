@@ -21,6 +21,8 @@
 !|crayftn       | compiler_cray                       |                                                                                                                                 | _CRAYFTN                                      | -O0, -g[n]                    |
 !|lf95          | compiler_lahey                      | Lahey/Fujitsu Fortran 95 Compiler Release L6.10a                                                                                | __COMPILER_LAHEY                              | -O0, -g                       |
 !|lfortran      | compiler_lfortran                   | LFortran version 0.36.0                                                                                                         | __LFORTRAN__                                  | --debug-with-line-column, -g  |
+!> @ingroup group_all
+!> @author davidpfister
 module benchmark_compilerinfo
     use, intrinsic :: iso_fortran_env, only : compiler_version, compiler_options
     use benchmark_systeminfo

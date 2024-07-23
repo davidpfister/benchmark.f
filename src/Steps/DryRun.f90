@@ -1,3 +1,6 @@
+!> @ingroup group_all group_steps
+!> @author davidpfister
+!> @brief Run the method calls with an empty dummy function
 module benchmark_steps_dryrun
     use benchmark_workflow, only: workflow
     use benchmark_timer, only: clock
@@ -40,7 +43,7 @@ module benchmark_steps_dryrun
         type(method) :: mtd
         integer :: repeat
         
-        write (output_unit, '(A)') new_line('A'), step%header
+        ! write (output_unit, '(A)') new_line('A'), step%header
         
         mtd = method(dummy_empty)
         repeat = 0
@@ -62,7 +65,7 @@ module benchmark_steps_dryrun
             step%options%offset = offset
             nullify(step%options)
         end select
-        write (output_unit, '(A)') new_line('A'), '                            Offset:                   '//str(offset, '(f12.3)') // ' us'
+        ! write (output_unit, '(A)') new_line('A'), '                            Offset:                   '//str(offset, '(f12.3)') // ' us'
     end subroutine
     
     subroutine dummy_empty()

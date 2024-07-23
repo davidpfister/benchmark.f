@@ -1,3 +1,10 @@
+!> @ingroup group_all group_steps
+!> @author davidpfister
+!> @brief Retrieve system infortion at run time
+!> @details This steps retrieves system information at run time. 
+!>          The method was inspired by the paramonte library (https://github.com/cdslaborg/paramonte/blob/main/src/fortran/main/pm_sysInfo.F90)
+!>          from AmirShahmoradi. 
+!>          It has been simplified and adapted to the needs
 module benchmark_steps_system
     use benchmark_systeminfo
     use benchmark_workflow, only: workflow

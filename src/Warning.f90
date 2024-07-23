@@ -1,3 +1,5 @@
+!> @ingroup group_all group_benchmark
+!> @author davidpfister
 module benchmark_warning
     use benchmark_kinds
     use benchmark_output_unit

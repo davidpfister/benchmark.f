@@ -1,3 +1,10 @@
+!> @ingroup group_all group_steps
+!> @author davidpfister
+!> @brief Retrieve compiler infortion at run time
+!> @details This steps retrieves compiler information as the compiler's name
+!>          and version, as well as compilation options. It uses the intrinsic 
+!>          functions `compiler_options` and `compiler_version` from the 
+!>          module `iso_fortran_env`
 module benchmark_steps_compiler
     use benchmark_compilerinfo
     use benchmark_workflow, only: workflow

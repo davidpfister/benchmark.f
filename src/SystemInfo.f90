@@ -1,3 +1,5 @@
+!> @ingroup group_all
+!> @author davidpfister
 module benchmark_systeminfo
     use benchmark_output_unit
     use benchmark_output_unit

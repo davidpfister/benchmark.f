@@ -1,3 +1,9 @@
+!> @ingroup group_all group_steps
+!> @author davidpfister
+!> @brief Run the method call and compute statistics
+!> @details Runs the method call until reaching steady state. 
+!>          Statistics as mean and standard deviations are 
+!>          computed and reported
 module benchmark_steps_benchmark_run
     use benchmark_steady_state_detection, only: ssd
     use benchmark_workflow, only: workflow
@@ -14,7 +20,7 @@ module benchmark_steps_benchmark_run
     
     private
     
-    public :: benchmark_run
+    public :: benchmarker
     
     logical :: first_call = .true.
     
@@ -23,13 +29,13 @@ module benchmark_steps_benchmark_run
         type(method), pointer :: method => null()
     end type
        
-    interface benchmark_run
-        module procedure :: benchmark_run_new
+    interface benchmarker
+        module procedure :: benchmarker_new
     end interface
     
     contains
     
-    type(benchmark_run) function benchmark_run_new(options, mtd) result(step)
+    type(benchmark_run) function benchmarker_new(options, mtd) result(step)
          class(runner_options), intent(in), target :: options
          class(method), intent(in), target :: mtd
          step%header = '                                     -- BENCHMARKING --                                              '
@@ -82,21 +88,28 @@ module benchmark_steps_benchmark_run
                     end if
                 end do
             end block
-            
+
             call s%compute(times)
-            call summary(step, s)
+            if (step%options%csv_unit > 0) then
+                call summary(step, s, step%options%csv_unit)
+            else
+                call summary(step, s)
+            end if
+            
             nullify(step%method)
             nullify(step%options)
         end select
     end subroutine
     
-    subroutine summary(step, s)
+    subroutine summary(step, s, csv_unit)
         class(benchmark_run), intent(in) :: step
         class(stats), intent(in) :: s
+        integer, optional :: csv_unit
         !private
         character(48) :: column
         character(:), allocatable :: c
         character(:), allocatable :: row
+        character(:), allocatable :: csv
         integer :: i
         
         if (first_call) then
@@ -109,6 +122,10 @@ module benchmark_steps_benchmark_run
             row = row // column(1:24) // '|'
             column = '    Standard Deviation'
             row = row // column(1:24) // '|'
+
+            if (present(csv_unit)) then
+                write(csv_unit, '(A)') 'Method Name;'//'Mean;'//'Standard Deviation'
+            end if
         
             write (output_unit, '(A)') row
             row = '     '//'|'//repeat('_', 47)//'|'
@@ -139,25 +156,51 @@ module benchmark_steps_benchmark_run
         c = c // ')'
         column = c
         row = '     ' // column // '|'
+
+        if (present(csv_unit)) then
+            csv = trim(column(2:))
+        end if
+
         select case (int(log10(s%mean)))
             case (1:3)
                 column = str(s%mean, '(f12.3)') // ' ms'
+                if (present(csv_unit)) then
+                    csv = csv //';'//str(s%mean, '(f12.3)')
+                end if        
                 row = row // adjustr(column(1:24)) // '|'
                 column = ' +/- '//str(s%stddev, '(f12.3)') // ' ms|'
+                if (present(csv_unit)) then
+                    csv = csv //';'//str(s%stddev, '(f12.3)')
+                end if 
                 row = row // adjustr(column(1:25))
             case (4:6)
                 column = str(s%mean / 1000.0_r8, '(f12.3)') // '  s'
+                if (present(csv_unit)) then
+                    csv = csv //';'//str(s%mean / 1000.0_r8, '(f12.3)')
+                end if  
                 row = row // adjustr(column(1:24)) // '|'
                 column = ' +/- '//str(s%stddev / 1000.0_r8, '(f12.3)') // '  s|'
+                if (present(csv_unit)) then
+                    csv = csv //';'//str(s%stddev / 1000.0_r8, '(f12.3)')
+                end if  
                 row = row // adjustr(column(1:25))
             case default
                 column = str(1000.0_r8 * s%mean, '(f12.3)') // ' us'
+                if (present(csv_unit)) then
+                    csv = csv //';'//str(1000.0_r8 * s%mean, '(f12.3)')
+                end if
                 row = row // adjustr(column(1:24)) // '|'
                 column = ' +/- '//str(1000.0_r8 * s%stddev, '(f12.3)') // ' us|'
+                if (present(csv_unit)) then
+                    csv = csv //';'//str(1000.0_r8 * s%stddev, '(f12.3)')
+                end if
                 row = row // adjustr(column(1:25))
             end select
         
         write (output_unit, '(A)') row
+        if (present(csv_unit)) then
+            write (csv_unit, '(A)') csv
+        end if
     end subroutine
     
 end module
