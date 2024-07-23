@@ -176,23 +176,23 @@ module benchmark_steps_benchmark_run
             case (4:6)
                 column = str(s%mean / 1000.0_r8, '(f12.3)') // '  s'
                 if (present(csv_unit)) then
-                    csv = csv //';'//str(s%mean / 1000.0_r8, '(f12.3)')
+                    csv = csv //';'//str(s%mean, '(f12.3)')
                 end if  
                 row = row // adjustr(column(1:24)) // '|'
                 column = ' +/- '//str(s%stddev / 1000.0_r8, '(f12.3)') // '  s|'
                 if (present(csv_unit)) then
-                    csv = csv //';'//str(s%stddev / 1000.0_r8, '(f12.3)')
+                    csv = csv //';'//str(s%stddev, '(f12.3)')
                 end if  
                 row = row // adjustr(column(1:25))
             case default
                 column = str(1000.0_r8 * s%mean, '(f12.3)') // ' us'
                 if (present(csv_unit)) then
-                    csv = csv //';'//str(1000.0_r8 * s%mean, '(f12.3)')
+                    csv = csv //';'//str(s%mean, '(f12.3)')
                 end if
                 row = row // adjustr(column(1:24)) // '|'
                 column = ' +/- '//str(1000.0_r8 * s%stddev, '(f12.3)') // ' us|'
                 if (present(csv_unit)) then
-                    csv = csv //';'//str(1000.0_r8 * s%stddev, '(f12.3)')
+                    csv = csv //';'//str(s%stddev, '(f12.3)')
                 end if
                 row = row // adjustr(column(1:25))
             end select

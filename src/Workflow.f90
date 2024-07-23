@@ -92,8 +92,7 @@ module benchmark_workflow
         
         if (associated(this%next)) then
             call dispose(this%next)
-            deallocate(this%header)
-            deallocate(this%next)
+            if (allocated(this%header)) deallocate(this%header)
             nullify(this%next)
         end if
     end subroutine
