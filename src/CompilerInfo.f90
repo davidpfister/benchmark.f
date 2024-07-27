@@ -152,6 +152,7 @@ module benchmark_compilerinfo
             i = j + 1
             k = 0
         end do
+        
         associate(isdebug => compiler_is_debug(compiler, options))
             write(output_unit,'(A)') '                           Profile:                   '//trim(merge('Debug  ', 'Release', isdebug))
             if (isdebug) then 
@@ -164,7 +165,7 @@ module benchmark_compilerinfo
         pure function to_lower(input) result(str)
             character(*), intent(in) :: input !  the input to be lowercased
             character(len(input)) :: str !  the lower case input
-    !private
+            !private
             integer, parameter :: change_case = 32
             integer :: i
 

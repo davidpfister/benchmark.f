@@ -11,7 +11,7 @@ module benchmark_steps_benchmark_run
     use benchmark_method
     use benchmark_timer, only: clock
     use benchmark_statistics, only: stats   
-    use benchmark_warning
+    use benchmark_warning, only: display_maxcall_warning
     use benchmark_string
     use benchmark_kinds
     use benchmark_output_unit
@@ -23,6 +23,7 @@ module benchmark_steps_benchmark_run
     public :: benchmarker
     
     logical :: first_call = .true.
+    logical :: maxcall_reached = .false.
     
     type, extends(workflow) :: benchmark_run
         type(runner_options), pointer :: options => null()
@@ -54,6 +55,8 @@ module benchmark_steps_benchmark_run
         real(r8), allocatable :: times(:)
         real(r8) :: treshold
         
+        
+        maxcall_reached = .false.
         select type(step)
         type is (benchmark_run)
             treshold = step%options%ssd_threshold
@@ -84,7 +87,8 @@ module benchmark_steps_benchmark_run
                     count = count + 1
 
                     if (count >= step%options%maxcalls) then 
-                        call warning_maxcalls()
+                        maxcall_reached = .true.
+                        display_maxcall_warning = .true.
                         exit
                     end if
                 end do
@@ -156,8 +160,11 @@ module benchmark_steps_benchmark_run
         end do
         c = c // ')'
         column = c
-        row = '     ' // column // '|'
-
+        if (maxcall_reached) then    
+            row = ' <!> ' // column // '|'
+        else
+            row = '     ' // column // '|'
+        end if
         if (present(csv_unit)) then
             csv = trim(column(2:))
         end if

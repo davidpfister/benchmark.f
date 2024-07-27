@@ -30,7 +30,7 @@ module benchmark_systeminfo
         
         allocate(character(256) :: cmsg)
         
-        tmpout = 'info.sys'
+        tmpout = 'sys.info'
         inquire(file=tmpout, exist=exists)
         
         if (.not. exists) then
@@ -80,7 +80,7 @@ module benchmark_systeminfo
     !> @returns an integer. Returns OS_UNKNOWN if the operating system cannot be determined.
     integer function get_os_type() result(r)
         !private        
-        character(len=255)          :: val
+        character(255)              :: val
         integer                     :: length, rc
         logical                     :: file_exists
         integer, allocatable, save  :: ret

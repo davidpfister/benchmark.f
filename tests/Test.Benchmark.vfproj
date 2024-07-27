@@ -45,5 +45,6 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
-		<File RelativePath=".\main.f90"/></Files>
+		<File RelativePath=".\main.f90"/>
+		<File RelativePath=".\Utility.f90"/></Files>
 	<Globals/></VisualStudioProject>

@@ -17,29 +17,30 @@ module benchmark_timer
     
     contains
     
-    subroutine clock(r)
-        real(r8), intent(inout) :: r
+    subroutine clock(r, option)
+        real(r8), intent(inout)         :: r
+        integer, intent(in), optional   :: option
+        !private
+        integer :: dft_option
+        
+        dft_option = DATETIME
+        if (present(option)) dft_option = option
 #ifdef _OPENMP
         if (with_openmp()) then
             r = omp_get_wtime()
         else
-            call get_time(r)
+            call get_time(r, dft_option)
         end if
 #else
-        call get_time(r)
+        call get_time(r, dft_option)
 #endif
     end subroutine
 
     subroutine get_time(ctime, option)! in milliseconds
-        real(r8), intent(out) :: ctime
-        integer, intent(in), optional :: option
-        !private
-        integer :: dft_option
+        real(r8), intent(out)   :: ctime
+        integer, intent(in)     :: option
 
-        dft_option = DATETIME
-
-        if (present(option)) dft_option = option
-        select case (dft_option)
+        select case (option)
         case (CPUTIME)
             call cpu_time(ctime)
             ctime = ctime * 1000_r8

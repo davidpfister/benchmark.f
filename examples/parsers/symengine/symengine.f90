@@ -1,59 +1,45 @@
-module test_symengine
-    use parser_abstract
-    use parameters
-    use symengine
-    
-    implicit none
-    
-    private
-    
-    type(Symbol) :: var(11)
-    type(RealDouble) :: x(11)
-    type(Basic) :: f
-    
-    type, extends(parser_x), public :: symengine_parser
-        private
-    contains
-        procedure, nopass :: initialize
-        procedure, nopass :: compute
-    end type
-    
-    interface symengine_parser
-        module procedure :: constructor_null
-    end interface
+module symengine
+
+use iso_c_binding, only: c_int, c_long, c_double, c_ptr, c_null_ptr, c_null_char, c_f_pointer, c_associated
+use iso_fortran_env, only: int32, int64, real32, real64
+use exceptions
+use symengine_interface
+use symengine_basic
+use functions
+use symengine_rational
+use symengine_symbol
+use constants
+use dense_matrix
+use sets
+
+implicit none
+
+private
+public :: ptr, Basic, SymInteger, Rational, RealDouble, Symbol, parse, exp, log, abs, sqrt, atan2, max, SymComplex
+public :: sin, cos, tan, asin, acos, atan, erf, erfc
+public :: csc, sec, cot, acsc, asec, acot
+public :: sinh, cosh, tanh, asinh, acosh, atanh
+public :: csch, sech, coth, acsch, asech, acoth
+public :: lambertw, zeta, dirichlet_eta, gamma, loggamma, floor, ceiling
+public :: ComplexDouble
+public :: pi, e, eulergamma, catalan, goldenratio
+public :: SetBasic
+public :: DenseMatrix, transpose, ones, zeros, eye
+public :: emptyset, universalset, complexes, reals, rationals, integers, set_union, set_intersection
+public :: interval, finiteset
 
 contains
 
-    type(symengine_parser) function constructor_null() result(this)
-        this%name = 'symengine'
-    end function
-    
-    subroutine initialize()
-        var = [Symbol('x'), Symbol('y'), Symbol('z'), Symbol('x1'), Symbol('x2'), &
-            Symbol('a'), Symbol('b'), Symbol('c'), Symbol('d'), Symbol('e'), Symbol('f')]
-        x(1) = RealDouble(0.175)
-        x(2) = RealDouble(0.110)
-        x(3) = RealDouble(0.900)
-        x(4) = RealDouble(0.508)
-        x(5) = RealDouble(30.000)
-        x(6) = RealDouble(0.900)
-        x(7) = RealDouble(0.100)
-        x(8) = RealDouble(0.110)
-        x(9) = RealDouble(0.120)
-        x(10) = RealDouble(0.120)
-        x(11) = RealDouble(0.140)
-    end subroutine
-    
-    real(r8) function compute(i)
-        integer, intent(in) :: i
-        !private
-        type(Basic) :: f
-        integer :: j
-        f = parse(test_data(i))
-        do j=1,11
-            f = f%subs(var(j), x(j))
-        end do
-        f = f%evalf()
-        compute = f%dbl()
-    end function
+function parse(c)
+    character(len=*) :: c
+    type(Basic) :: parse
+    integer(c_long) :: exception
+    character(len_trim(c) + 1) :: new_c
+
+    new_c = trim(c) // c_null_char
+    parse%ptr = c_basic_new_heap()
+    exception = c_basic_parse(parse%ptr, new_c) 
+    call handle_exception(exception)
+end function
+
 end module

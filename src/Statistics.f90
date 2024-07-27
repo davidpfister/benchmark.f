@@ -4,7 +4,7 @@
 module benchmark_statistics
     use benchmark_kinds
     
-    implicit none
+    implicit none; private
     
     public :: stats
     
@@ -16,9 +16,7 @@ module benchmark_statistics
     contains
         procedure, pass(this) :: compute => stats_compute
     end type
-    
-    private
-    
+
     contains
     
     subroutine stats_compute(this, y)

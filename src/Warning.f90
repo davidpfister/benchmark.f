@@ -6,6 +6,14 @@ module benchmark_warning
     
     implicit none
     
+    private
+    
+    public :: display_maxcall_warning, &
+              warning_debug, &
+              warning_maxcalls
+    
+    logical :: display_maxcall_warning = .false.
+    
     contains
     
     subroutine warning_debug()
@@ -18,8 +26,8 @@ module benchmark_warning
     subroutine warning_maxcalls()
         write (output_unit, '(A)') new_line('A'), &
                             &                '                                  <!>     WARNING     <!>'
-        write (output_unit, '(A)') '                           Maximum number of calls reached. The warmup phase may'//&
-        ' not have reached steady state.'
+        write (output_unit, '(A)') '                           Maximum number of calls reached for some cases. Steady state'//&
+        ' may not have been reached for all runs.'
     end subroutine
     
 end module

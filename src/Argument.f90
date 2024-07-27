@@ -1,15 +1,12 @@
 !> @ingroup group_all group_method
 !> @file
 module benchmark_method_argument
+    use, intrinsic :: iso_c_binding
     use benchmark_kinds
     use benchmark_method_argument_base
     use benchmark_string
     
-    implicit none
-    
-    private
-    
-    public :: assignment(=)
+    implicit none; private
     
     !> @class arg_base
     !> @brief Provides an extended class for the method arguments
@@ -19,14 +16,7 @@ module benchmark_method_argument
         procedure, pass(lhs), private   :: any_assign_argument
         generic :: assignment(=) => any_assign_argument
         procedure, pass(this), public :: to_string
-        procedure, pass(rhs), private   :: any_equal_argument
-        procedure, pass(lhs), private   :: argument_equal_any
-        generic :: operator(==) => any_equal_argument, argument_equal_any
     end type
-    
-    interface assignment(=)
-        module procedure :: argument_assign_any
-    end interface
     
     interface arg
         !> @name Public Constructors
@@ -89,57 +79,6 @@ module benchmark_method_argument
             allocate(lhs%value, source = rhs)
         end select
     end subroutine
-    
-    subroutine argument_assign_any(lhs, rhs)
-        use iso_c_binding
-        class(*), intent(inout)       :: lhs
-        class(arg_base), intent(in)         :: rhs
-        !private
-        interface
-            subroutine memcpy(dest, src, n) bind(c, name='memcpy')
-                import
-                integer(c_intptr_t), intent(in), value :: dest
-                integer(c_intptr_t), intent(in), value :: src
-                integer(c_size_t), value :: n
-            end subroutine
-        end interface
-      
-        select type (lhs)
-        type is (arg)
-            if (allocated(lhs%display)) deallocate(lhs%display)
-            if (allocated(rhs%display)) allocate(lhs%display, source = rhs%display)
-            if (allocated(lhs%value)) deallocate(lhs%value) 
-            allocate(lhs%value, source = rhs%value)
-        class default
-            associate(x => rhs%value)
-                if (same_type_as(lhs, x)) then
-                    call memcpy(loc(lhs), loc(x), storage_size(x, kind=c_size_t)/8_c_size_t)
-                else
-                    stop 'Not supported assignment'
-                end if
-            end associate
-        end select
-    end subroutine
-
-    
-    logical function any_equal_argument(lhs, rhs) result(res)
-        class(*), intent(in)       :: lhs
-        class(arg), intent(in)     :: rhs
-        !private
-        integer(kind=1), allocatable :: mold(:)
-        
-        res = all(transfer(lhs, mold) == transfer(rhs%value, mold))
-        
-    end function
-    
-    logical function argument_equal_any(lhs, rhs) result(res)
-        class(arg), intent(in)     :: lhs
-        class(*), intent(in)       :: rhs
-        !private
-        integer(kind=1), allocatable :: mold(:)
-        
-        res = all(transfer(lhs%value, mold) == transfer(rhs, mold))
-    end function
     
     pure function to_string(this) result(s)
         class(arg), intent(in) :: this

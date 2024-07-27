@@ -20,15 +20,16 @@ module benchmark_steps
     contains
     
     subroutine steps_initialize(wf, options)
-        type(workflow), allocatable, intent(inout), target :: wf
-        class(runner_options), intent(in) :: options
+        type(workflow), allocatable, intent(inout), target  :: wf
+        class(runner_options), intent(in)                   :: options
         
         if(.not. allocated(wf)) allocate(wf)
-
         call wf%add(setup())
-        call wf%add(system())
-        call wf%add(compiler())
-        call wf%add(dryrun(options))
+        if (.not. options%skip_prelude) then
+            call wf%add(system())
+            call wf%add(compiler())
+            call wf%add(dryrun(options))
+        end if
     end subroutine
     
 end module

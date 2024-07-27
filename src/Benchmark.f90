@@ -9,37 +9,37 @@ module benchmark_library
     use benchmark_options
     use benchmark_string
     use benchmark_output_unit
+    use benchmark_warning
 #ifdef _OPENMP
     use omp_lib
 #endif
 
-    implicit none
-
-    private
+    implicit none; private
     
-    type(workflow), allocatable, target  :: root
-    class(workflow), pointer             :: current
+    type(workflow), allocatable, target     :: root
+    class(workflow), pointer                :: current
 
-    type, extends(runner_options), public :: runner
+    type, extends(runner_options), public   :: runner
         type(iproperty), public :: unit
     contains
-        procedure, pass(this), public :: load => benchmark_load
-        procedure, pass(this), private :: benchmark_serialize_to_unit
-        procedure, pass(this), private :: benchmark_serialize_to_string
+        procedure, pass(this), public       :: load => benchmark_load
+        procedure, pass(this), public       :: save => benchmark_save
+        procedure, pass(this), private      :: benchmark_serialize_to_unit
+        procedure, pass(this), private      :: benchmark_serialize_to_string
         generic, public :: serialize => benchmark_serialize_to_unit, &
                                           benchmark_serialize_to_string
-        procedure, nopass, private :: benchmark_deserialize_from_unit
-        procedure, nopass, private :: benchmark_deserialize_from_string
+        procedure, pass(this), private      :: benchmark_deserialize_from_unit
+        procedure, pass(this), private      :: benchmark_deserialize_from_string
         generic, public :: deserialize => benchmark_deserialize_from_unit, &
                                           benchmark_deserialize_from_string
-        procedure, pass(this), private :: benchmark_void
-        procedure, pass(this), private :: benchmark_a1
-        procedure, pass(this), private :: benchmark_a2
-        procedure, pass(this), private :: benchmark_a3
-        procedure, pass(this), private :: benchmark_a4
-        procedure, pass(this), private :: benchmark_a5
-        procedure, pass(this), private :: benchmark_a6
-        procedure, pass(this), private :: benchmark_a7
+        procedure, pass(this), private      :: benchmark_void
+        procedure, pass(this), private      :: benchmark_a1
+        procedure, pass(this), private      :: benchmark_a2
+        procedure, pass(this), private      :: benchmark_a3
+        procedure, pass(this), private      :: benchmark_a4
+        procedure, pass(this), private      :: benchmark_a5
+        procedure, pass(this), private      :: benchmark_a6
+        procedure, pass(this), private      :: benchmark_a7
         generic, public :: run => benchmark_void, &
                                   benchmark_a1, &
                                   benchmark_a2, &
@@ -48,25 +48,39 @@ module benchmark_library
                                   benchmark_a5, &
                                   benchmark_a6, &
                                   benchmark_a7
+        procedure, pass(this), public       :: dispose
         final :: finalize
     end type
 
 contains
 
     subroutine benchmark_load(this, path)
-        class(runner), intent(inout) :: this
-        character(*), intent(in) :: path
+        class(runner), intent(inout)    :: this
+        character(*), intent(in)        :: path
         !private
         logical :: exists
         integer :: lu, ios
 
         inquire(file=trim(path), exist = exists)
         if (exists) then
-            open (newunit=lu, file=trim(path), status='old', action='read', iostat = ios)
+            open (newunit=lu, file=trim(path), status='old', action='read', delim='apostrophe', iostat = ios)
             if (ios == 0) then
-                call this%deserialize(this, lu)
+                call this%deserialize(lu)
                 close(lu)
             end if
+        end if
+    end subroutine
+    
+    subroutine benchmark_save(this, path)
+        class(runner), intent(inout)    :: this
+        character(*), intent(in)        :: path
+        !private
+        integer :: ios, lu
+
+        open (newunit=lu, file=trim(path), delim='apostrophe', iostat = ios)
+        if (ios == 0) then
+            call this%serialize(lu)
+            close(lu)
         end if
     end subroutine
 
@@ -261,35 +275,37 @@ contains
         class(runner), intent(in), target   :: this
         integer, intent(in)                 :: lu
         !private
-        type(runner), pointer :: bench => null()
+        type(runner_options), pointer :: bench => null()
         namelist / config / bench
             
-        bench => this
+        bench => this%runner_options
                  
         write(unit=lu, nml=config)
         nullify(bench)
     end subroutine
         
-    subroutine benchmark_deserialize_from_string(that, str)
-        type(runner), intent(inout)     :: that
+    subroutine benchmark_deserialize_from_string(this, str)
+        class(runner), intent(inout)    :: this
         character(*), intent(in)        :: str
         !private
-        type(runner) :: bench
+        type(runner_options) :: bench
+        integer :: ierr
         namelist / config / bench
                  
-        read(str, nml=config)
-        that = bench
+        read(str, nml=config, iostat= ierr)
+        this%runner_options = bench
     end subroutine
     
-    subroutine benchmark_deserialize_from_unit(that, lu)
-        type(runner), intent(inout) :: that
-        integer, intent(in)         :: lu
+    subroutine benchmark_deserialize_from_unit(this, lu)
+        class(runner), intent(out)   :: this
+        integer, intent(in)          :: lu
         !private
-        type(runner) :: bench
+        type(runner_options) :: bench
+        integer :: ierr
         namelist / config / bench
                  
-        read(nml=config, unit=lu)
-        that = bench
+        read(nml=config, unit=lu, iostat= ierr)
+        this%runner_options = bench
     end subroutine
     
     function parse_names(this, n, name) result(names)
@@ -342,8 +358,16 @@ contains
         end if
     end function
     
+    subroutine dispose(this)
+        class(runner), intent(inout) :: this
+        
+        call finalize(this)
+    end subroutine
+    
     subroutine finalize(this)
         type(runner), intent(inout) :: this
+        
+        if (display_maxcall_warning) call warning_maxcalls()
         
         nullify(current)
         if (allocated(root)) deallocate(root)
