@@ -44,12 +44,12 @@ contains
         x(11) = RealDouble(0.140)
     end subroutine
     
-    real(r8) function compute(i)
-        integer, intent(in) :: i
+    real(r8) function compute(eq)
+        character(*), intent(in) :: eq
         !private
         type(Basic) :: f
         integer :: j
-        f = parse(test_data(i))
+        f = parse(eq)
         do j=1,11
             f = f%subs(var(j), x(j))
         end do

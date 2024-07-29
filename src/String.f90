@@ -6,7 +6,7 @@ module benchmark_string
     
     implicit none 
     
-    public :: str
+    public :: str, len
     
     type, public :: string
         character(:), allocatable :: chars
@@ -16,6 +16,10 @@ module benchmark_string
         generic, public :: assignment(=) => character_assign_string, &
                                             string_assign_character
     end type
+    
+    interface len
+        module procedure :: string_len
+    end interface
         
     contains
     
@@ -33,6 +37,11 @@ module benchmark_string
         
         lhs = rhs%chars
     end subroutine
+    
+    pure integer function string_len(this) result(res)
+        class(string), intent(in) :: this
+         res = len(this%chars)
+    end function
     
     pure recursive function str(value, fmt) result(chars)
         class(*), intent(in)        :: value

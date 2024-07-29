@@ -16,7 +16,7 @@ module benchmark_options
         logical, public         :: skip_prelude = .false.
         !private
         integer,  public        :: count = 0
-        character(200), public  :: name
+        character(200), public  :: name = ''
     end type
     
 end module

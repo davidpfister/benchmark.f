@@ -42,8 +42,8 @@ contains
         x(11) = 0.140_r8
     end subroutine
     
-    real(r8) function compute(i)
-        integer, intent(in) :: i
-        compute = EVAL(test_data(i), var, x)
+    real(r8) function compute(eq)
+        character(*), intent(in) :: eq
+        compute = EVAL(eq, var, x)
     end function
 end module

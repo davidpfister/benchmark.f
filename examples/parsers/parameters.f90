@@ -1,11 +1,12 @@
 module parameters
-    use iso_fortran_env, only: i1 => int8, i2 => int16, i4 => int32, i8 => int64, &
-                               r4 => real32, r8 => real64, r16 => real128
+    use benchmark_kinds
     
-    implicit none
-    private j
+    implicit none; private j
+    
     public :: i1, i2, i4, i8, r4, r8, r16
-    public :: results
+    
+    integer :: j
+    integer, parameter :: neq = 23 
     
     real(r8), parameter :: x = 0.175_r8
     real(r8), parameter :: y = 0.110_r8
@@ -21,9 +22,8 @@ module parameters
     real(r8), parameter :: e = 0.130_r8
     real(r8), parameter :: f = 0.140_r8
     
-    real(r8) :: results(24)
-    integer j
-    data(results(j), j=1, 24) / 0.9508_r8, &
+    real(r8) :: results(neq)  
+    data(results(j), j=1, neq) / 0.9508_r8, &
                                 0.7958_r8, &
                                 0.2846_r8, &
                                 1.1247_r8, &
@@ -45,11 +45,10 @@ module parameters
                                 1.5574_r8, &
                                 0.8869_r8, &
                                 3.0118_r8, &
-                                5.4819_r8, &
                                 1.5311_r8 /
     
-    character(200) :: test_data(1:24)
-    data(test_data(j), j=1, 24)/ &
+    character(200) :: eqstring(1:neq)
+    data(eqstring(j), j=1, neq)/ &
 		'a+b*x1', & 
         '(a*x**b)/(c+x**b)', &
         '(a*x)/(b+(x*(1+x/c)))', &
@@ -72,6 +71,5 @@ module parameters
         'atan(sinh(log(abs(exp(z/x)*sqrt(y+a**c+f*e)))))*cos(log(abs(sqrt(y+a**c+f*e))))', &
         'a+b*log(x1)+c*log(x1)**2+d/x2+e/x2**2', &
         '(x+a)/(b+c*(x+a)+d*(x+a)**2)', &
-        '(x+y+z+x*y+x*z+y*z+x/y+x/z+y/z+x*cos(x)+y*sin(y)+z*tan(z)*2/(x+y+z+x*y+x*z+y*z+x/y+x/z+y/z+x*cos(x)+y*sin(y)+z*tan(z))*3+sqrt(x*y*z+x+y+z)*log10(sqrt(x*2+y*2+z*2)+x+y+z))', &
 		'a+b*log(x1)+c*log(x1)**2+d*log(x1)**3+e/x'/
 end module

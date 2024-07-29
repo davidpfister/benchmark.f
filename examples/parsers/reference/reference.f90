@@ -2,9 +2,9 @@ module test_reference
     use parser_abstract
     use parameters
     
-    implicit none
+    implicit none; private
     
-    private
+    integer :: count = 0
     
     type, extends(parser_x), public :: reference
         procedure(double precision), nopass, pointer :: ptr
@@ -13,7 +13,7 @@ module test_reference
         procedure, nopass :: compute
     end type
     
-    type(reference), dimension(24) :: refs
+    type(reference), dimension(neq) :: refs
     
     interface reference
         module procedure :: reference_new
@@ -50,131 +50,126 @@ module test_reference
         refs(21)%ptr => f21
         refs(22)%ptr => f22
         refs(23)%ptr => f23
-        refs(24)%ptr => f24
     end subroutine
     
-    real(r8) function compute(i) result(res)
-        integer, intent(in) :: i
-        res = refs(i)%ptr(i)
+    real(r8) function compute(eq) result(res)
+        character(*), intent(in) :: eq
+        count = count + 1
+        res = refs(count)%ptr(eq)
     end function
     
-    real(r8) function f1(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f1(eq) result(res)
+        character(*), intent(in) :: eq
         res = a+b*x1
     end function
 
-    real(r8) function f2(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f2(eq) result(res)
+        character(*), intent(in) :: eq
         res = (a*x**b)/(c+x**b)
     end function
     
-    real(r8) function f3(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f3(eq) result(res)
+        character(*), intent(in) :: eq
         res = (a*x)/(b+(x*(1+x/c)))
     end function
 
-    real(r8) function f4(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f4(eq) result(res)
+        character(*), intent(in) :: eq
         res = a+b*exp(c*x)+d*exp(e*x)
     end function
 
-    real(r8) function f5(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f5(eq) result(res)
+        character(*), intent(in) :: eq
         res = a+b*(exp(c*x) - 1)/c
     end function
     
-    real(r8) function f6(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f6(eq) result(res)
+        character(*), intent(in) :: eq
         res = a+b*log(x)+c*log(x)**2
     end function
 
-    real(r8) function f7(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f7(eq) result(res)
+        character(*), intent(in) :: eq
         res = a-log(1+b*exp(-c*x))
     end function
 
-    real(r8) function f8(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f8(eq) result(res)
+        character(*), intent(in) :: eq
         res = (a+b*x)/(c+x)
     end function
   
-    real(r8) function f9(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f9(eq) result(res)
+        character(*), intent(in) :: eq
         res = a+b*exp(-(c*x))
     end function
 
-    real(r8) function f10(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f10(eq) result(res)
+        character(*), intent(in) :: eq
         res = a+b*sin(2*3.14*x/c+d)
     end function
 
-    real(r8) function f11(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f11(eq) result(res)
+        character(*), intent(in) :: eq
         res = a+b*sin(2*4.14*x/c+d)**2
     end function
 
-    real(r8) function f12(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f12(eq) result(res)
+        character(*), intent(in) :: eq
         res = 1-exp(-a*x)
     end function
 
-    real(r8) function f13(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f13(eq) result(res)
+        character(*), intent(in) :: eq
         res = a+b*x1+c*x2
     end function
 
-    real(r8) function f14(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f14(eq) result(res)
+        character(*), intent(in) :: eq
         res = a+b*log(x1)+c*log(x2)
     end function
 
-    real(r8) function f15(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f15(eq) result(res)
+        character(*), intent(in) :: eq
         res = a*x1**b*x2**c
     end function
 
-    real(r8) function f16(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f16(eq) result(res)
+        character(*), intent(in) :: eq
         res = cosh(log(abs(y*z+x**2+x1**x2)))+a*d*(exp(c*f)+154.3)
     end function
 
-    real(r8) function f17(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f17(eq) result(res)
+        character(*), intent(in) :: eq
         res = a+b*log(x1)+c*x2+d*x2**2
     end function
 
-    real(r8) function f18(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f18(eq) result(res)
+        character(*), intent(in) :: eq
         res = atan(sinh(log(abs(exp(z/x)*sqrt(y+a**c+f*e)))))
     end function
 
-    real(r8) function f19(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f19(eq) result(res)
+        character(*), intent(in) :: eq
         res = a+b/x1+c*log(x2)+d*log(x2)**2+e*log(x2)**3
     end function
 
-    real(r8) function f20(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f20(eq) result(res)
+        character(*), intent(in) :: eq
         res = atan(sinh(log(abs(exp(z/x)*sqrt(y+a**c+f*e)))))*cos(log(abs(sqrt(y+a**c+f*e))))
     end function
 
-    real(r8) function f21(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f21(eq) result(res)
+        character(*), intent(in) :: eq
         res = a+b*log(x1)+c*log(x1)**2+d/x2+e/x2**2
     end function
 
-    real(r8) function f22(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f22(eq) result(res)
+        character(*), intent(in) :: eq
         res = (x+a)/(b+c*(x+a)+d*(x+a)**2)
     end function
 
-     real(r8) function f23(i) result(res)
-        integer, intent(in) :: i
-        res = (x+y+z+x*y+x*z+y*z+x/y+x/z+y/z+x*cos(x)+y*sin(y)+z*tan(z)*2/(x+y+z+x*y+x*z+y*z+x/y+x/z+y/z+x*cos(x)+y*sin(y)+z*tan(z))*3+sqrt(x*y*z+x+y+z)*log10(sqrt(x*2+y*2+z*2)+x+y+z))
-    end function
-
-    real(r8) function f24(i) result(res)
-        integer, intent(in) :: i
+    real(r8) function f23(eq) result(res)
+        character(*), intent(in) :: eq
         res = a+b*log(x1)+c*log(x1)**2+d*log(x1)**3+e/x
     end function
 

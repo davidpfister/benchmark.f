@@ -42,12 +42,12 @@ contains
         x(11) = 0.140_wp
     end subroutine
     
-    real(r8) function compute(i)
-        integer, intent(in) :: i
+    real(r8) function compute(eq)
+        character(*), intent(in) :: eq
         real(wp) :: res
         !private
         type(fparser) :: parser
-        call parser%parse(test_data(i), var, .false.) 
+        call parser%parse(eq, var, .false.) 
         call parser%evaluate(x, res)
         compute = res
     end function

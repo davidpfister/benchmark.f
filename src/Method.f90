@@ -20,10 +20,10 @@ module benchmark_method
 
     type :: method
         private
-        integer, public                 :: nargs
-        procedure(), nopass, pointer    :: f => null()
-        procedure(), nopass, pointer    :: caller => null()
-        type(arg), allocatable, public  :: args(:)
+        integer, public                         :: nargs
+        procedure(), nopass, pointer            :: f => null()
+        procedure(), nopass, pointer, public    :: caller => null()
+        type(arg), allocatable, public          :: args(:)
     contains
         procedure, pass(this), private :: invoke_a0
         procedure, pass(this), private :: invoke_a1

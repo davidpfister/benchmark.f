@@ -39,8 +39,8 @@ contains
         res = dnum0('f = 0.140')
     end subroutine
     
-    real(r8) function compute(i)
-        integer, intent(in) :: i
-        compute = dnum0(test_data(i))
+    real(r8) function compute(eq)
+        character(*), intent(in) :: eq
+        compute = dnum0(eq)
     end function
 end module

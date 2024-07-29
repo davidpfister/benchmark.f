@@ -43,12 +43,12 @@ contains
         x(11) = 0.140_wp
     end subroutine
     
-    real(r8) function compute(i)
-        integer, intent(in) :: i
+    real(r8) function compute(eq)
+        character(*), intent(in) :: eq
         real(wp) :: res
         !private
         type(EquationParser) :: eqParser
-        eqParser = EquationParser(test_data(i), var)
+        eqParser = EquationParser(eq, var)
         res = eqParser%evaluate(x)
         compute = res
     end function

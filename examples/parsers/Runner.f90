@@ -5,7 +5,7 @@ module parser_runner
     private 
     
     public :: runner_test, &
-              runner, &
+              current_parser, &
               parsers
     
     type, public :: parser
@@ -16,7 +16,7 @@ module parser_runner
         procedure, pass(this), public :: initialize
     end type
     
-    type(parser) :: runner
+    type(parser) :: current_parser
     type(factory) :: fact
         
     contains 
@@ -31,14 +31,14 @@ module parser_runner
         call this%interpretor%initialize()
     end subroutine
     
-    subroutine runner_test(i)
-        integer(i4), intent(in) :: i
+    subroutine runner_test(eq)
+        character(200), intent(in) :: eq
         !private
         real(r8) :: res
 
-        associate(x => runner%interpretor)
-            res = x%compute(i)
-            if (abs(results(runner%index)- res > 1.0d-3)) then 
+        associate(x => current_parser%interpretor)
+            res = x%compute(trim(eq))
+            if (abs(results(current_parser%index)- res > 0.001_r8)) then 
                 pause
             end if
         end associate

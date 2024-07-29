@@ -43,14 +43,14 @@ contains
         x(11) = 0.140_wp
     end subroutine
     
-    real(r8) function compute(i)
-        integer, intent(in) :: i
+    real(r8) function compute(eq)
+        character(*), intent(in) :: eq
         !private
         character(len=255) :: error1, error2
         real(wp) :: res, rerr, ttol
         integer :: funcnum
 
-        call s_createfn(test_data(i), var, funcnum, error1)
+        call s_createfn(eq, var, funcnum, error1)
         call s_evaluatefn(funcnum, x, res, error2)
         compute = res
     end function

@@ -1,7 +1,7 @@
 !
 ! Copyright (c) 2000-2008, Roland Schmehl. All rights reserved.
 !
-! This software is distributable under the BSD license. See the terms of the
+! This software i4 distributable under the BSD license. See the terms of the
 ! BSD license in the documentation provided with this software.
 !
 MODULE fparser
@@ -9,21 +9,21 @@ MODULE fparser
   ! Fortran 90 function parser v1.1
   !------- -------- --------- --------- --------- --------- --------- --------- -------
   !
-  ! This function parser module is intended for applications where a set of mathematical
-  ! fortran-style expressions is specified at runtime and is then evaluated for a large 
-  ! number of variable values. This is done by compiling the set of function strings 
-  ! into byte code, which is interpreted efficiently for the various variable values. 
+  ! This function parser module i4 intended for applications where a set of mathematical
+  ! fortran-style expressions i4 specified at runtime and i4 then evaluated for a large 
+  ! number of variable values. This i4 done by compiling the set of function strings 
+  ! into byte code, which i4 interpreted efficiently for the various variable values. 
   !
-  ! The source code is available from http://fparser.sourceforge.net
+  ! The source code i4 available from http://fparser.sourceforge.net
   !
   ! Please send comments, corrections or questions to the author:
   ! Roland Schmehl <roland.schmehl@alumni.uni-karlsruhe.de>
   !
   !------- -------- --------- --------- --------- --------- --------- --------- -------
-  ! The function parser concept is based on a C++ class library written by  Juha 
+  ! The function parser concept i4 based on a C++ class library written by  Juha 
   ! Nieminen <warp@iki.fi> available from http://warp.povusers.org/FunctionParser/
   !------- -------- --------- --------- --------- --------- --------- --------- -------
-  USE parameters, ONLY: rn,is               ! Import KIND parameters
+  USE parameters, ONLY: r8,i4               ! Import KIND parameters
   IMPLICIT NONE
   !------- -------- --------- --------- --------- --------- --------- --------- -------
   PUBLIC                     :: initf,    & ! Initialize function parser for n functions
@@ -34,7 +34,7 @@ MODULE fparser
   !------- -------- --------- --------- --------- --------- --------- --------- -------
   PRIVATE
   SAVE
-  INTEGER(is),                              PARAMETER :: cImmed   = 1,          &
+  INTEGER(i4),                              PARAMETER :: cImmed   = 1,          &
                                                          cNeg     = 2,          &
                                                          cAdd     = 3,          & 
                                                          cSub     = 4,          & 
@@ -76,11 +76,11 @@ MODULE fparser
                                                                        'acos ', &
                                                                        'atan ' /)
   TYPE tComp
-     INTEGER(is), DIMENSION(:), POINTER :: ByteCode
+     INTEGER(i4), DIMENSION(:), POINTER :: ByteCode
      INTEGER                            :: ByteCodeSize
-     REAL(rn),    DIMENSION(:), POINTER :: Immed
+     REAL(r8),    DIMENSION(:), POINTER :: Immed
      INTEGER                            :: ImmedSize
-     REAL(rn),    DIMENSION(:), POINTER :: Stack
+     REAL(r8),    DIMENSION(:), POINTER :: Stack
      INTEGER                            :: StackSize, &
                                            StackPtr
   END TYPE tComp
@@ -132,12 +132,12 @@ CONTAINS
     !----- -------- --------- --------- --------- --------- --------- --------- -------
     IMPLICIT NONE
     INTEGER,                INTENT(in) :: i                  ! Function identifier
-    REAL(rn), DIMENSION(:), INTENT(in) :: Val                ! Variable values
-    REAL(rn)                           :: res                ! Result
+    REAL(r8), DIMENSION(:), INTENT(in) :: Val                ! Variable values
+    REAL(r8)                           :: res                ! Result
     INTEGER                            :: IP,              & ! Instruction pointer
                                           DP,              & ! Data pointer
                                           SP                 ! Stack pointer
-    REAL(rn),                PARAMETER :: zero = 0._rn
+    REAL(r8),                PARAMETER :: zero = 0._r8
     !----- -------- --------- --------- --------- --------- --------- --------- -------
     DP = 1
     SP = 0
@@ -149,16 +149,16 @@ CONTAINS
        CASE   (cAdd); Comp(i)%Stack(SP-1)=Comp(i)%Stack(SP-1)+Comp(i)%Stack(SP); SP=SP-1
        CASE   (cSub); Comp(i)%Stack(SP-1)=Comp(i)%Stack(SP-1)-Comp(i)%Stack(SP); SP=SP-1
        CASE   (cMul); Comp(i)%Stack(SP-1)=Comp(i)%Stack(SP-1)*Comp(i)%Stack(SP); SP=SP-1
-       CASE   (cDiv); IF (Comp(i)%Stack(SP)==0._rn) THEN; EvalErrType=1; res=zero; RETURN; ENDIF
+       CASE   (cDiv); IF (Comp(i)%Stack(SP)==0._r8) THEN; EvalErrType=1; res=zero; RETURN; ENDIF
                       Comp(i)%Stack(SP-1)=Comp(i)%Stack(SP-1)/Comp(i)%Stack(SP); SP=SP-1
        CASE   (cPow); Comp(i)%Stack(SP-1)=Comp(i)%Stack(SP-1)**Comp(i)%Stack(SP); SP=SP-1
        CASE   (cAbs); Comp(i)%Stack(SP)=ABS(Comp(i)%Stack(SP))
        CASE   (cExp); Comp(i)%Stack(SP)=EXP(Comp(i)%Stack(SP))
-       CASE (cLog10); IF (Comp(i)%Stack(SP)<=0._rn) THEN; EvalErrType=3; res=zero; RETURN; ENDIF
+       CASE (cLog10); IF (Comp(i)%Stack(SP)<=0._r8) THEN; EvalErrType=3; res=zero; RETURN; ENDIF
                       Comp(i)%Stack(SP)=LOG10(Comp(i)%Stack(SP))
-       CASE   (cLog); IF (Comp(i)%Stack(SP)<=0._rn) THEN; EvalErrType=3; res=zero; RETURN; ENDIF
+       CASE   (cLog); IF (Comp(i)%Stack(SP)<=0._r8) THEN; EvalErrType=3; res=zero; RETURN; ENDIF
                       Comp(i)%Stack(SP)=LOG(Comp(i)%Stack(SP))
-       CASE  (cSqrt); IF (Comp(i)%Stack(SP)<0._rn) THEN; EvalErrType=3; res=zero; RETURN; ENDIF
+       CASE  (cSqrt); IF (Comp(i)%Stack(SP)<0._r8) THEN; EvalErrType=3; res=zero; RETURN; ENDIF
                       Comp(i)%Stack(SP)=SQRT(Comp(i)%Stack(SP))
        CASE  (cSinh); Comp(i)%Stack(SP)=SINH(Comp(i)%Stack(SP))
        CASE  (cCosh); Comp(i)%Stack(SP)=COSH(Comp(i)%Stack(SP))
@@ -166,10 +166,10 @@ CONTAINS
        CASE   (cSin); Comp(i)%Stack(SP)=SIN(Comp(i)%Stack(SP))
        CASE   (cCos); Comp(i)%Stack(SP)=COS(Comp(i)%Stack(SP))
        CASE   (cTan); Comp(i)%Stack(SP)=TAN(Comp(i)%Stack(SP))
-       CASE  (cAsin); IF ((Comp(i)%Stack(SP)<-1._rn).OR.(Comp(i)%Stack(SP)>1._rn)) THEN
+       CASE  (cAsin); IF ((Comp(i)%Stack(SP)<-1._r8).OR.(Comp(i)%Stack(SP)>1._r8)) THEN
                       EvalErrType=4; res=zero; RETURN; ENDIF
                       Comp(i)%Stack(SP)=ASIN(Comp(i)%Stack(SP))
-       CASE  (cAcos); IF ((Comp(i)%Stack(SP)<-1._rn).OR.(Comp(i)%Stack(SP)>1._rn)) THEN
+       CASE  (cAcos); IF ((Comp(i)%Stack(SP)<-1._r8).OR.(Comp(i)%Stack(SP)>1._r8)) THEN
                       EvalErrType=4; res=zero; RETURN; ENDIF
                       Comp(i)%Stack(SP)=ACOS(Comp(i)%Stack(SP))
        CASE  (cAtan); Comp(i)%Stack(SP)=ATAN(Comp(i)%Stack(SP))
@@ -182,15 +182,15 @@ CONTAINS
   !
   SUBROUTINE CheckSyntax (Func,FuncStr,Var)
     !----- -------- --------- --------- --------- --------- --------- --------- -------
-    ! Check syntax of function string,  returns 0 if syntax is ok
+    ! Check syntax of function string,  returns 0 if syntax i4 ok
     !----- -------- --------- --------- --------- --------- --------- --------- -------
     IMPLICIT NONE
     CHARACTER (LEN=*),               INTENT(in) :: Func      ! Function string without spaces
     CHARACTER (LEN=*),               INTENT(in) :: FuncStr   ! Original function string
     CHARACTER (LEN=*), DIMENSION(:), INTENT(in) :: Var       ! Array with variable names
-    INTEGER(is)                                 :: n
+    INTEGER(i4)                                 :: n
     CHARACTER (LEN=1)                           :: c
-    REAL(rn)                                    :: r
+    REAL(r8)                                    :: r
     LOGICAL                                     :: err
     INTEGER                                     :: ParCnt, & ! Parenthesis counter
                                                    j,ib,in,lFunc
@@ -310,7 +310,7 @@ CONTAINS
     !----- -------- --------- --------- --------- --------- --------- --------- -------
     IMPLICIT NONE
     CHARACTER (LEN=1), INTENT(in) :: c
-    INTEGER(is)                   :: n,j
+    INTEGER(i4)                   :: n,j
     !----- -------- --------- --------- --------- --------- --------- --------- -------
     n = 0
     DO j=cAdd,cPow
@@ -327,7 +327,7 @@ CONTAINS
     !----- -------- --------- --------- --------- --------- --------- --------- -------
     IMPLICIT NONE
     CHARACTER (LEN=*), INTENT(in) :: str
-    INTEGER(is)                   :: n,j
+    INTEGER(i4)                   :: n,j
     INTEGER                       :: k
     CHARACTER (LEN=LEN(Funcs))    :: fun
     !----- -------- --------- --------- --------- --------- --------- --------- -------
@@ -349,7 +349,7 @@ CONTAINS
     IMPLICIT NONE
     CHARACTER (LEN=*),               INTENT(in) :: str       ! String
     CHARACTER (LEN=*), DIMENSION(:), INTENT(in) :: Var       ! Array with variable names
-    INTEGER(is)                                 :: n         ! Index of variable
+    INTEGER(i4)                                 :: n         ! Index of variable
     INTEGER, OPTIONAL,              INTENT(out) :: ibegin, & ! Start position of variable name
                                                    inext     ! Position of character after name
     INTEGER                                     :: j,ib,in,lstr
@@ -452,7 +452,7 @@ CONTAINS
     !----- -------- --------- --------- --------- --------- --------- --------- -------
     IMPLICIT NONE
     INTEGER,     INTENT(in) :: i                             ! Function identifier  
-    INTEGER(is), INTENT(in) :: b                             ! Value of byte to be added
+    INTEGER(i4), INTENT(in) :: b                             ! Value of byte to be added
     !----- -------- --------- --------- --------- --------- --------- --------- -------
     Comp(i)%ByteCodeSize = Comp(i)%ByteCodeSize + 1
     IF (ASSOCIATED(Comp(i)%ByteCode)) Comp(i)%ByteCode(Comp(i)%ByteCodeSize) = b
@@ -460,13 +460,13 @@ CONTAINS
   !
   FUNCTION MathItemIndex (i, F, Var) RESULT (n)
     !----- -------- --------- --------- --------- --------- --------- --------- -------
-    ! Return math item index, if item is real number, enter it into Comp-structure
+    ! Return math item index, if item i4 real number, enter it into Comp-structure
     !----- -------- --------- --------- --------- --------- --------- --------- -------
     IMPLICIT NONE
     INTEGER,                         INTENT(in) :: i         ! Function identifier  
     CHARACTER (LEN=*),               INTENT(in) :: F         ! Function substring
     CHARACTER (LEN=*), DIMENSION(:), INTENT(in) :: Var       ! Array with variable names
-    INTEGER(is)                                 :: n         ! Byte value of math item
+    INTEGER(i4)                                 :: n         ! Byte value of math item
     !----- -------- --------- --------- --------- --------- --------- --------- -------
     n = 0
     IF (SCAN(F(1:1),'0123456789.') > 0) THEN                 ! Check for begin of a number
@@ -481,7 +481,7 @@ CONTAINS
   !
   FUNCTION CompletelyEnclosed (F, b, e) RESULT (res)
     !----- -------- --------- --------- --------- --------- --------- --------- -------
-    ! Check if function substring F(b:e) is completely enclosed by a pair of parenthesis
+    ! Check if function substring F(b:e) i4 completely enclosed by a pair of parenthesis
     !----- -------- --------- --------- --------- --------- --------- --------- -------
     IMPLICIT NONE
     CHARACTER (LEN=*), INTENT(in) :: F                       ! Function substring
@@ -513,7 +513,7 @@ CONTAINS
     CHARACTER (LEN=*),               INTENT(in) :: F         ! Function substring
     INTEGER,                         INTENT(in) :: b,e       ! Begin and end position substring
     CHARACTER (LEN=*), DIMENSION(:), INTENT(in) :: Var       ! Array with variable names
-    INTEGER(is)                                 :: n
+    INTEGER(i4)                                 :: n
     INTEGER                                     :: b2,j,k,io
     CHARACTER (LEN=*),                PARAMETER :: calpha = 'abcdefghijklmnopqrstuvwxyz'// &
                                                             'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -602,9 +602,9 @@ CONTAINS
   !
   FUNCTION IsBinaryOp (j, F) RESULT (res)
     !----- -------- --------- --------- --------- --------- --------- --------- -------
-    ! Check if operator F(j:j) in string F is binary operator
-    ! Special cases already covered elsewhere:              (that is corrected in v1.1)
-    ! - operator character F(j:j) is first character of string (j=1)
+    ! Check if operator F(j:j) in string F i4 binary operator
+    ! Special cases already covered elsewhere:              (that i4 corrected in v1.1)
+    ! - operator character F(j:j) i4 first character of string (j=1)
     !----- -------- --------- --------- --------- --------- --------- --------- -------
     IMPLICIT NONE
     INTEGER,           INTENT(in) :: j                       ! Position of Operator
@@ -648,7 +648,7 @@ CONTAINS
     !----- -------- --------- --------- --------- --------- --------- --------- -------
     IMPLICIT NONE
     CHARACTER (LEN=*),  INTENT(in) :: str                    ! String
-    REAL(rn)                       :: res                    ! Real number
+    REAL(r8)                       :: res                    ! Real number
     INTEGER, OPTIONAL, INTENT(out) :: ibegin,              & ! Start position of real number
                                       inext                  ! 1st character after real number
     LOGICAL, OPTIONAL, INTENT(out) :: error                  ! Error flag
@@ -709,7 +709,7 @@ CONTAINS
     END DO
     err = (ib > in-1) .OR. (.NOT.DInMan) .OR. ((Eflag.OR.InExp).AND..NOT.DInExp)
     IF (err) THEN
-       res = 0.0_rn
+       res = 0.0_r8
     ELSE
        READ(str(ib:in-1),*,IOSTAT=istat) res
        err = istat /= 0
@@ -721,7 +721,7 @@ CONTAINS
   !  
   SUBROUTINE LowCase (str1, str2)
     !----- -------- --------- --------- --------- --------- --------- --------- -------
-    ! Transform upper case letters in str1 into lower case letters, result is str2
+    ! Transform upper case letters in str1 into lower case letters, result i4 str2
     !----- -------- --------- --------- --------- --------- --------- --------- -------
     IMPLICIT NONE
     CHARACTER (LEN=*),  INTENT(in) :: str1

@@ -131,7 +131,6 @@ TESTPROGRAM(main)
         call br%run(1.0d-6, 30, test_dummy)
     
         !calling using the derived type and and empty name
-        br%name = ''
         call br%run(1.0d-6, 30, test_dummy)
         
         inquire(unit=15, exist=exists)

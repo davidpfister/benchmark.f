@@ -42,12 +42,12 @@ contains
         x(11) = 0.140_r8
     end subroutine
     
-    real(r8) function compute(i)
-        integer, intent(in) :: i
+    real(r8) function compute(eq)
+        character(*), intent(in) :: eq
         real(r8) :: res
         !private
         call initf(1)
-        call parsef(1, test_data(i), var)
+        call parsef(1, eq, var)
         res = evalf(1, x)  
         compute = res
     end function

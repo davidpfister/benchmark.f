@@ -6,7 +6,7 @@
 	<Configurations>
 		<Configuration Name="Debug|Win32" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" SubSystem="subSystemConsole"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories=".\symengine\lib\" GenerateDebugInformation="true" SubSystem="subSystemConsole" AdditionalDependencies="symengine.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -15,7 +15,7 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" RuntimeLibrary="rtMultiThreadedDLL"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" SubSystem="subSystemConsole"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories=".\symengine\lib\" SubSystem="subSystemConsole" AdditionalDependencies="symengine.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -25,7 +25,7 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" SubSystem="subSystemConsole"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories=".\symengine\lib\" GenerateDebugInformation="true" SubSystem="subSystemConsole" AdditionalDependencies="symengine.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -35,7 +35,7 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" RuntimeLibrary="rtMultiThreadedDLL"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" SubSystem="subSystemConsole"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories=".\symengine\lib\" SubSystem="subSystemConsole" AdditionalDependencies="symengine.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -45,7 +45,7 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="equationparser">
-		<File RelativePath=".\equationparser\constants.f90"/>
+		<File RelativePath=".\equationparser\EquationConstants.f90"/>
 		<File RelativePath=".\equationparser\EquationParser.f90"/>
 		<File RelativePath=".\equationparser\Runner1.f90"/></Filter>
 		<Filter Name="evaluate">
@@ -82,6 +82,8 @@
 		<Filter Name="M_calculator">
 		<File RelativePath=".\M_calculator\M_calculator.f90"/>
 		<File RelativePath=".\M_calculator\Runner9.f90"/></Filter>
+		<Filter Name="reference">
+		<File RelativePath=".\reference\reference.f90"/></Filter>
 		<Filter Name="symengine">
 		<Filter Name="lib">
 		<File RelativePath=".\symengine\lib\x64\symengine-0.11.dll"/>
@@ -98,11 +100,9 @@
 		<File RelativePath=".\symengine\symengine_interface.f90"/>
 		<File RelativePath=".\symengine\symengine_rational.f90"/>
 		<File RelativePath=".\symengine\symengine_symbol.f90"/></Filter>
-		<Filter Name="reference">
-		<File RelativePath=".\reference\reference.f90"/></Filter>
-		<File RelativePath=".\Parameters.f90"/>
 		<File RelativePath=".\Abstract.f90"/>
 		<File RelativePath=".\Factory.f90"/>
-		<File RelativePath=".\Runner.f90"/>
-		<File RelativePath=".\Parsers.f90"/></Files>
+		<File RelativePath=".\Parameters.f90"/>
+		<File RelativePath=".\Parsers.f90"/>
+		<File RelativePath=".\Runner.f90"/></Files>
 	<Globals/></VisualStudioProject>

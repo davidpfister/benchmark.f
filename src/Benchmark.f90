@@ -20,7 +20,8 @@ module benchmark_library
     class(workflow), pointer                :: current
 
     type, extends(runner_options), public   :: runner
-        type(iproperty), public :: unit
+        type(iproperty), public             :: unit
+        procedure(), nopass, pointer        :: caller => null()
     contains
         procedure, pass(this), public       :: load => benchmark_load
         procedure, pass(this), public       :: save => benchmark_save
@@ -32,6 +33,7 @@ module benchmark_library
         procedure, pass(this), private      :: benchmark_deserialize_from_string
         generic, public :: deserialize => benchmark_deserialize_from_unit, &
                                           benchmark_deserialize_from_string
+        procedure, pass(this), public       :: set_caller
         procedure, pass(this), private      :: benchmark_void
         procedure, pass(this), private      :: benchmark_a1
         procedure, pass(this), private      :: benchmark_a2
@@ -83,7 +85,14 @@ contains
             close(lu)
         end if
     end subroutine
-
+    
+    subroutine set_caller(this, caller)
+        class(runner), intent(inout) :: this
+        procedure() :: caller
+        
+        this%caller => caller
+    end subroutine 
+    
     subroutine benchmark_void(this, f)
         class(runner), intent(inout)        :: this
         procedure()                         :: f
@@ -99,6 +108,7 @@ contains
         end if
         
         mtd = method(f)
+        if (associated(this%caller)) mtd%caller => this%caller
         
         call current%add(benchmarker(this, mtd))
         current => current%run()
@@ -120,6 +130,7 @@ contains
             current => root%run()
         end if
         mtd = method(f, arg(a1, names(1)))
+        if (associated(this%caller)) mtd%caller => this%caller
         
         call current%add(benchmarker(this, mtd))
         current => current%run()
@@ -141,6 +152,7 @@ contains
         end if
 
         mtd = method(f, arg(a1, names(1)), arg(a2, names(2)))
+         if (associated(this%caller)) mtd%caller => this%caller
     
         call current%add(benchmarker(this, mtd))
         current => current%run()
@@ -162,6 +174,7 @@ contains
         end if
 
         mtd = method(f, arg(a1, names(1)), arg(a2, names(2)), arg(a3, names(3)))
+         if (associated(this%caller)) mtd%caller => this%caller
         
         call current%add(benchmarker(this, mtd))
         current => current%run()
@@ -184,6 +197,7 @@ contains
 
         mtd = method(f, arg(a1, names(1)), arg(a2, names(2)), arg(a3, names(3)), &
                         arg(a4, names(4)))
+         if (associated(this%caller)) mtd%caller => this%caller
         
         call current%add(benchmarker(this, mtd))
         current => current%run()
@@ -206,6 +220,7 @@ contains
 
         mtd = method(f, arg(a1, names(1)), arg(a2, names(2)), arg(a3, names(3)), &
                         arg(a4, names(4)), arg(a5, names(5)))
+         if (associated(this%caller)) mtd%caller => this%caller
         
         call current%add(benchmarker(this, mtd))
         current => current%run()
@@ -228,6 +243,7 @@ contains
 
         mtd = method(f, arg(a1, names(1)), arg(a2, names(2)), arg(a3, names(3)), &
                         arg(a4, names(4)), arg(a5, names(5)), arg(a6, names(6)))
+         if (associated(this%caller)) mtd%caller => this%caller
         
         call current%add(benchmarker(this, mtd))
         current => current%run()
@@ -250,7 +266,8 @@ contains
 
         mtd = method(f, arg(a1, names(1)), arg(a2, names(2)), arg(a3, names(3)), &
                         arg(a4, names(4)), arg(a5, names(5)), arg(a6, names(6)), arg(a7, names(7)))
-        
+         if (associated(this%caller)) mtd%caller => this%caller
+
         call current%add(benchmarker(this, mtd))
         current => current%run()
     end subroutine
@@ -301,10 +318,16 @@ contains
         integer, intent(in)          :: lu
         !private
         type(runner_options) :: bench
+        character(len=1000) :: line
         integer :: ierr
         namelist / config / bench
                  
-        read(nml=config, unit=lu, iostat= ierr)
+        read(nml=config, unit=lu, iostat=ierr)
+        if (ierr /= 0) then
+            backspace(lu)
+            read(lu, '(A)') line
+            write(*, '(A)') 'Invalid namelist at line '//trim(line)
+        end if
         this%runner_options = bench
     end subroutine
     

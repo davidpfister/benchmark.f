@@ -45,13 +45,13 @@ contains
         x(11) = 0.140_realkind
     end subroutine
     
-    real(r8) function compute(i)
-        integer, intent(in) :: i
+    real(r8) function compute(eq)
+        character(*), intent(in) :: eq
         !private
         real(r8) :: res
         character (len = 5)  :: status
         character(len=256) :: func
-        func = test_data(i)
+        func = eq
 
         call init (func, var, status)
         res = evaluate(x)

@@ -14,9 +14,9 @@ module parser_abstract
     abstract interface
         subroutine initialize_x()
         end subroutine
-        real(r8) function compute_x(i)
+        real(r8) function compute_x(eq)
             import r8
-            integer, intent(in) :: i 
+            character(*), intent(in) :: eq
         end function
     end interface
     

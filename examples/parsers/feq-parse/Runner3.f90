@@ -45,11 +45,11 @@ contains
         x(11) = 0.140_r8
     end subroutine
     
-    real(r8) function compute(i)
-        integer, intent(in) :: i
+    real(r8) function compute(eq)
+        character(*), intent(in) :: eq
         !private
         type(EquationParser) :: f
-        f = EquationParser(test_data(i), independentVars)
+        f = EquationParser(eq, independentVars)
         compute = f%evaluate(x)
     end function
 end module

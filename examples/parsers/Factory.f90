@@ -1,5 +1,6 @@
 module parser_factory
     use parser_abstract
+    use test_evaluate
     use test_M_calculator
     use test_FEQParse
     use test_function_parser
@@ -15,22 +16,23 @@ module parser_factory
     
     private
     
-    public :: parsers, &
+    public :: eq_parsers, &
               parser_x
     
-    character(80) :: parsers(1:10)
+    character(80) :: eq_parsers(1:11)
     integer :: j
     
-    data(parsers(j), j=1, 10)/ &
-		'M_calculator', & !https://urbanjost.github.io/M_calculator
-        'feq-parse', & !https://github.com/fluidnumerics/feq-parse
+    data(eq_parsers(j), j=1, 11)/ &
+        'equationparser', & !https://github.com/ScottBoyce/bif/blob/main/src/math_numbers/EquationParser.f90
+        'evaluate', & !https://gbenthien.net/strings/index.html
+        'feq-parse', & !https://github.com/fluidnumerics/feq-parse   
         'function_parser', & !https://github.com/jacobwilliams/fortran_function_parser
         'interpreter', & !https://github.com/sdm900/fortran_parser
         'fortranparser', & !https://github.com/jacopo-chevallard/FortranParser
         'fparser', & !http://fparser.sourceforge.net
         'fee', & !https://github.com/ivomarb/Fortran-Expression-Evaluator
+        'M_calculator', & !https://urbanjost.github.io/M_calculator  
         'symengine', & !https://github.com/symengine/symengine.f90
-        'equationparser', & !https://github.com/ScottBoyce/bif/blob/main/src/math_numbers/EquationParser.f90
         'reference'/
     
     type, public :: factory
@@ -66,6 +68,8 @@ contains
 
         if (parser == 'M_calculator') then
             allocate (e, source=M_calculator_parser())
+        elseif (parser == 'evaluate') then
+            allocate (e, source=eqnevaluate())
         elseif (parser == 'feq-parse') then
             allocate (e, source=FEQParse_parser())
         elseif (parser == 'function_parser') then
