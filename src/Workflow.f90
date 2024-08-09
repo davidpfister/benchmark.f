@@ -1,5 +1,7 @@
-!> @ingroup group_all group_workflow
-!> @author davidpfister
+!> @ingroup group_benchmark
+!> @defgroup group_workflow workflow
+!> @brief Workflow library
+!> @{
 module benchmark_workflow
 
     implicit none
@@ -98,3 +100,4 @@ module benchmark_workflow
     end subroutine
     
 end module
+!> @}

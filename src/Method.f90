@@ -1,7 +1,7 @@
 
-!> @ingroup group_method group_all
-!> @author davidpfister
-!> @file
+!> @ingroup group_benchmark
+!> @defgroup group_method method
+!> @{
 !> @cond
 #include <concat.inc>
 #define ADD_ARGUMENT(n) \
@@ -45,8 +45,15 @@ module benchmark_method
         generic, public :: assignment(=) => method_assign_method
     end type
     
+    !> @name Public Constructors
     interface method
-        module procedure :: method_create, & 
+    !> @par Base constructor
+    !> @n
+    !> @b usage:
+    !> @code{.f90}
+    !> m = method(2, f)
+    !> @endcode
+        module procedure :: method_create, &
                             method_create_0, &
                             method_create_1, &
                             method_create_2, &
@@ -207,7 +214,7 @@ module benchmark_method
         ADD_ARGUMENT(6)
         ADD_ARGUMENT(7)
     end function
-    
+
     subroutine invoke_a0(this)
         class(method), intent(inout)    :: this
         select case (this%nargs)
@@ -326,7 +333,7 @@ module benchmark_method
             stop -1
         end select
     end subroutine
-    
+
     subroutine invoke_a1(this, a1)
         class(method), intent(inout)    :: this
         class(*), intent(in)            :: a1
@@ -499,3 +506,4 @@ module benchmark_method
     end subroutine
     
 end module
+!> @}

@@ -1,5 +1,6 @@
-!> @ingroup group_all
-!> @author davidpfister
+!> @ingroup group_benchmark
+!> @defgroup group_kinds kinds
+!> @{
 module benchmark_kinds
     use, intrinsic :: iso_fortran_env, only: i1 => int8, &
                                i2 => int16, &
@@ -15,3 +16,4 @@ module benchmark_kinds
     public :: r4, r8, r16
     
 end module
+!> @}

@@ -800,6 +800,7 @@ html.dark-mode iframe#MSearchResults {
 #nav-tree .item {
     height: var(--tree-item-height);
     line-height: var(--tree-item-height);
+    text-decoration: none;
 }
 
 #nav-sync {
@@ -814,6 +815,7 @@ html.dark-mode iframe#MSearchResults {
     background-image: none;
     background-color: transparent;
     position: relative;
+    text-decoration: none;
 }
 
 #nav-tree .selected::after {
@@ -825,20 +827,24 @@ html.dark-mode iframe#MSearchResults {
     width: 4px;
     border-radius: 0 var(--border-radius-small) var(--border-radius-small) 0;
     background: var(--primary-color);
+    text-decoration: none;
 }
 
 
 #nav-tree a {
     color: var(--side-nav-foreground) !important;
     font-weight: normal;
+    text-decoration: none;
 }
 
 #nav-tree a:focus {
     outline-style: auto;
+    text-decoration: none;
 }
 
 #nav-tree .arrow {
     opacity: var(--side-nav-arrow-opacity);
+    text-decoration: none;
 }
 
 .arrow {
@@ -854,12 +860,19 @@ html.dark-mode iframe#MSearchResults {
 
 #nav-tree div.item:hover .arrow, #nav-tree a:focus .arrow {
     opacity: var(--side-nav-arrow-hover-opacity);
+    text-decoration: none;
+}
+
+#nav-tree a:hover .arrow {
+    background-color: var(--odd-color);
+    text-decoration: none;
 }
 
 #nav-tree .selected a {
     color: var(--primary-color) !important;
     font-weight: bolder;
     font-weight: 600;
+    text-decoration: none;
 }
 
 .ui-resizable-e {
@@ -1002,6 +1015,32 @@ h2 {
 }
 
 h2.groupheader {
+    border-bottom: 0px;
+    color: var(--page-foreground-color);
+    box-shadow:
+        100px 0 var(--page-background-color),
+        -100px 0 var(--page-background-color),
+        100px 0.75px var(--separator-color),
+        -100px 0.75px var(--separator-color),
+        500px 0 var(--page-background-color),
+        -500px 0 var(--page-background-color),
+        500px 0.75px var(--separator-color),
+        -500px 0.75px var(--separator-color),
+        900px 0 var(--page-background-color),
+        -900px 0 var(--page-background-color),
+        900px 0.75px var(--separator-color),
+        -900px 0.75px var(--separator-color),
+        1400px 0 var(--page-background-color),
+        -1400px 0 var(--page-background-color),
+        1400px 0.75px var(--separator-color),
+        -1400px 0.75px var(--separator-color),
+        1900px 0 var(--page-background-color),
+        -1900px 0 var(--page-background-color),
+        1900px 0.75px var(--separator-color),
+        -1900px 0.75px var(--separator-color);
+}
+
+div.groupHeader {
     border-bottom: 0px;
     color: var(--page-foreground-color);
     box-shadow:
@@ -2547,3 +2586,7 @@ h2:hover a.anchorlink, h1:hover a.anchorlink, h3:hover a.anchorlink, h4:hover a.
 html.dark-mode .tabs-overview button.tab-button:hover .tab-title {
     color: var(--page-foreground-color);
 }
+
+div.hljs {
+    white-space: pre;
+  }

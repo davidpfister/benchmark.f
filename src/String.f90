@@ -1,5 +1,7 @@
-!> @ingroup group_all
-!> @author davidpfister
+!> @ingroup group_benchmark
+!> @defgroup group_string string
+!> @brief String
+!> @{
 module benchmark_string
     use benchmark_kinds
     use benchmark_method_argument_base
@@ -88,3 +90,4 @@ module benchmark_string
         chars = trim(adjustl(chars))
     end function
 end module
+!> @}

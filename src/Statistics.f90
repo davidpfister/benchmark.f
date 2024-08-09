@@ -1,6 +1,8 @@
 
-!> @ingroup group_all
-!> @author davidpfister
+!> @ingroup group_benchmark
+!> @defgroup group_statistics statistics
+!> @brief Compute statistics
+!> @{
 module benchmark_statistics
     use benchmark_kinds
     
@@ -30,3 +32,4 @@ module benchmark_statistics
     end subroutine
     
 end module
+!> @}

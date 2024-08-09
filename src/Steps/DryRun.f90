@@ -1,6 +1,7 @@
-!> @ingroup group_all group_steps
-!> @author davidpfister
+!> @ingroup group_steps
+!> @defgroup group_steps_dryrun dry run
 !> @brief Run the method calls with an empty dummy function
+!> @{
 module benchmark_steps_dryrun
     use benchmark_workflow, only: workflow
     use benchmark_timer, only: clock

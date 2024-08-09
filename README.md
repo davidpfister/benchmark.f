@@ -56,39 +56,25 @@
 
 
 <!-- ABOUT THE PROJECT -->
-## About The Project
+## About the Project
 
-[![Benchmark Screen Shot][product-screenshot]](doc/images/screenshot.png)
+[![Benchmark Screen Shot][product-screenshot]](./images/screenshot.png)
 
-Fortran is the fastest language on earth, so they say. But can we prove it? \
-And despite its legendary calculation speed when it comes to crunching numbers, Fortran is no exception when it comes to writing code: it is also very possible to write terribly slow pieces of code. This is where benchmarking implementations of the same function can help developing better and faster algorithms.  
+Fortran is the fastest language on earth, so they say. But can we prove it? <br><br>
+And despite its legendary calculation speed when it comes to crunching numbers, Fortran is no exception when it comes to writing code: it is also very possible to write terribly slow pieces of code. This is where benchmarking different implementations of the same function can help developing better and faster algorithms.  
 
-This project aims at providing an easy interface to benchmark functions and subroutines while taking care warming up the machine, collecting system information, computing statistics and reporting. 
-
-Use the `BLANK_README.md` to get started.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-### Built With
-
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
+This project aims at providing an easy interface to benchmark functions and subroutines while taking care of warming up the machine, collecting system information, computing statistics and reporting the results. 
 
 * [![fpm][fpm]][fpm-url]
 * [![ifort][ifort]][ifort-url]
 * [![gfortran][gfortran]][gfortran-url]
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 
 <!-- GETTING STARTED -->
 ## Getting Started
 
 ### Requirements
 
-To build the Fortran standard library you need
+To build that library you need
 
 - a Fortran 2008 compliant compiler, or better, a Fortran 2018 compliant compiler (GCC Fortran and Intel Fortran compilers are known to work for *benchmark.f*)
 
@@ -130,6 +116,35 @@ fpm @build
 ```
 (For the Windows users, that command does not work in Powershell since '@' is a reserved symbol. This is linked to the following [issue](https://github.com/urbanjost/M_CLI2/issues/19))
 
+Building with ifort requires to specify the compiler name(gfortran by default)
+```cmd
+fpm @build --compiler ifort
+```
+Alternatively, the compiler can be set using fpm environmental variables.
+```cmd
+set FPM_FC=ifort
+```
+
+Besides the build command, several command are also available 
+```cmd
+@pretiffy
+system fprettify .\examples\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations
+system fprettify .\src\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations
+system fprettify .\tests\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations
+
+@clean
+option clean --all
+
+@rebuild
+system rmdir /s /q build
+option build --flag '-ffree-line-length-none'
+
+@build
+option build --flag '-ffree-line-length-none'
+
+@test
+options test --flag '-ffree-line-length-none'
+```
 
 The toml files contains two items that are worth commenting: 
 1. The settings to the cpp preprocessor are specified in the file. 
@@ -151,8 +166,6 @@ In order to be able to benchmark functions AND subroutines with any number of du
 #### Build with Visual Studio 2019
 
 The project was originally developed on Windows with Visual Studio 2019. The repo contains the solution file (_Benchmark.f.sln_) to get you started with Visual Studio 2019. 
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 <!-- USAGE EXAMPLES -->
@@ -184,24 +197,18 @@ and generates this kind of table:
 _For more examples, please refer to the [Documentation](doc/html/index.html)_
 
 The library takes care of everything else for you
-- Collection of System Information
-- Collection of Compiler Information
-- Collection of Compilation Options
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+- Collection of system information
+- Collection of compiler information
+- Collection of compilation options
+- Reporting
 
 <!-- CONTRIBUTING -->
-## Contributing
+### Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**. So, thank you for considering contributing to *benchmark.f*.
-Please review and follow these guidelines to make the contribution process
-simple and effective for all involved. It will help communicate that you
-respect the time of the developers. In return, the developers will
-help address your problem, evaluate changes, and guide you through your pull
-requests.
+Please review and follow these guidelines to make the contribution process simple and effective for all involved. It will help communicate that you respect the time of the developers. In return, the developers will help address your problem, evaluate changes, and guide you through your pull requests.
 
-By contributing to *benchmark.f*, you certify that you own or are allowed to share the
-content of your contribution under the [same license](LICENSE).
+By contributing to *benchmark.f*, you certify that you own or are allowed to share the content of your contribution under the [same license](LICENSE).
 
 ### Style
 
@@ -237,23 +244,20 @@ If you have a suggestion that would make this project better, please fork the re
 Don't forget to give the project a star! Thanks again!
 1. Open a [new issue](https://github.com/davidpfister/benchmark.f/issues/new) to
    describe a bug or propose a new feature.
-   Refer to the earlier sections on how to write a good bug report or feature
-   request.
-2. Discuss with the developers and reach consensus about what should be
-   done about the bug or feature request.
+   Refer to the earlier sections on how to write a good bug report or feature    request.
+2. Discuss with the developers and reach consensus about what should be done about the bug or feature request.
    **When actively working on code towards a PR, please assign yourself to the
    issue on GitHub.**
-   This is good collaborative practice to avoid duplicated effort and also
-   inform others what you are currently working on.
+   This is good collaborative practice to avoid duplicated effort and also inform others what you are currently working on.
 3. Fork the Project
-4. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-5. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-6. Push to the Branch (`git push origin feature/AmazingFeature`)
+4. Create your Feature Branch (```git checkout -b feature/AmazingFeature```)
+5. Commit your Changes (```git commit -m 'Add some AmazingFeature'```)
+6. Push to the Branch (```git push origin feature/AmazingFeature```)
 7. Open a Pull Request with your contribution.
    The body of the PR should at least include a bullet-point summary of the
    changes, and a detailed description is encouraged.
    If the PR completely addresses the issue you opened in step 1, include in
-   the PR description the following line: `Fixes #<issue-number>`. If your PR implements a feature that adds or changes the behavior of *benchmark.f*,
+   the PR description the following line: ```Fixes #<issue-number>```. If your PR implements a feature that adds or changes the behavior of *benchmark.f*,
    your PR must also include appropriate changes to the documentation and associated units tests.
 
 In brief, 
@@ -264,15 +268,11 @@ In brief,
 * Add tests for your feature or bug fix to be sure that it stays functional and useful
 * Be open to constructive criticism and requests for improving your code.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- LICENSE -->
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->

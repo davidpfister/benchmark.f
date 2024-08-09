@@ -1,9 +1,10 @@
-!> @ingroup group_all group_steps
-!> @author davidpfister
+!> @ingroup group_steps
+!> @defgroup group_steps_run runner
 !> @brief Run the method call and compute statistics
 !> @details Runs the method call until reaching steady state. 
 !>          Statistics as mean and standard deviations are 
 !>          computed and reported
+!> @{
 module benchmark_steps_benchmark_run
     use benchmark_steady_state_detection, only: ssd
     use benchmark_workflow, only: workflow
@@ -95,7 +96,7 @@ module benchmark_steps_benchmark_run
             end block
 
             call s%compute(times)
-            if (step%options%csv_unit > 0) then
+            if (step%options%csv_unit /= 0) then
                 call summary(step, s, step%options%csv_unit)
             else
                 call summary(step, s)

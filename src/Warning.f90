@@ -1,5 +1,6 @@
-!> @ingroup group_all group_benchmark
-!> @author davidpfister
+!> @ingroup group_benchmark
+!> @defgroup group_wqrning warning
+!> @{
 module benchmark_warning
     use benchmark_kinds
     use benchmark_output_unit
@@ -31,3 +32,4 @@ module benchmark_warning
     end subroutine
     
 end module
+!> @}

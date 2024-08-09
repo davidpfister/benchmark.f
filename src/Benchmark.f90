@@ -1,5 +1,6 @@
-!> @ingroup group_all group_benchmark
-!> @author davidpfister
+!> @defgroup group_benchmark benchmark
+!> @details Main benchmarking module
+!> @{
 module benchmark_library
     use, intrinsic :: iso_c_binding
     use benchmark_kinds
@@ -19,6 +20,8 @@ module benchmark_library
     type(workflow), allocatable, target     :: root
     class(workflow), pointer                :: current
 
+    !> @class runner
+    !> @brief Benchmark runner type
     type, extends(runner_options), public   :: runner
         type(iproperty), public             :: unit
         procedure(), nopass, pointer        :: caller => null()
@@ -26,13 +29,29 @@ module benchmark_library
         procedure, pass(this), public       :: load => benchmark_load
         procedure, pass(this), public       :: save => benchmark_save
         procedure, pass(this), private      :: benchmark_serialize_to_unit
+!> @cond
+#ifdef __INTEL_COMPILER
+!> @endcond
         procedure, pass(this), private      :: benchmark_serialize_to_string
         generic, public :: serialize => benchmark_serialize_to_unit, &
-                                          benchmark_serialize_to_string
+                                        benchmark_serialize_to_string
+!> @cond
+#else
+        generic, public :: serialize => benchmark_serialize_to_unit
+#endif
+!> @endcond
         procedure, pass(this), private      :: benchmark_deserialize_from_unit
+!> @cond
+#ifdef __INTEL_COMPILER
+!> @endcond
         procedure, pass(this), private      :: benchmark_deserialize_from_string
         generic, public :: deserialize => benchmark_deserialize_from_unit, &
                                           benchmark_deserialize_from_string
+!> @cond
+#else
+        generic, public :: deserialize => benchmark_deserialize_from_unit
+#endif
+!> @endcond
         procedure, pass(this), public       :: set_caller
         procedure, pass(this), private      :: benchmark_void
         procedure, pass(this), private      :: benchmark_a1
@@ -56,6 +75,7 @@ module benchmark_library
 
 contains
 
+    !> @private
     subroutine benchmark_load(this, path)
         class(runner), intent(inout)    :: this
         character(*), intent(in)        :: path
@@ -272,6 +292,7 @@ contains
         current => current%run()
     end subroutine
 
+#ifdef __INTEL_COMPILER
     subroutine benchmark_serialize_to_string(this, str)
         class(runner), intent(in), target       :: this
         character(:), allocatable, intent(out)  :: str
@@ -287,7 +308,8 @@ contains
         str = trim(str)
         nullify(bench)
     end subroutine
-    
+#endif
+   
     subroutine benchmark_serialize_to_unit(this, lu)
         class(runner), intent(in), target   :: this
         integer, intent(in)                 :: lu
@@ -300,7 +322,8 @@ contains
         write(unit=lu, nml=config)
         nullify(bench)
     end subroutine
-        
+
+#ifdef __INTEL_COMPILER
     subroutine benchmark_deserialize_from_string(this, str)
         class(runner), intent(inout)    :: this
         character(*), intent(in)        :: str
@@ -312,7 +335,8 @@ contains
         read(str, nml=config, iostat= ierr)
         this%runner_options = bench
     end subroutine
-    
+#endif
+
     subroutine benchmark_deserialize_from_unit(this, lu)
         class(runner), intent(out)   :: this
         integer, intent(in)          :: lu
@@ -396,3 +420,4 @@ contains
         if (allocated(root)) deallocate(root)
     end subroutine
 end module
+!> @}

@@ -4,33 +4,35 @@
   <navindex>
     <tab type="mainpage" visible="yes" title="Main"/>
     <tab type="classindex" visible="no" title="Types"/>
+    <tab type="pages" visible="yes" title="" intro=""/>
     <tab type="topics" visible="yes" title="API" intro=""/>
     <!-- <tab type="usergroup" visible="no" title="API" url="classes.html">
       <tab type="classlist" visible="yes" title="All"/>
     </tab> -->
       <!-- <tab type="classindex" visible="$ALPHABETICAL_INDEX" title=""/>
-      <tab type="hierarchy" visible="yes" title="" intro=""/>
-      <tab type="classmembers" visible="no" title="Members" intro=""/> -->
-    <tab type="pages" visible="yes" title="" intro=""/>
-    <tab type="user" visible="yes" title="GitHub repository" url="https://github.com/davidpfister/benchmark.f"/>
+      <tab type="hierarchy" visible="yes" title="" intro=""/> -->
+    <!-- <tab type="user" visible="yes" title="Code" url="dir_c43cb02980e08731d96f7af40bd734ea.html"/> -->
+    <!-- <tab type="classmembers" visible="no" title="Members" intro=""/> -->
+    <tab type="user" visible="yes" title="GitHub Repository" url="https://github.com/davidpfister/benchmark.f"/>
   </navindex>
 
   <!-- Layout definition for a class page -->
   <class>
-    <briefdescription visible="yes"/>
-    <includes visible="$SHOW_INCLUDE_FILES"/>
     <inheritancegraph visible="$CLASS_GRAPH"/>
+    <includes visible="$SHOW_INCLUDE_FILES"/>
+    <usedfiles visible="$SHOW_USED_FILES"/>
+    <briefdescription visible="no"/>
+    <detaileddescription visible="yes" title="Definition"/>
     <!-- <collaborationgraph visible="$COLLABORATION_GRAPH"/> -->
     <memberdecl>
-      <nestedclasses visible="yes" title=""/>
       <publictypes title=""/>
       <services title=""/>
-      <interfaces title=""/>
+      <interfaces title="Derived types and public interfaces"/>
       <publicslots title=""/>
       <signals title=""/>
-      <publicmethods title=""/>
+      <publicmethods title="Methods"/>
       <publicstaticmethods title=""/>
-      <publicattributes title=""/>
+      <publicattributes title="Fields"/>
       <publicstaticattributes title=""/>
       <protectedtypes title=""/>
       <protectedslots title=""/>
@@ -54,14 +56,14 @@
       <friends title=""/>
       <related title="" subtitle=""/>
       <membergroups visible="yes"/>
+      <nestedclasses visible="yes" title=""/>
     </memberdecl>
-    <detaileddescription title=""/>
     <memberdef>
       <inlineclasses title=""/>
       <typedefs title=""/>
       <enums title=""/>
       <services title=""/>
-      <interfaces title=""/>
+      <interfaces title="subroutine"/>
       <constructors title=""/>
       <functions title=""/>
       <related title=""/>
@@ -70,24 +72,24 @@
       <events title=""/>
     </memberdef>
     <allmemberslink visible="yes"/>
-    <usedfiles visible="$SHOW_USED_FILES"/>
-    <authorsection visible="yes"/>
+    <authorsection visible="no"/>
   </class>
 
   <!-- Layout definition for a namespace page -->
   <namespace>
-    <briefdescription visible="yes"/>
+    <briefdescription visible="no"/>
+    <detaileddescription title="Description"/>
+    <authorsection visible="no"/>
     <memberdecl>
       <nestednamespaces visible="yes" title=""/>
       <constantgroups visible="yes" title=""/>
-      <classes visible="yes" title=""/>
+      <classes visible="yes" title="Derived types and interfaces"/>
       <typedefs title=""/>
       <enums title=""/>
       <functions title=""/>
       <variables title=""/>
       <membergroups visible="yes"/>
     </memberdecl>
-    <detaileddescription title=""/>
     <memberdef>
       <inlineclasses title=""/>
       <typedefs title=""/>
@@ -95,7 +97,6 @@
       <functions title=""/>
       <variables title=""/>
     </memberdef>
-    <authorsection visible="yes"/>
   </namespace>
 
   <!-- Layout definition for a file page -->
@@ -130,20 +131,21 @@
 
   <!-- Layout definition for a group page -->
   <group>
-    <briefdescription visible="yes"/>
+    <briefdescription visible="no"/>
+    <detaileddescription title="Definition"/>
+    <authorsection visible="no"/>
     <groupgraph visible="$GROUP_GRAPHS"/>
     <memberdecl>
-      <nestedgroups visible="yes" title=""/>
       <dirs visible="yes" title=""/>
       <files visible="yes" title=""/>
-      <namespaces visible="yes" title=""/>
-      <classes visible="yes" title=""/>
+      <namespaces visible="no" title="Modules"/>
+      <classes visible="no"/>
       <defines title=""/>
       <typedefs title=""/>
       <enums title=""/>
       <enumvalues title=""/>
-      <functions title=""/>
-      <variables title=""/>
+      <variables title="" visible="no"/>
+      <functions title="Methods"/>
       <signals title=""/>
       <publicslots title=""/>
       <protectedslots title=""/>
@@ -152,17 +154,17 @@
       <properties title=""/>
       <friends title=""/>
       <membergroups visible="yes"/>
+      <nestedgroups visible="yes" title=""/>
     </memberdecl>
-    <detaileddescription title=""/>
     <memberdef>
       <pagedocs/>
-      <inlineclasses title=""/>
+      <inlineclasses visible="no" title=""/>
       <defines title=""/>
       <typedefs title=""/>
       <enums title=""/>
       <enumvalues title=""/>
-      <functions title=""/>
-      <variables title=""/>
+      <functions title="Description"/>
+      <variables title="" visible="no"/>
       <signals title=""/>
       <publicslots title=""/>
       <protectedslots title=""/>
@@ -171,17 +173,17 @@
       <properties title=""/>
       <friends title=""/>
     </memberdef>
-    <authorsection visible="yes"/>
   </group>
 
   <!-- Layout definition for a directory page -->
   <directory>
     <briefdescription visible="yes"/>
+    <detaileddescription title=""/>
     <directorygraph visible="yes"/>
     <memberdecl>
       <dirs visible="yes"/>
       <files visible="yes"/>
     </memberdecl>
-    <detaileddescription title=""/>
+    
   </directory>
 </doxygenlayout>

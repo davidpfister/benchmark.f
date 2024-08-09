@@ -1,10 +1,11 @@
-!> @ingroup group_all
-!> @author davidpfister
+!> @ingroup group_benchmark
+!> @defgroup group_timer timer
+!> @{
 module benchmark_timer
     use benchmark_kinds
     
     implicit none
-    
+
     enum, bind(c)
         enumerator :: CPUTIME = 0
         enumerator :: DATETIME = 1
@@ -61,4 +62,4 @@ module benchmark_timer
         end select
     end subroutine
 end module
-    
+!> @}

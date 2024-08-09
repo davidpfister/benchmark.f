@@ -1,5 +1,7 @@
-!> @ingroup group_all
-!> @author davidpfister
+!> @ingroup group_benchmark
+!> @defgroup group_output output
+!> @brief Set output unit
+!> @{
 module benchmark_output_unit
     use, intrinsic :: iso_fortran_env, only: stdout => output_unit
     
@@ -35,3 +37,4 @@ module benchmark_output_unit
     end subroutine
     
 end module
+!> @}

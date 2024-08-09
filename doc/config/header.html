@@ -31,6 +31,17 @@
   $mathjax
   <link href="$relpath^$stylesheet" rel="stylesheet" type="text/css" />
   $extrastylesheet
+  <link rel="stylesheet" href="$relpath^arta.css">
+  <script src="$relpath^highlight.min.js"></script>
+<script>
+$(function() {
+	hljs.configure({useBR: false});
+	$(".fragment").each(function(i,node) {
+		$(node).removeClass("fragment");
+		hljs.highlightBlock(node);
+	});
+});
+</script>
   </head>
   <body>
   <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
@@ -47,12 +58,9 @@
           <td id="projectalign" style="padding-left: 0.5em;">
             <div id="projectname">
               <a href="index.html">$projectname</a>
-              <!--BEGIN PROJECT_NUMBER-->&#160;<span id="projectnumber">v$projectnumber</span>
-              <!--END PROJECT_NUMBER-->
+              <!--BEGIN PROJECT_NUMBER-->&#160;<span id="projectnumber">v$projectnumber</span><!--END PROJECT_NUMBER-->
             </div>
-            <!--BEGIN PROJECT_BRIEF-->
-            <div id="projectbrief">$projectbrief</div>
-            <!--END PROJECT_BRIEF-->
+            <!--BEGIN PROJECT_BRIEF--><div id="projectbrief">$projectbrief</div><!--END PROJECT_BRIEF-->
           </td>
           <!--END PROJECT_NAME-->
           <!--BEGIN !PROJECT_NAME-->

@@ -1,5 +1,7 @@
-!> @ingroup group_all
-!> @author davidpfister
+!> @ingroup group_benchmark
+!> @defgroup group_ssd steady-state detection
+!> @brief Detect steady-state based on t-test
+!> @{
 module benchmark_steady_state_detection
     use benchmark_kinds
     
@@ -74,3 +76,4 @@ module benchmark_steady_state_detection
     end function
 
 end module
+!> @}

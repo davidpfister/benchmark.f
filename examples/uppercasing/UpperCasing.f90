@@ -1,5 +1,5 @@
 #include <benchmark.inc>
-program simple
+program uppercasing
     use benchmark_string
     use benchmark_library
     use utility
@@ -8,7 +8,7 @@ program simple
     
     integer :: i
     type(runner) :: br   
-    character(1000) :: s(3)
+    type(string) :: s(3)
     
     s(1) = 'abcdefghijklmnopqrstuvwxyz'
     s(2) = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -23,9 +23,9 @@ program simple
     
     call br%set_caller(upper_caller)
     do i = 1, 3
-        br%name = 'upper1'; call br%run(string(trim(s(i))), upper1)
-        br%name = 'upper2'; call br%run(string(trim(s(i))), upper2)
-        br%name = 'upper3'; call br%run(string(trim(s(i))), upper3)
+        br%name = 'upper1'; call br%run(s(i), upper1)
+        br%name = 'upper2'; call br%run(s(i), upper2)
+        br%name = 'upper3'; call br%run(s(i), upper3)
     end do
 
     read(*,*)

@@ -24,7 +24,9 @@ end program
 !> @brief Gregory-Liebniz series for calculating Pi
 real(r8) function compute_pi(n) result(x)
     use benchmark_kinds
+    
     implicit none
+    
     integer, intent(in) :: n
     !private
     integer :: i

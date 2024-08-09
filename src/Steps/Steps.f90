@@ -1,6 +1,7 @@
-!> @ingroup group_all group_steps
-!> @author davidpfister
-!> @brief list of default steps
+!> @ingroup group_benchmark
+!> @defgroup group_steps steps
+!> @brief Steps
+!> @{
 module benchmark_steps
     use benchmark_steps_setup
     use benchmark_steps_system

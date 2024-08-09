@@ -1,5 +1,11 @@
-!> @ingroup group_all
-!> @author davidpfister
+!> @ingroup group_benchmark
+!> @defgroup group_systeminfo system information
+!> @brief Collect system related information
+!> @details This steps retrieves system information at run time. 
+!>          The method was inspired by the paramonte library (https://github.com/cdslaborg/paramonte/blob/main/src/fortran/main/pm_sysInfo.F90)
+!>          from AmirShahmoradi. 
+!>          It has been simplified and adapted to the needs
+!> @{
 module benchmark_systeminfo
     use benchmark_output_unit
     use benchmark_output_unit
@@ -201,3 +207,4 @@ module benchmark_systeminfo
         end select
     end function
 end module
+!> @}
