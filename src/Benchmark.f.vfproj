@@ -59,11 +59,10 @@
 		<File RelativePath=".\Argument.f90"/>
 		<File RelativePath=".\ArgumentBase.f90"/>
 		<File RelativePath=".\Benchmark.f90"/>
-		<File RelativePath=".\CompilerInfo.f90"/>
-		<File RelativePath=".\IntegerProperty.f90"/>
 		<File RelativePath=".\Kinds.f90"/>
 		<File RelativePath=".\Method.f90"/>
 		<File RelativePath=".\Options.f90"/>
+		<File RelativePath=".\OutputUnit.f90"/>
 		<File RelativePath=".\Statistics.f90"/>
 		<File RelativePath=".\SteadyStateDetection.f90"/>
 		<File RelativePath=".\String.f90"/>

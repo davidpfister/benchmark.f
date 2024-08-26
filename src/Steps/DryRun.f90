@@ -1,5 +1,5 @@
 !> @ingroup group_steps
-!> @defgroup group_steps_dryrun dry run
+!> @defgroup group_steps_dryrun benchmark_steps_dryrun
 !> @brief Run the method calls with an empty dummy function
 !> @{
 module benchmark_steps_dryrun

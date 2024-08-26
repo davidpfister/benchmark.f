@@ -1,5 +1,4 @@
-!> @ingroup group_benchmark
-!> @defgroup group_steps steps
+!> @defgroup group_steps benchmark_steps
 !> @brief Steps
 !> @{
 module benchmark_steps

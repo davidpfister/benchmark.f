@@ -1,6 +1,5 @@
-!> @defgroup group_benchmark benchmark
-!> @details Main benchmarking module
-!> @{
+!> @defgroup group_benchmark benchmark_library
+!> @brief Benchmark library module
 module benchmark_library
     use, intrinsic :: iso_c_binding
     use benchmark_kinds
@@ -21,35 +20,49 @@ module benchmark_library
     class(workflow), pointer                :: current
 
     !> @class runner
-    !> @brief Benchmark runner type
+    !! @ingroup group_benchmark
+    !! @brief Provides properties and instance methods for the execution 
+    !!        a benchmarking run. The @ref runner class extends the base
+    !!        class @link benchmark_options::runner_options runner_options @endlink.
+    !! <h2>Examples</h2>
+    !! The following examples demonstrate some of the main members of the @ref runner. 
+    !! @n
+    !! The first example shows a simple benchmark of the methods `foo` and `bar`
+    !! passing two dummy arguments. This example make use of the preprocessing macros
+    !! found in the include file `benchmark.inc`. 
+    !! @n
+    !! @snippet snippet.f90 benchmark_ex1
+    !! @n
+    !! The second example demonstrates how the benchmarking options can be 
+    !! serialized to disk and loaded for later use. The options are saved 
+    !! as namelist on disk. 
+    !! @n
+    !! @snippet snippet.f90 benchmark_ex2
+    !! <h2>Remarks</h2>
+    !! @note This class is best used together with the include file `benchmark.inc`. 
     type, extends(runner_options), public   :: runner
-        type(iproperty), public             :: unit
-        procedure(), nopass, pointer        :: caller => null()
+        private
+        type(output), public                :: unit !< Output unit. By default the standard output is used.
+        procedure(), nopass, pointer        :: caller => null() !< Caller wrapper procedure
     contains
-        procedure, pass(this), public       :: load => benchmark_load
-        procedure, pass(this), public       :: save => benchmark_save
+        private
         procedure, pass(this), private      :: benchmark_serialize_to_unit
-!> @cond
-#ifdef __INTEL_COMPILER
-!> @endcond
-        procedure, pass(this), private      :: benchmark_serialize_to_string
-        generic, public :: serialize => benchmark_serialize_to_unit, &
-                                        benchmark_serialize_to_string
-!> @cond
-#else
-        generic, public :: serialize => benchmark_serialize_to_unit
-#endif
-!> @endcond
         procedure, pass(this), private      :: benchmark_deserialize_from_unit
 !> @cond
 #ifdef __INTEL_COMPILER
-!> @endcond
-        procedure, pass(this), private      :: benchmark_deserialize_from_string
-        generic, public :: deserialize => benchmark_deserialize_from_unit, &
-                                          benchmark_deserialize_from_string
-!> @cond
+        procedure, pass(this), private      :: benchmark_serialize_to_string
+        generic, private :: serialize => benchmark_serialize_to_unit, &
+                                        benchmark_serialize_to_string
 #else
-        generic, public :: deserialize => benchmark_deserialize_from_unit
+        generic, private :: serialize => benchmark_serialize_to_unit
+#endif
+        
+#ifdef __INTEL_COMPILER
+        procedure, pass(this), private      :: benchmark_deserialize_from_string
+        generic, private :: deserialize => benchmark_deserialize_from_unit, &
+                                          benchmark_deserialize_from_string
+#else
+        generic, private :: deserialize => benchmark_deserialize_from_unit
 #endif
 !> @endcond
         procedure, pass(this), public       :: set_caller
@@ -69,13 +82,15 @@ module benchmark_library
                                   benchmark_a5, &
                                   benchmark_a6, &
                                   benchmark_a7
+        procedure, pass(this), public       :: write => benchmark_save
+        procedure, pass(this), public       :: read => benchmark_load 
         procedure, pass(this), public       :: dispose
         final :: finalize
     end type
 
 contains
 
-    !> @private
+    !> @brief Load
     subroutine benchmark_load(this, path)
         class(runner), intent(inout)    :: this
         character(*), intent(in)        :: path
@@ -93,6 +108,7 @@ contains
         end if
     end subroutine
     
+    !> @brief Save
     subroutine benchmark_save(this, path)
         class(runner), intent(inout)    :: this
         character(*), intent(in)        :: path
@@ -269,6 +285,7 @@ contains
         current => current%run()
     end subroutine
     
+    !> @brief run
     subroutine benchmark_a7(this, a1, a2, a3, a4, a5, a6, a7, f)
         class(runner), intent(inout)        :: this
         class(*), intent(in)                :: a1, a2, a3, a4, a5, a6, a7
@@ -405,12 +422,16 @@ contains
         end if
     end function
     
+    !> @brief Dispose resources associated with 
+    !!        the bound type.
+    !! @param[inout] this The type bound to the method
     subroutine dispose(this)
         class(runner), intent(inout) :: this
         
         call finalize(this)
     end subroutine
     
+    !> @private
     subroutine finalize(this)
         type(runner), intent(inout) :: this
         
@@ -420,4 +441,3 @@ contains
         if (allocated(root)) deallocate(root)
     end subroutine
 end module
-!> @}

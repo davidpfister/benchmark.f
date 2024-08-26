@@ -1,7 +1,6 @@
 
-!> @ingroup group_benchmark
-!> @defgroup group_method method
-!> @{
+!> @defgroup group_method benchmark_method
+!> @brief Method module
 !> @cond
 #include <concat.inc>
 #define ADD_ARGUMENT(n) \
@@ -10,7 +9,7 @@ that%args(n) = MACRO_CAT2(a,n)
 module benchmark_method
     use iso_c_binding
     use benchmark_kinds
-    use benchmark_method_argument
+    use benchmark_argument
     
     implicit none
     
@@ -19,11 +18,14 @@ module benchmark_method
     private
 
     type :: method
+        !> @name Variables
+        !! @{
         private
         integer, public                         :: nargs
         procedure(), nopass, pointer            :: f => null()
         procedure(), nopass, pointer, public    :: caller => null()
         type(arg), allocatable, public          :: args(:)
+        !> @}    
     contains
         procedure, pass(this), private :: invoke_a0
         procedure, pass(this), private :: invoke_a1
@@ -506,4 +508,3 @@ module benchmark_method
     end subroutine
     
 end module
-!> @}

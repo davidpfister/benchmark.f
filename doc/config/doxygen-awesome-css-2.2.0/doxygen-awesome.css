@@ -1040,6 +1040,14 @@ h2.groupheader {
         -1900px 0.75px var(--separator-color);
 }
 
+h3 {
+    border-bottom: 0px;
+    font-weight: 360;
+    font-size: 1.35em;
+    padding-left: 1.02em;
+    color: var(--page-foreground-color);
+}
+
 div.groupHeader {
     border-bottom: 0px;
     color: var(--page-foreground-color);
@@ -2589,4 +2597,15 @@ html.dark-mode .tabs-overview button.tab-button:hover .tab-title {
 
 div.hljs {
     white-space: pre;
+    background-color: var(--code-background);
+    border-color: var(--separator-color);
+    border-radius: 8px;
+    padding: 12px;
+  }
+
+  pre.hljs {
+    background-color: var(--code-background);
+    border-color: var(--separator-color);
+    border-radius: 8px;
+    padding: 12px;
   }

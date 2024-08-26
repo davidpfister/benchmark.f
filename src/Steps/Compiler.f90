@@ -1,39 +1,44 @@
 !https://github.com/fortran-lang/fpm/issues/50#issuecomment-731883071
 !https://fortran-lang.discourse.group/t/compiler-flags-comparison/2692/2
 !https://fortran-lang.discourse.group/t/retrieve-compiler-info-at-run-time/8192/19
-!|compiler      | id                                  | outcome                                                                                                                         | macro                                         | Debug                         |
-!|gfortran      | compiler_gcc                        | GCC version 14.1.0                                                                                                              |  __GFORTRAN__                                 | -O0, -g[n]                    |
-!|f95           | compiler_f95                        |                                                                                                                                 |                                               |                               |
-!|caf           | compiler_caf                        | GCC version 12.3.0                                                                                                              |                                               |                               |
-!|ifort         | compiler_intel_classic_nix          | Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on Intel(R) 64, Version 2021.12.0 Build 20240211_000000  | __INTEL_COMPILER                              | -g[n], -debug, -O0            |
-!|ifort         | compiler_intel_classic_mac          |                                                                                                                                 | __INTEL_COMPILER                              | -g[n], -debug, -O0            |
-!|ifort         | compiler_intel_classic_windows (x64)| Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on Intel(R) 64, Version 2021.3.0 Build 20210609_000000   | __INTEL_COMPILER                              | /Zi, /Z7, /debug /Od          |
-!|ia32          | compiler_intel_classic_windows (x86)| Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on IA-32, Version 2021.12.0 Build 20240222_000000        | __INTEL_COMPILER                              | /Zi, /Z7, /debug:full /Od     |
-!|ifx           | compiler_intel_llvm_nix             | Intel(R) Fortran Compiler for applications running on Intel(R) 64, Version 2024.1.2 Build 20240508                              | __INTEL_COMPILER and __INTEL_LLVM_COMPILER    | /Zi, /Z7, /debug:full /Od     |
-!|ifx           | compiler_intel_llvm_windows         | Intel(R) Fortran Compiler for applications running on Intel(R) 64, Version 2024.1.0 Build 20240308                              | __INTEL_COMPILER and __INTEL_LLVM_COMPILER    | /Zi, /Z7, /debug:full /Od     |
-!|pgfortran     | compiler_pgi                        |                                                                                                                                 | __PGI                                         | -O0, -g (not -gopt)           |
-!|nvfortran     | compiler_nvhpc                      | nvfortran 21.5-0 LLVM                                                                                                           | __NVCOMPILER (and __PGI for some versions)    | -O0, -g[n]                    |
-!|nagfor        | compiler_nag                        | NAG Fortran Compiler Release 7.2(Shin-Urayasu) Build 7205                                                                       | NAGFOR                                        | -O0, -g[n]                    |
-!|flang         | compiler_flang                      |                                                                                                                                 | __PGLLVM__                                    | -O0, -g[n]                    |
-!|flang         | compiler_flang_new                  | flang version 19.0.0                                                                                                            |  __flang__                                    | -O0, -g[n]                    |
-!|f18           | compiler_f18                        |                                                                                                                                 |                                               |                               |
-!|xlf90         | compiler_ibmxl                      | IBM XL Fortran for AIX, 16.1 (5765-J14, 5725-C74) Version: 16.01.0000.0000                                                      | __IBMC__                                      | -qnoopt, -O0, -g              |
-!|crayftn       | compiler_cray                       |                                                                                                                                 | _CRAYFTN                                      | -O0, -g[n]                    |
-!|lf95          | compiler_lahey                      | Lahey/Fujitsu Fortran 95 Compiler Release L6.10a                                                                                | __COMPILER_LAHEY                              | -O0, -g                       |
-!|lfortran      | compiler_lfortran                   | LFortran version 0.36.0    
 !> @ingroup group_steps
-!> @defgroup group_steps_compiler compiler
-!> @brief Retrieve compiler infortion at run time
-!> @details This steps retrieves compiler information as the compiler's name
-!>          and version, as well as compilation options. It uses the intrinsic 
-!>          functions `compiler_options` and `compiler_version` from the 
-!>          module `iso_fortran_env`
+!> @defgroup group_steps_compiler benchmark_steps_compiler
+!! @details Retrieves compiler information at run time as the compiler's name
+!!          and version, as well as compilation options. It uses the intrinsic 
+!!          functions `compiler_options` and `compiler_version` from the 
+!!          module `iso_fortran_env`
+!! @par
+!! <h2>Remarks</h2>
+!! The different compilers all come with there own macros, debug options and version information.
+!! Some pieces of information are collected in the following table:
+!!|compiler      | id                                  | outcome                                                                                                                         | macro                                         | debug                         |
+!!|:------------:|:-----------------------------------:|:-------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------:|:-----------------------------:|
+!!|gfortran      | compiler_gcc                        | GCC version 14.1.0                                                                                                              |  `__GFORTRAN__`                               | -O0, -g[n]                    |
+!!|f95           | compiler_f95                        |                                                                                                                                 |                                               |                               |
+!!|caf           | compiler_caf                        | GCC version 12.3.0                                                                                                              |                                               |                               |
+!!|ifort         | compiler_intel_classic_nix          | Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on Intel(R) 64, Version 2021.12.0 Build 20240211_000000  | `__INTEL_COMPILER`                            | -g[n], -debug, -O0            |
+!!|ifort         | compiler_intel_classic_mac          |                                                                                                                                 | `__INTEL_COMPILER`                            | -g[n], -debug, -O0            |
+!!|ifort         | compiler_intel_classic_windows (x64)| Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on Intel(R) 64, Version 2021.3.0 Build 20210609_000000   | `__INTEL_COMPILER`                            | /Zi, /Z7, /debug /Od          |
+!!|ia32          | compiler_intel_classic_windows (x86)| Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on IA-32, Version 2021.12.0 Build 20240222_000000        | `__INTEL_COMPILER`                            | /Zi, /Z7, /debug:full /Od     |
+!!|ifx           | compiler_intel_llvm_nix             | Intel(R) Fortran Compiler for applications running on Intel(R) 64, Version 2024.1.2 Build 20240508                              | `__INTEL_COMPILER` and `__INTEL_LLVM_COMPILER`| /Zi, /Z7, /debug:full /Od     |
+!!|ifx           | compiler_intel_llvm_windows         | Intel(R) Fortran Compiler for applications running on Intel(R) 64, Version 2024.1.0 Build 20240308                              | `__INTEL_COMPILER` and `__INTEL_LLVM_COMPILER`| /Zi, /Z7, /debug:full /Od     |
+!!|pgfortran     | compiler_pgi                        |                                                                                                                                 | `__PGI`                                       | -O0, -g (not -gopt)           |
+!!|nvfortran     | compiler_nvhpc                      | nvfortran 21.5-0 LLVM                                                                                                           | `__NVCOMPILER` (and `__PGI` for some versions)| -O0, -g[n]                    |
+!!|nagfor        | compiler_nag                        | NAG Fortran Compiler Release 7.2(Shin-Urayasu) Build 7205                                                                       | `NAGFOR`                                      | -O0, -g[n]                    |
+!!|flang         | compiler_flang                      |                                                                                                                                 | `__PGLLVM__`                                  | -O0, -g[n]                    |
+!!|flang         | compiler_flang_new                  | flang version 19.0.0                                                                                                            | `__flang__`                                   | -O0, -g[n]                    |
+!!|f18           | compiler_f18                        |                                                                                                                                 |                                               |                               |
+!!|xlf90         | compiler_ibmxl                      | IBM XL Fortran for AIX, 16.1 (5765-J14, 5725-C74) Version: 16.01.0000.0000                                                      | `__IBMC__`                                    | -qnoopt, -O0, -g              |
+!!|crayftn       | compiler_cray                       |                                                                                                                                 | `_CRAYFTN`                                    | -O0, -g[n]                    |
+!!|lf95          | compiler_lahey                      | Lahey/Fujitsu Fortran 95 Compiler Release L6.10a                                                                                | `__COMPILER_LAHEY`                            | -O0, -g                       |
+!!|lfortran      | compiler_lfortran                   | LFortran version 0.36.0                                                                                                         |                                               |                               |
 !> @{
 module benchmark_steps_compiler
     use, intrinsic :: iso_fortran_env, only : compiler_version, compiler_options
     use benchmark_workflow, only: workflow
     use benchmark_output_unit
     use benchmark_systeminfo
+    use benchmark_warning
     
     implicit none
     
@@ -41,6 +46,29 @@ module benchmark_steps_compiler
     
     public :: compiler
 
+    !> @name Enums
+    !! @details
+    !! compiler_unknown
+    !! compiler_gcc
+    !! compiler_f95
+    !! compiler_caf
+    !! compiler_intel_classic_nix
+    !! compiler_intel_classic_mac
+    !! compiler_intel_classic_windows
+    !! compiler_intel_llvm_nix
+    !! compiler_intel_llvm_windows
+    !! compiler_intel_llvm_unknown
+    !! compiler_pgi
+    !! compiler_nvhpc
+    !! compiler_nag
+    !! compiler_flang
+    !! compiler_flang_new
+    !! compiler_f18
+    !! compiler_ibmxl
+    !! compiler_cray
+    !! compiler_lahey
+    !! compiler_lfortran
+    !! @{
     enum, bind(c)
     enumerator :: &
         compiler_unknown, &
@@ -64,17 +92,59 @@ module benchmark_steps_compiler
         compiler_lahey, &
         compiler_lfortran
     end enum
-    integer, parameter :: compiler_enum = kind(compiler_unknown)
     
-    type :: compilerinfo
+    integer, parameter, public :: compiler_enum = kind(compiler_unknown)
+    !> @}
+
+    !> @class compilerinfo
+    !! @ingroup group_steps_compiler
+    !! @brief 
+    !! @verbatim type, public :: compilerinfo @endverbatim
+    !! <h2>Examples</h2>
+    !! <h2>Remarks</h2>
+    !! @par
+    !! <h2>Constructors</h2>
+    !! Initializes a new instance of the @ref compilerinfo class
+    !! <h3>compilerinfo(integer(compiler_enum), character(20), character(20), character(20))</h3>
+    !! @verbatim type(compilerinfo) :: ci@endverbatim
+    !! 
+    !! @b Examples
+    !! ```fortran
+    !! use benchmark_steps_compiler
+    !!
+    !!  type(compilerinfo) :: ci
+    !! ```
+    !! @b Remarks
+    type, public :: compilerinfo
         integer(compiler_enum) :: id
-        character(20)       :: name
-        character(20)       :: vendor
-        character(20)       :: version
+        character(20)          :: name
+        character(20)          :: vendor
+        character(20)          :: version
     end type
-       
+    
+    !> @interface compiler
+    !! @ingroup group_steps_compiler
+    !! @brief 
+    !! @verbatim interface compiler @endverbatim
+    !! <h2>Examples</h2>
+    !! <h2>Remarks</h2>
+    !! @par
+    !! <h2>Constructors</h2>
+    !! Initializes a new instance of the @ref compilerinfo class
+    !! <h3>compilerinfo(integer(compiler_enum), character(20), character(20), character(20))</h3>
+    !! @verbatim type(compilerinfo) :: ci@endverbatim
+    !! 
+    !! @b Examples
+    !! ```fortran
+    !! use benchmark_steps_compiler
+    !!
+    !!  type(compilerinfo) :: ci
+    !! ```
+    !! @b Remarks
     interface compiler
+        !! @cond
         module procedure :: compiler_new
+        !> @endcond
     end interface
     
     contains
@@ -98,7 +168,6 @@ module benchmark_steps_compiler
         character(:), allocatable   :: version
         character(:), allocatable   :: options
         type(compilerinfo)          :: ci
-        integer                     :: major, minor, patch
         
         if (.not. present(os)) then
             os_ = get_os_type()
@@ -190,8 +259,8 @@ module benchmark_steps_compiler
     contains
     
         pure function to_lower(input) result(str)
-            character(*), intent(in) :: input !  the input to be lowercased
-            character(len(input)) :: str !  the lower case input
+            character(*), intent(in) :: input !< the input to be lowercased
+            character(len(input))    :: str !< the lower case input
             !private
             integer, parameter :: change_case = 32
             integer :: i
@@ -249,7 +318,7 @@ module benchmark_steps_compiler
     end function
     
     logical function compiler_is_debug(compiler, options) result(is)
-        integer, intent(in) :: compiler
+        integer, intent(in)      :: compiler
         character(*), intent(in) :: options
         
         is = .false.
@@ -282,8 +351,8 @@ module benchmark_steps_compiler
     end function
     
     type(compilerinfo) function build_compilerinfo(id, string) result(info)
-        integer, intent(in)         :: id
-        character(*), intent(in)   :: string
+        integer, intent(in)      :: id
+        character(*), intent(in) :: string
         !private
         integer :: i, j
         

@@ -6,33 +6,31 @@
     <tab type="classindex" visible="no" title="Types"/>
     <tab type="pages" visible="yes" title="" intro=""/>
     <tab type="topics" visible="yes" title="API" intro=""/>
-    <!-- <tab type="usergroup" visible="no" title="API" url="classes.html">
-      <tab type="classlist" visible="yes" title="All"/>
-    </tab> -->
       <!-- <tab type="classindex" visible="$ALPHABETICAL_INDEX" title=""/>
       <tab type="hierarchy" visible="yes" title="" intro=""/> -->
     <!-- <tab type="user" visible="yes" title="Code" url="dir_c43cb02980e08731d96f7af40bd734ea.html"/> -->
     <!-- <tab type="classmembers" visible="no" title="Members" intro=""/> -->
+    <tab type="filelist" visible="yes" title="Files" intro=""/>
     <tab type="user" visible="yes" title="GitHub Repository" url="https://github.com/davidpfister/benchmark.f"/>
   </navindex>
 
   <!-- Layout definition for a class page -->
   <class>
     <inheritancegraph visible="$CLASS_GRAPH"/>
-    <includes visible="$SHOW_INCLUDE_FILES"/>
-    <usedfiles visible="$SHOW_USED_FILES"/>
-    <briefdescription visible="no"/>
     <detaileddescription visible="yes" title="Definition"/>
-    <!-- <collaborationgraph visible="$COLLABORATION_GRAPH"/> -->
+    <briefdescription visible="no"/>
+    <usedfiles visible="$SHOW_USED_FILES"/>
+    <includes visible="$SHOW_INCLUDE_FILES"/>
+    <collaborationgraph visible="$COLLABORATION_GRAPH"/>
     <memberdecl>
       <publictypes title=""/>
       <services title=""/>
-      <interfaces title="Derived types and public interfaces"/>
+      <interfaces title=""/>
       <publicslots title=""/>
       <signals title=""/>
-      <publicmethods title="Methods"/>
+      <publicattributes title="Variables"/>
+      <publicmethods title="Methods" visible="no"/>
       <publicstaticmethods title=""/>
-      <publicattributes title="Fields"/>
       <publicstaticattributes title=""/>
       <protectedtypes title=""/>
       <protectedslots title=""/>
@@ -54,22 +52,22 @@
       <privateattributes title=""/>
       <privatestaticattributes title=""/>
       <friends title=""/>
-      <related title="" subtitle=""/>
+      <related title="" subtitle="" visible=""/>
       <membergroups visible="yes"/>
       <nestedclasses visible="yes" title=""/>
     </memberdecl>
     <memberdef>
-      <inlineclasses title=""/>
-      <typedefs title=""/>
-      <enums title=""/>
-      <services title=""/>
-      <interfaces title="subroutine"/>
-      <constructors title=""/>
-      <functions title=""/>
-      <related title=""/>
-      <variables title=""/>
-      <properties title=""/>
-      <events title=""/>
+      <inlineclasses title="1"/>
+      <typedefs title="2"/>
+      <enums title="3"/>
+      <services title="4"/>
+      <interfaces title="5"/>
+      <variables title="Variables Definitions" visible="no"/>
+      <functions title="Methods"/>
+      <related title="8"/>
+      <properties title="10"/>
+      <events title="11"/>
+      <constructors title="Finalizer"/>
     </memberdef>
     <allmemberslink visible="yes"/>
     <authorsection visible="no"/>
@@ -132,26 +130,26 @@
   <!-- Layout definition for a group page -->
   <group>
     <briefdescription visible="no"/>
-    <detaileddescription title="Definition"/>
+    <detaileddescription title="Definition" visible="yes" />
     <authorsection visible="no"/>
     <groupgraph visible="$GROUP_GRAPHS"/>
     <memberdecl>
       <dirs visible="yes" title=""/>
       <files visible="yes" title=""/>
-      <namespaces visible="no" title="Modules"/>
-      <classes visible="no"/>
-      <defines title=""/>
-      <typedefs title=""/>
-      <enums title=""/>
+      <namespaces visible="yes" title="Modules"/>
+      <classes visible="yes"/>
+      <defines title="" visible="no"/>
+      <typedefs title="" visible="no"/>
+      <enums title="" visible="no"/>
       <enumvalues title=""/>
-      <variables title="" visible="no"/>
-      <functions title="Methods"/>
+      <variables title="Variables" visible="no"/>
+      <functions title="Methods" visible="no"/>
       <signals title=""/>
       <publicslots title=""/>
       <protectedslots title=""/>
       <privateslots title=""/>
       <events title=""/>
-      <properties title=""/>
+      <properties title="" visible="yes"/>
       <friends title=""/>
       <membergroups visible="yes"/>
       <nestedgroups visible="yes" title=""/>
@@ -163,8 +161,8 @@
       <typedefs title=""/>
       <enums title=""/>
       <enumvalues title=""/>
-      <functions title="Description"/>
-      <variables title="" visible="no"/>
+      <variables title="Variables" visible="no"/>
+      <functions title="Methods"/>
       <signals title=""/>
       <publicslots title=""/>
       <protectedslots title=""/>

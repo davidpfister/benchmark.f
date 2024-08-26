@@ -1,17 +1,45 @@
-!> @ingroup group_benchmark
-!> @defgroup group_output output
-!> @brief Set output unit
-!> @{
+!> @defgroup group_output benchmark_output_unit
+!> @brief Output unit module
 module benchmark_output_unit
     use, intrinsic :: iso_fortran_env, only: stdout => output_unit
     
     implicit none
     
     private
-       
-    integer, public :: output_unit = stdout
-    
-    type, public :: iproperty
+      
+    !> @name Variables
+    !! @{
+    integer, public :: output_unit = stdout !< @brief Static variable controling the output unit number
+    !> @}
+
+    !> @class output
+    !! @ingroup group_output
+    !! @details Integer property dedicated to manipulating the output unit
+    !! <h2>Examples</h2>
+    !! @code{.f90}
+    !! type(output) :: prop
+    !! integer      :: unit
+    !!
+    !! unit = prop
+    !! if (unit /= stdout) stop
+    !! @endcode
+    !! <h2>Remarks</h2>
+    !! The default value corresponds to the standard error `stdout`.
+    !! @par
+    !! <h2>Constructors</h2>
+    !! Initializes a new instance of the @ref output class
+    !! <h3>output()</h3>
+    !! @verbatim type(output) :: o @endverbatim
+    !! 
+    !! 
+    !! @b Examples
+    !! ```fortran
+    !! use benchmark_output_unit
+    !!
+    !! type(output) :: o
+    !! ```
+    !! @b Remarks
+    type, public :: output
     contains
     private
         procedure, pass(lhs) :: iprop_equals_int
@@ -22,16 +50,53 @@ module benchmark_output_unit
     
     contains
     
+    !> @brief Overloading of the assigment procedure.
+    !! @param[inout] lhs class(output)
+    !! @param[in] rhs integer
+    !!
+    !! @b Remarks
+    !! 
+    !! The value of lhs is not used and only the static variable @ref output will be used. 
+    !! 
+    !! @b Examples
+    !! 
+    !! The following example uses the `assigment(\=)` the set the 
+    !! value of the output unit
+    !! @code{.f90}
+    !! type(output) :: prop
+    !! integer :: unit = 15
+    !! prop = unit
+    !! if (output_unit /= 15) stop
+    !! @endcode
     subroutine iprop_equals_int(lhs, rhs)
-       class(iproperty), intent(inout) :: lhs
+       class(output), intent(inout) :: lhs
        integer, intent(in) :: rhs
        
        output_unit = rhs
     end subroutine
     
+    !> @brief Overloading of the assigment procedure.
+    !! @param[inout] lhs integer
+    !! @param[in] rhs class(output)
+    !!
+    !! @b Remarks
+    !! 
+    !! The value of rhs is not used and only the static variable @ref output will be used. 
+    !! 
+    !! @b Examples
+    !! 
+    !! The following example uses the `assigment(\=)` the set the 
+    !! value of the output unit
+    !! @code{.f90}
+    !! type(output) :: prop
+    !! integer      :: unit
+    !!
+    !! unit = prop
+    !! if (unit /= stdout) stop
+    !! @endcode
     subroutine int_equals_iprop(lhs, rhs)
        integer, intent(inout) :: lhs
-       class(iproperty), intent(in) :: rhs
+       class(output), intent(in) :: rhs
        
        lhs = output_unit
     end subroutine

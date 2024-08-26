@@ -1,4 +1,0 @@
-/** @defgroup group_benchmark Benchmark 
-  * @brief Contains types and methods that allow benchmarking 
-  * Fortran procedures.
-  */

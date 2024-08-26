@@ -1,13 +1,42 @@
-!> @ingroup group_benchmark
-!> @defgroup group_systeminfo system information
+!> @defgroup group_systeminfo benchmark_systeminfo
 !> @brief Collect system related information
-!> @details This steps retrieves system information at run time. 
-!>          The method was inspired by the paramonte library (https://github.com/cdslaborg/paramonte/blob/main/src/fortran/main/pm_sysInfo.F90)
-!>          from AmirShahmoradi. 
-!>          It has been simplified and adapted to the needs
-!> @{
+!! <h2>Examples</h2>
+!! The following example demonstrates some of the methods found in the 
+!! @link benchmark_warning benchmark_warning @endlink module.
+!! @n@n
+!! The first example shows how to use the method  
+!! @link benchmark_warning::warning_debug warning_debug @endlink.
+!! @n
+!! @code{.f90}
+!! use benchmark_warning
+!!
+!! #ifdef _DEBUG
+!! call warning_debug()
+!! #endif
+!! @endcode
+!! The output message is the following
+!! @verbatim <!>     WARNING     <!> DEBUG profile detected. The results might be unreliable.  @endverbatim
+!! @n
+!! The second example shows how to use the method  
+!! @link benchmark_warning::warning_maxcalls warning_maxcalls @endlink.
+!! @n
+!! @code{.f90}
+!! use benchmark_warning
+!!
+!! if (display_maxcall_warning) then
+!!      call warning_maxcalls()
+!! end if
+!! @endcode
+!! The output message is the following
+!! @verbatim <!>     WARNING     <!> Maximum number of calls reached for some cases. Steady state may not have been reached for all runs.  @endverbatim
+!! @n
+!! <h2>Remarks</h2>
+!! This steps retrieves system information at run time. 
+!! The method was inspired by the paramonte library (https://github.com/cdslaborg/paramonte/blob/main/src/fortran/main/pm_sysInfo.F90)
+!! from AmirShahmoradi. 
+!! It has been simplified and adapted to the needs
+!! @{
 module benchmark_systeminfo
-    use benchmark_output_unit
     use benchmark_output_unit
     
     implicit none

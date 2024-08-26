@@ -1,6 +1,17 @@
-!> @ingroup group_benchmark
-!> @defgroup group_timer timer
-!> @{
+!> @defgroup group_timer benchmark_timer
+!! @par
+!! <h2>Examples</h2>
+!! The following example demonstrates ...
+!! @n@n
+!! The first example shows how to use the ...
+!! @n
+!! @code{.f90}
+!! use benchmark_timer
+!! @endcode
+!! @par
+!! <h2>Remarks</h2>
+!! ..
+!! @{
 module benchmark_timer
     use benchmark_kinds
     
@@ -18,6 +29,14 @@ module benchmark_timer
     
     contains
     
+    !> @brief Add a step to an existing workflow, described by a
+    !!        workflow object.
+    !! @param[inout] r The parameter containing the clock time
+    !! @param[in] option (optional) Option flag. 
+    !! Possible values are 
+    !! - 0: CPUTIME
+    !! - 1: DATETIME
+    !! - 2: SYSTEMTIME
     subroutine clock(r, option)
         real(r8), intent(inout)         :: r
         integer, intent(in), optional   :: option

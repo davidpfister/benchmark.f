@@ -151,8 +151,8 @@ END_BLOCK(.false., condition, .true.)
 /**
   * Macros for testing equalities and inequalities.
   *
-  *    * {ASSERT|EXPECT}_EQV(v1, v2): Tests that o1 == o2, in terms of values for derived types
-  *    * {ASSERT|EXPECT}_NEQV(v1, v2): Tests that o1 /= o2, in terms of values for derived types
+  *    * {ASSERT|EXPECT}_BEQ(v1, v2): Tests that o1 == o2, in terms of bites
+  *    * {ASSERT|EXPECT}_BNEQV(v1, v2): Tests that o1 /= o2, in terms of bites
   *    * {ASSERT|EXPECT}_SAME(v1, v2): Tests that o1 == o2, in terms of reference for derived types
   *    * {ASSERT|EXPECT}_NSAME(v1, v2): Tests that o1 /= o2, in terms of reference for derived types
   *    * {ASSERT|EXPECT}_EQ(v1, v2): Tests that v1 == v2
@@ -172,7 +172,6 @@ block ; \
 integer(kind=1), allocatable :: mold(:); \
 logical :: equals_; \
 equals_ = same_type_as(val1, val2) .and. loc(val1) == loc(val2) .and. storage_size(val1) == storage_size(val2) ;\
-if(equals_) equals_ = all(transfer(val1, mold) == transfer(val2, mold)); \
 if(equals_) then ; \
 END_BLOCK(val2, val1, .false.) \
 end block
@@ -182,12 +181,11 @@ block ; \
 integer(kind=1), allocatable :: mold(:); \
 logical :: equals_; \
 equals_ = same_type_as(val1, val2) .and. loc(val1) == loc(val2) .and. storage_size(val1) == storage_size(val2) ;\
-if(equals_) equals_ = all(transfer(val1, mold) == transfer(val2, mold)); \
 if(.not. equals_) then; \
 END_BLOCK(val2, val1, .false.) \
 end block
-# define EXPECT_EQV(val1, val2) \
-START_BLOCK(EXPECT_EQV) \
+# define EXPECT_BEQ(val1, val2) \
+START_BLOCK(EXPECT_BEQ) \
 block ; \
 integer(kind=1), allocatable :: mold(:); \
 logical :: equals_; \
@@ -195,8 +193,8 @@ equals_ = all(transfer(val1, mold) == transfer(val2, mold)); \
 if(equals_) then ; \
 END_BLOCK(val2, val1, .false.) \
 end block
-# define EXPECT_NEQV(val1, val2) \
-START_BLOCK(EXPECT_NEQV) \
+# define EXPECT_BNEQ(val1, val2) \
+START_BLOCK(EXPECT_BNEQ) \
 block ; \
 integer(kind=1), allocatable :: mold(:); \
 logical :: equals_; \
@@ -248,8 +246,8 @@ if(equals_) equals_ = all(transfer(val1, mold) == transfer(val2, mold)); \
 if(.not. equals_) then; \
 END_BLOCK(val2, val1, .true.) \
 end block
-# define ASSERT_EQV(val1, val2) \
-START_BLOCK(ASSERT_EQV) \
+# define ASSERT_BEQ(val1, val2) \
+START_BLOCK(ASSERT_BEQ) \
 block ; \
 integer(kind=1), allocatable :: mold(:); \
 logical :: equals_; \
@@ -257,8 +255,8 @@ equals_ = all(transfer(val1, mold) == transfer(val2, mold)); \
 if(equals_) then; \
 END_BLOCK(val2, val1, .true.) \
 end block
-# define ASSERT_NEQV(val1, val2) \
-START_BLOCK(ASSERT_NEQV) \
+# define ASSERT_BNEQ(val1, val2) \
+START_BLOCK(ASSERT_BNEQ) \
 block ; \
 integer(kind=1), allocatable :: mold(:); \
 logical :: equals_; \

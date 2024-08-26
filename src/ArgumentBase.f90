@@ -1,33 +1,34 @@
-!> @ingroup group_benchmark
-!> @defgroup group_arg_base arg_base
-!> @par 
-!> <h2>Examples</h2>
-!> @code{.f90}
-!> type, extends(arg_base), public :: arg
-!>  private
-!>  contains
-!>  procedure, pass(lhs), private   :: any_assign_argument
-!>  generic :: assignment(=) => any_assign_argument
-!>  procedure, pass(this), public :: to_string
-!> end type
-!> @endcode
-!> @par 
-!> <h2>Remarks</h2>
-!> arg_base is an abstract base class of @ref group_arg "arg", 
-!> which also contains bound procedures.
-!> @note This type contains a ::value component
-!> @{
-module benchmark_method_argument_base
+!> @defgroup group_arg_base benchmark_argument_base
+!! @brief Base argument module
+module benchmark_argument_base
     
     implicit none; private
 
     !> @class arg_base
-    !> @details Represents an abstract type
-    !>          of the method argument
+    !! @ingroup group_arg_base
+    !! @brief Represents an abstract type 
+    !!        of the method argument. Method arguments 
+    !!        are simple types containing a name for display and 
+    !!        a polymorphic value.
+    !! @verbatim type, public :: arg_base @endverbatim
+    !! <h2>Examples</h2>
+    !! The following example demonstrates how to use @ref arg_base to create
+    !! the concrete type @link benchmark_argument::arg arg @endlink
+    !! @snippet snippet.f90 arg_base_derivation
+    !! <h2>Remarks</h2>
+    !! @ref arg_base is an abstract base class of @ref group_arg "arg", 
+    !! which contains the type bound procedures.
     type, abstract, public :: arg_base
-        character(:), allocatable :: display !< String characterizing the argument
-        class(*), allocatable, public :: value !< Unlimited polymorphic value of the argument
+        character(:), allocatable   :: display  !< String characterizing the argument.
+                                                !! @n 
+                                                !! If not specified, the numeric value is 
+                                                !! stringified.
+                                                !! @note For unknown types, the symbol '?'
+                                                !! is used
+        class(*), allocatable       :: value    !< Unlimited polymorphic value of the argument.
+                                                !! @n 
+                                                !! This property is used to store any
+                                                !! value of any type.
     end type
     
 end module
-!> @}

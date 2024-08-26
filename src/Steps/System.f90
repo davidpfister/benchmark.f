@@ -1,5 +1,5 @@
 !> @ingroup group_steps
-!> @defgroup group_steps_system system
+!> @defgroup group_steps_system benchmark_steps_system
 !> @brief Retrieve system infortion at run time
 !> @{
 module benchmark_steps_system

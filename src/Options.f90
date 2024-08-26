@@ -1,16 +1,27 @@
-!> @ingroup group_benchmark
-!> @defgroup group_options options
-!> @details Base type for the benchmark runner
-!> @{
+!> @defgroup group_options benchmark_options
+!! @brief Options module
 module benchmark_options
     use benchmark_kinds
     
     implicit none
     
     !> @class runner_options
-    !> @brief Provides a base class for the benchmark runner
+    !! @ingroup group_options
+    !! @brief Provides a base class for the benchmark runner
+    !! @par
+    !! <h2>Examples</h2>
+    !! The first example demonstrates how to instantiate the @ref runner_options
+    !! type and modify some values.
+    !! @n@n
+    !! @snippet snippet.f90 options_constructor
+    !! @n 
+    !! The second example shows how to export benchmark results to csv file
+    !! @snippet snippet.f90 options_csv
+    !! @par
+    !! <h2>Remarks</h2>
+    !! The @ref runner_options is the base class for the @link benchmark_library::runner runner @endlink class. 
+    !! @{
     type, public :: runner_options
-        
         integer,  public        :: maxcalls = 1000000       !< Maximum number of function calls
         integer,  public        :: csv_unit = 0             !< Integer designating the logical output unit for csv results. Null value corresponds to unset value
         real(r8), public        :: mintime = 100.0_r8       !< Minimum sampling time in ms to collect data
@@ -24,6 +35,4 @@ module benchmark_options
         !> @endcond            
         character(200), public  :: name = ''                !<  String name
     end type
-    !> @}
 end module
-!> @}

@@ -1,5 +1,5 @@
 !> @ingroup group_steps
-!> @defgroup group_steps_setup setup
+!> @defgroup group_steps_setup benchmark_steps_setup
 !> @brief First step to display libray version number
 !> @{
 module benchmark_steps_setup
