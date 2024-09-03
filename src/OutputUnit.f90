@@ -1,5 +1,5 @@
 !> @defgroup group_output benchmark_output_unit
-!> @brief Output unit module
+!! @brief Output unit module
 module benchmark_output_unit
     use, intrinsic :: iso_fortran_env, only: stdout => output_unit
     
@@ -14,7 +14,7 @@ module benchmark_output_unit
 
     !> @class output
     !! @ingroup group_output
-    !! @details Integer property dedicated to manipulating the output unit
+    !! @brief Integer property dedicated to manipulating the output unit
     !! <h2>Examples</h2>
     !! @code{.f90}
     !! type(output) :: prop
@@ -42,8 +42,8 @@ module benchmark_output_unit
     type, public :: output
     contains
     private
-        procedure, pass(lhs) :: iprop_equals_int
-        procedure, pass(rhs) :: int_equals_iprop
+        procedure, pass(lhs), private :: iprop_equals_int
+        procedure, pass(rhs), private :: int_equals_iprop
         generic, public :: assignment(=) => iprop_equals_int, &
                                             int_equals_iprop
     end type

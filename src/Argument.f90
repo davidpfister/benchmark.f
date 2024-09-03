@@ -138,8 +138,6 @@ module benchmark_argument
     !> @brief Returns a string that represents the current object.
     !! @returns character(:), allocatable @n@n A string that represents the current object.
     !! 
-    !! @b Remarks
-    !! 
     !! @b Examples
     !! 
     !! @code{.f90}

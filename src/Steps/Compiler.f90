@@ -3,7 +3,7 @@
 !https://fortran-lang.discourse.group/t/retrieve-compiler-info-at-run-time/8192/19
 !> @ingroup group_steps
 !> @defgroup group_steps_compiler benchmark_steps_compiler
-!! @details Retrieves compiler information at run time as the compiler's name
+!! @brief Retrieves compiler information at run time as the compiler's name
 !!          and version, as well as compilation options. It uses the intrinsic 
 !!          functions `compiler_options` and `compiler_version` from the 
 !!          module `iso_fortran_env`
@@ -47,53 +47,32 @@ module benchmark_steps_compiler
     public :: compiler
 
     !> @name Enums
-    !! @details
-    !! compiler_unknown
-    !! compiler_gcc
-    !! compiler_f95
-    !! compiler_caf
-    !! compiler_intel_classic_nix
-    !! compiler_intel_classic_mac
-    !! compiler_intel_classic_windows
-    !! compiler_intel_llvm_nix
-    !! compiler_intel_llvm_windows
-    !! compiler_intel_llvm_unknown
-    !! compiler_pgi
-    !! compiler_nvhpc
-    !! compiler_nag
-    !! compiler_flang
-    !! compiler_flang_new
-    !! compiler_f18
-    !! compiler_ibmxl
-    !! compiler_cray
-    !! compiler_lahey
-    !! compiler_lfortran
     !! @{
     enum, bind(c)
     enumerator :: &
-        compiler_unknown, &
-        compiler_gcc, &
-        compiler_f95, &
-        compiler_caf, &
-        compiler_intel_classic_nix, &
-        compiler_intel_classic_mac, &
-        compiler_intel_classic_windows, &
-        compiler_intel_llvm_nix, &
-        compiler_intel_llvm_windows, &
-        compiler_intel_llvm_unknown, &
-        compiler_pgi, &
-        compiler_nvhpc, &
-        compiler_nag, &
-        compiler_flang, &
-        compiler_flang_new, &
-        compiler_f18, &
-        compiler_ibmxl, &
-        compiler_cray, &
-        compiler_lahey, &
-        compiler_lfortran
+        COMPILER_UNKNOWN, &
+        COMPILER_GCC, &
+        COMPILER_F95, &
+        COMPILER_CAF, &
+        COMPILER_INTEL_CLASSIC_NIX, &
+        COMPILER_INTEL_CLASSIC_MAC, &
+        COMPILER_INTEL_CLASSIC_WINDOWS, &
+        COMPILER_INTEL_LLVM_NIX, &
+        COMPILER_INTEL_LLVM_WINDOWS, &
+        COMPILER_INTEL_LLVM_UNKNOWN, &
+        COMPILER_PGI, &
+        COMPILER_NVHPC, &
+        COMPILER_NAG, &
+        COMPILER_FLANG, &
+        COMPILER_FLANG_NEW, &
+        COMPILER_F18, &
+        COMPILER_IBMXL, &
+        COMPILER_CRAY, &
+        COMPILER_LAHEY, &
+        COMPILER_LFORTRAN
     end enum
     
-    integer, parameter, public :: compiler_enum = kind(compiler_unknown)
+    integer, parameter, public :: COMPILER_ENUM = kind(COMPILER_UNKNOWN)
     !> @}
 
     !> @class compilerinfo
@@ -105,7 +84,7 @@ module benchmark_steps_compiler
     !! @par
     !! <h2>Constructors</h2>
     !! Initializes a new instance of the @ref compilerinfo class
-    !! <h3>compilerinfo(integer(compiler_enum), character(20), character(20), character(20))</h3>
+    !! <h3>compilerinfo(integer(COMPILER_ENUM), character(20), character(20), character(20))</h3>
     !! @verbatim type(compilerinfo) :: ci@endverbatim
     !! 
     !! @b Examples
@@ -116,7 +95,7 @@ module benchmark_steps_compiler
     !! ```
     !! @b Remarks
     type, public :: compilerinfo
-        integer(compiler_enum) :: id
+        integer(COMPILER_ENUM) :: id
         character(20)          :: name
         character(20)          :: vendor
         character(20)          :: version
@@ -131,7 +110,7 @@ module benchmark_steps_compiler
     !! @par
     !! <h2>Constructors</h2>
     !! Initializes a new instance of the @ref compilerinfo class
-    !! <h3>compilerinfo(integer(compiler_enum), character(20), character(20), character(20))</h3>
+    !! <h3>compilerinfo(integer(COMPILER_ENUM), character(20), character(20), character(20))</h3>
     !! @verbatim type(compilerinfo) :: ci@endverbatim
     !! 
     !! @b Examples
@@ -178,37 +157,37 @@ module benchmark_steps_compiler
         version = to_lower(compiler_version())
         
         if (index(version, 'gcc') > 0) then
-            compiler = compiler_gcc
+            compiler = COMPILER_GCC
         else if (index(version, 'intel') > 0) then
             if (index(version, 'classic') > 0) then
                 if (os_ == OS_LINUX) then
-                    compiler = compiler_intel_classic_nix
+                    compiler = COMPILER_INTEL_CLASSIC_NIX
                 elseif (os_ == OS_WINDOWS) then
-                    compiler = compiler_intel_classic_windows
+                    compiler = COMPILER_INTEL_CLASSIC_WINDOWS
                 elseif (os_ == OS_MACOS) then
-                    compiler = compiler_intel_classic_mac
+                    compiler = COMPILER_INTEL_CLASSIC_MAC
                 end if
             else
                 if (os_ == OS_LINUX) then
-                    compiler = compiler_intel_llvm_nix
+                    compiler = COMPILER_INTEL_LLVM_NIX
                 elseif (os_ == OS_WINDOWS) then
-                    compiler = compiler_intel_llvm_windows
+                    compiler = COMPILER_INTEL_LLVM_WINDOWS
                 else
-                    compiler = compiler_intel_llvm_unknown
+                    compiler = COMPILER_INTEL_LLVM_UNKNOWN
                 end if
             end if
         else if (index(version, 'nvfortran') > 0) then
-            compiler = compiler_nvhpc
+            compiler = COMPILER_NVHPC
         else if (index(version, 'nag fortran') > 0) then
-            compiler = compiler_nag
+            compiler = COMPILER_NAG
         else if (index(version, 'flang') > 0) then
-            compiler = compiler_flang
+            compiler = COMPILER_FLANG
         else if (index(version, 'ibm xl') > 0) then
-            compiler = compiler_ibmxl
+            compiler = COMPILER_IBMXL
         else if (index(version, 'lahey/fujitsu') > 0) then
-            compiler = compiler_lahey
+            compiler = COMPILER_LAHEY
         else if (index(version, 'lfortran') > 0) then
-            compiler = compiler_lfortran
+            compiler = COMPILER_LFORTRAN
         else
             compiler = get_compiler_at_compiletime(os_)
         end if
@@ -279,41 +258,41 @@ module benchmark_steps_compiler
     integer function get_compiler_at_compiletime(os) result(id)
         integer, intent(in) :: os
         
-        id = compiler_unknown
+        id = COMPILER_UNKNOWN
 #ifdef __GFORTRAN__
-        id = compiler_gcc
+        id = COMPILER_GCC
 #elif defined(__INTEL_COMPILER)
 #if defined(__INTEL_LLVM_COMPILER)
         if (os == OS_LINUX) then
-            id = compiler_intel_llvm_nix
+            id = COMPILER_INTEL_LLVM_NIX
         elseif (os == OS_WINDOWS) then
-            id = compiler_intel_llvm_windows
+            id = COMPILER_INTEL_LLVM_WINDOWS
         else
-            id = compiler_intel_llvm_unknown
+            id = COMPILER_INTEL_LLVM_UNKNOWN
         end if
 #else
         if (os == OS_LINUX) then
-            id = compiler_intel_classic_nix
+            id = COMPILER_INTEL_CLASSIC_NIX
         elseif (os == OS_WINDOWS) then
-            id = compiler_intel_classic_windows
+            id = COMPILER_INTEL_CLASSIC_WINDOWS
         elseif (os == OS_MACOS) then
-            id = compiler_intel_classic_mac
+            id = COMPILER_INTEL_CLASSIC_MAC
         end if
 #endif
 #elif defined (NAGFOR)
-        id = compiler_nag
+        id = COMPILER_NAG
 #elif defined (__PGI)
 #if defined (__NVCOMPILER]
-        id = compiler_nvhpc
+        id = COMPILER_NVHPC
 #else
-        id = compiler_pgi
+        id = COMPILER_PGI
 #endif
 #elif defined (__NVCOMPILER)
-        id = compiler_nvhpc
+        id = COMPILER_NVHPC
 #elif defined (_CRAYFTN)
-        id = compiler_cray
+        id = COMPILER_CRAY
 #elif defined (__IBMC__]
-        id = compiler_ibmxl
+        id = COMPILER_IBMXL
 #endif
     end function
     
@@ -327,22 +306,22 @@ module benchmark_steps_compiler
             return 
         end if
         select case (compiler)
-        case (compiler_ibmxl)
+        case (COMPILER_IBMXL)
             if (index(options, '-qnoopt') > 0) then
                 is = .true.
                 return 
             end if
-        case (compiler_intel_classic_nix, compiler_intel_classic_mac, compiler_intel_llvm_nix, compiler_intel_llvm_unknown)
+        case (COMPILER_INTEL_CLASSIC_NIX, COMPILER_INTEL_CLASSIC_MAC, COMPILER_INTEL_LLVM_NIX, COMPILER_INTEL_LLVM_UNKNOWN)
             if (index(options, '-debug') > 0) then
                 is = .true.
                 return 
             end if
-        case (compiler_intel_classic_windows, compiler_intel_llvm_windows)
+        case (COMPILER_INTEL_CLASSIC_WINDOWS, COMPILER_INTEL_LLVM_WINDOWS)
             if (index(options, '/debug') > 0 .or. index(options, '/Od') > 0) then
                 is = .true.
                 return 
             end if
-        case (compiler_lfortran)
+        case (COMPILER_LFORTRAN)
             if (index(options, '--debug-with-line-column')> 0) then
                 is = .true.
                 return 
@@ -357,66 +336,66 @@ module benchmark_steps_compiler
         integer :: i, j
         
         select case (id)
-        case (compiler_unknown)
+        case (COMPILER_UNKNOWN)
             info = compilerinfo(id, 'UNKNOWN', 'UNKNOWN', 'X.X.X.X')
-        case (compiler_gcc)
+        case (COMPILER_GCC)
             i = index(string, 'version')
             info = compilerinfo(id, 'gfortran', 'GCC', trim(adjustl(string(i+7:))))
-        case (compiler_f95)
+        case (COMPILER_F95)
             info = compilerinfo(id, 'f95', 'ORACLE', 'X.X.X.X')
-        case (compiler_caf)
+        case (COMPILER_CAF)
             info = compilerinfo(id, 'caf', 'OPENCOARRAY', 'X.X.X.X')
-        case (compiler_intel_classic_nix)
+        case (COMPILER_INTEL_CLASSIC_NIX)
             i = index(string, 'version')
             j = index(string, 'build')
             info = compilerinfo(id, 'ifort', 'INTEL', trim(adjustl(string(i+7:j-1))))
-        case (compiler_intel_classic_mac)
+        case (COMPILER_INTEL_CLASSIC_MAC)
             i = index(string, 'version')
             j = index(string, 'build')
             info = compilerinfo(id, 'ifort','INTEL', trim(adjustl(string(i+7:j-1))))
-        case (compiler_intel_classic_windows)
+        case (COMPILER_INTEL_CLASSIC_WINDOWS)
             i = index(string, 'version')
             j = index(string, 'build')
             info = compilerinfo(id, merge('ia32 ', 'ifort', index(string, 'IA-32') > 0),'INTEL', trim(adjustl(string(i+7:j-1))))
-        case (compiler_intel_llvm_nix)
+        case (COMPILER_INTEL_LLVM_NIX)
             i = index(string, 'version')
             j = index(string, 'build')
             info = compilerinfo(id, 'ifx', 'INTEL', trim(adjustl(string(i+7:j-1))))
-        case (compiler_intel_llvm_windows)
+        case (COMPILER_INTEL_LLVM_WINDOWS)
             i = index(string, 'version')
             j = index(string, 'build')
             info = compilerinfo(id, 'ifx', 'INTEL', trim(adjustl(string(i+7:j-1))))
-        case (compiler_intel_llvm_unknown)
+        case (COMPILER_INTEL_LLVM_UNKNOWN)
             i = index(string, 'version')
             j = index(string, 'build')
             info = compilerinfo(id, 'ifx', 'INTEL', trim(adjustl(string(i+7:j-1))))
-        case (compiler_pgi)
+        case (COMPILER_PGI)
             info = compilerinfo(id, 'pgfortran','PGI', 'X.X.X.X')
-        case (compiler_nvhpc)
+        case (COMPILER_NVHPC)
             i = index(string, 'nvfortran')
             j = index(string, 'llvm')
             info = compilerinfo(id, 'nvhpc','NVIDIA', trim(adjustl(string(i+9:j-1))))
-        case (compiler_nag)
+        case (COMPILER_NAG)
             i = index(string, 'release')
             j = index(string, '(')
             info = compilerinfo(id, 'nagfor', 'NAG', trim(adjustl(string(i+7:j-1))))
-        case (compiler_flang)
+        case (COMPILER_FLANG)
             i = index(string, 'version')
             info = compilerinfo(id, 'flang', 'FLANG', trim(adjustl(string(i+7:))))
-        case (compiler_flang_new)
+        case (COMPILER_FLANG_NEW)
             i = index(string, 'version')
             info = compilerinfo(id, 'flang', 'FLANG', trim(adjustl(string(i+7:))))
-        case (compiler_f18)
+        case (COMPILER_F18)
             info = compilerinfo(id, 'f18', 'F18', 'X.X.X.X')
-        case (compiler_ibmxl)
+        case (COMPILER_IBMXL)
             i = index(string, 'version:')
             info = compilerinfo(id, 'xlf90', 'IBM', trim(adjustl(string(i+8:))))
-        case (compiler_cray)
+        case (COMPILER_CRAY)
             info = compilerinfo(id, 'crayftn','CRAY', 'X.X.X.X')
-        case (compiler_lahey)
+        case (COMPILER_LAHEY)
             i = index(string, 'release')
             info = compilerinfo(id, 'lf95', 'LAHEY/FUJITSU', trim(adjustl(string(i+7:))))
-        case (compiler_lfortran)
+        case (COMPILER_LFORTRAN)
             i = index(string, 'version')
             info = compilerinfo(id, 'lfortran', 'LFORTRAN', trim(adjustl(string(i+7:))))
         case default

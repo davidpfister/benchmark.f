@@ -1,7 +1,7 @@
 !> @ingroup group_steps
 !> @defgroup group_steps_run benchmark_steps_benchmark_run
 !> @brief Run the method call and compute statistics
-!> @details Runs the method call until reaching steady state. 
+!>          Runs the method call until reaching steady state. 
 !>          Statistics as mean and standard deviations are 
 !>          computed and reported
 !> @{

@@ -1,47 +1,60 @@
 !> @defgroup group_timer benchmark_timer
+!! @brief Returns the actual time in milliseconds.
 !! @par
 !! <h2>Examples</h2>
-!! The following example demonstrates ...
-!! @n@n
-!! The first example shows how to use the ...
+!! The following example uses the @ref clock subroutine to get the 
+!! actual time in milliseconds. 
 !! @n
-!! @code{.f90}
-!! use benchmark_timer
-!! @endcode
+!! @snippet snippet.f90 timer
 !! @par
 !! <h2>Remarks</h2>
-!! ..
+!! The system clock that is used can be modified. Three
+!! options are available at the moment: CPUTIME, DATETIME, SYSTEMTIME. 
+!! They corresponds to the underlying functions `cpu_time`, `date_and_time` and 
+!! `system_clock`, respectively.
 !! @{
 module benchmark_timer
     use benchmark_kinds
     
     implicit none
 
+    !> @name Enums
+    !! @{
+    !! <h3>CLOCK_ENUM</h3>
+    !! @cond
     enum, bind(c)
-        enumerator :: CPUTIME = 0
-        enumerator :: DATETIME = 1
-        enumerator :: SYSTEMTIME = 2
+    !! @endcond    
+        enumerator :: CPUTIME = 0 !< Value related to the function `cpu_time`
+        enumerator :: DATETIME = 1 !< Value related to the function `date_and_time`
+        enumerator :: SYSTEMTIME = 2 !< Value related to the function `system_clock`
+    !! @cond
     end enum
-        
+    !! @endcond
+    !> @}
+
+    integer, parameter, public :: CLOCK_ENUM = kind(CPUTIME)
+
     private 
     
     public :: clock
     
     contains
     
-    !> @brief Add a step to an existing workflow, described by a
-    !!        workflow object.
-    !! @param[inout] r The parameter containing the clock time
-    !! @param[in] option (optional) Option flag. 
+    !> @brief Returns the actual time in milliseconds.
+    !! @param[inout] r The parameter containing the clock time in milliseconds
+    !! @param[in] option (optional) clock type. 
+    !!
+    !! @b Remarks
+    !! @n
     !! Possible values are 
-    !! - 0: CPUTIME
-    !! - 1: DATETIME
-    !! - 2: SYSTEMTIME
+    !! - CPUTIME
+    !! - DATETIME
+    !! - SYSTEMTIME
     subroutine clock(r, option)
-        real(r8), intent(inout)         :: r
-        integer, intent(in), optional   :: option
+        real(r8), intent(inout)                     :: r
+        integer(CLOCK_ENUM), intent(in), optional   :: option
         !private
-        integer :: dft_option
+        integer(CLOCK_ENUM) :: dft_option
         
         dft_option = DATETIME
         if (present(option)) dft_option = option
@@ -57,8 +70,8 @@ module benchmark_timer
     end subroutine
 
     subroutine get_time(ctime, option)! in milliseconds
-        real(r8), intent(out)   :: ctime
-        integer, intent(in)     :: option
+        real(r8), intent(out)           :: ctime
+        integer(CLOCK_ENUM), intent(in) :: option
 
         select case (option)
         case (CPUTIME)

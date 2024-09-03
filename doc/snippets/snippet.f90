@@ -31,6 +31,51 @@ end type
 end block
 
 block
+   !> [method_caller]
+   use benchmark_string
+    use benchmark_library
+    use utility
+    
+    implicit none
+    
+    integer :: i
+    type(runner) :: br   
+    type(string) :: s(3)
+    
+    s(1) = 'abcdefghijklmnopqrstuvwxyz'
+    s(2) = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    s(3) = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '           // &
+                  'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'  // &
+                  ' Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris' // &
+                  ' nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in ' // &
+                  'reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla '// &
+                  'pariatur. Excepteur sint occaecat cupidatat non proident, sunt in '  // &
+                  'culpa qui officia deserunt mollit anim id est laborum'
+
+    
+    call br%set_caller(upper_caller)
+    do i = 1, 3
+        br%name = 'upper1'; call br%run(s(i), upper1)
+        br%name = 'upper2'; call br%run(s(i), upper2)
+        br%name = 'upper3'; call br%run(s(i), upper3)
+    end do
+
+    read(*,*)
+
+    subroutine upper_caller(f, a)
+      procedure(upper_x) :: f
+      type(string), intent(in) :: a
+      
+      block
+          character(len(a)) :: res
+              
+          res = f(a%chars)
+      end block
+    end subroutine
+   !> [method_caller]
+   end block
+
+block
 !> [workflow_example]
 use benchmark_workflow
 
@@ -138,6 +183,38 @@ block
          call br2%read('benchmark.nml')
       end if
       !> [benchmark_ex2]
+   end block
+
+   block
+      !> [timer]
+      use benchmark_timer
+      
+      real(r8) :: time
+      
+      call clock(time)
+      write(*,*) 'The actual time is ', time, ' ms.'
+      !> [timer]
+   end block
+
+   block
+      !> [systeminfo]
+      use benchmark_systeminfo
+      
+      write (*, '(A)') 'OS:'//os_name(get_os_type())
+      !> [systeminfo]
+   end block
+
+   block
+      !> [version]
+      use benchmark_version
+      
+      character(:), allocatable :: v
+      
+      v = version
+      write(*,*) 'The current version number is ' // v
+      !The example display the following output
+      !        'The current version number is 1.0.0'
+      !> [version]
    end block
 
    block

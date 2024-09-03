@@ -159,7 +159,7 @@
       <inlineclasses visible="no" title=""/>
       <defines title=""/>
       <typedefs title=""/>
-      <enums title=""/>
+      <enums title="" visible="no"/>
       <enumvalues title=""/>
       <variables title="Variables" visible="no"/>
       <functions title="Methods"/>

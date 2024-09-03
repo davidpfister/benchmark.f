@@ -52,7 +52,7 @@ module benchmark_warning
         ' might be unreliable.'
     end subroutine
     
-    !> @details Warning triggered when the maximum number of function calls
+    !> @brief Warning triggered when the maximum number of function calls
     !!          is readched. The maximum value can be set in @link benchmark_options::runner_options runner_options @endlink
     subroutine warning_maxcalls()
         write (output_unit, '(A)') new_line('A'), &

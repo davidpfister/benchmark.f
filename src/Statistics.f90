@@ -1,6 +1,6 @@
 
 !> @defgroup group_statistics benchmark_statistics
-!> @brief Compute statistics
+!! @brief Statistics module
 module benchmark_statistics
     use benchmark_kinds
     
@@ -10,10 +10,12 @@ module benchmark_statistics
     
     !> @class stats
     !! @ingroup group_statistics
-    !! @details Statistics class to compute mean, standard deviation and 
-    !! variance of a given vector.
+    !! @brief Provides methods to compute mean, standard deviation and 
+    !!          variance of a given sample.
     !! <h2>Examples</h2>
     !! @code{.f90}
+    !! use benchmark_statistics
+    !! 
     !! type(stats) :: s
     !! integer     :: i
     !! real(r8)    :: array(10)
@@ -60,12 +62,12 @@ module benchmark_statistics
     
     !> @brief Compute mean, standard deviation and 
     !! variance of a given vector.
-    !! @param[inout] this class(stats)
-    !! @param[in] y real(r8) input array
+    !! @param[inout] this bound argument
+    !! @param[in] y sample array
     !!
     !! @b Remarks @n
     !! 
-    !! At the moment it only works for real(r8) arrays
+    !! @note At the moment it only works for real(r8) arrays
     !!
     !! @b Examples @n
     !! 

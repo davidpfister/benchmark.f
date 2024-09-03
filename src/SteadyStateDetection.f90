@@ -6,7 +6,6 @@
 !! The following example demonstrates some of the methods found in the 
 !! @link benchmark_steady_state_detection benchmark_steady_state_detection @endlink module.
 !!
-!! @n
 !! @snippet snippet.f90 ssd
 !! @par
 !! <h2>Remarks</h2>
@@ -26,34 +25,36 @@ module benchmark_steady_state_detection
     
     contains
     
-    !> @fn ssd
+    !> @ingroup group_ssd
+    !> @brief Compute the probability that a sample `x` reached steady-state.
+    !!        The SSD algorithm presented in this work is also window-based and utilizes the
+    !!        Student-t test to determine if the difference between the process signal value 
+    !!        minus its mean is above or below the standard-deviation times its statistical critical value. If less
+    !!        than, then that time instant or point is steady and if greater than, then it is unsteady
+    !!        where the aggregation is computed over the window approximating a probability or
+    !!        frequency of being at steady-state. 
+    !! @param[in] input sample of real(r8) values
+    !! @param[in] offset Index of the first values inside the periodic array x
+    !! @param[in] alpha Significance level for the student test.
+    !! 
+    !! The mean is defined as:
+    !! @f[
+    !! \mu = \frac{1}{n}\left(\sum x-m\sum i\right)
+    !! @f]
+    !! where @f$m@f$ is the slope of a linear drift. In the present case, @f$m=0@f$
+    !! It comes that the standard deviation is given by 
+    !! @f[
+    !! \sigma = \sqrt{\frac{1}{n-2}\sum (x-\mu)^2}
+    !! @f]
+    !! At this point along with a specified Student-t critical or threshold value at a particu100 lar significance level α and degrees-of-freedom n, all of the necessary information is
+    !! available to test the null-hypothesis that the process signal is steady or is stationary
+    !! about @f$\mu@f$
+    !! @f[
+    !! if\  x - \mu < t_{crit}-\sigma\ , then\  1,\  else\  0
+    !! @f]
+    !! @f$t_{crit}@f$ is evaluated for a given significance level and a given degree of freedom
+    !! using the t-distribution.
     real(r8) function ssd(x, offset, alpha) result(res)
-        !> @param[in] Input sample of real(r8) values
-        !> @param[in] offset Index of the first values inside the periodic array x
-        !> @param[in] alpha Significance level for the student test.
-        !> @details Compute the probability that a sample `x` reached steady-state.
-        !! The SSD algorithm presented in this work is also window-based and utilizes the
-        !! Student-t test to determine if the difference between the process signal value 
-        !! minus its mean is above or below the standard-deviation times its statistical critical value. If less
-        !! than, then that time instant or point is steady and if greater than, then it is unsteady
-        !! where the aggregation is computed over the window approximating a probability or
-        !! frequency of being at steady-state. 
-        !! @f[
-        !! \mu = \frac{1}{n}\left(\sum x-m\sum i\right)
-        !! @f]
-        !! where @f$m@f$ is the slope of a linear drift. In the present case, @f$m=0@f$
-        !! It comes that the standard deviation is given by 
-        !! @f[
-        !! \sigma = \sqrt{\frac{1}{n-2}\sum (x-\mu)^2}
-        !! @f]
-        !! At this point along with a specified Student-t critical or threshold value at a particu100 lar significance level α and degrees-of-freedom n, all of the necessary information is
-        !! available to test the null-hypothesis that the process signal is steady or is stationary
-        !! about @f$\mu@f$
-        !! @f[
-        !! if\  x - \mu < t_{crit}-\sigma\ , then\  1,\  else\  0
-        !! @f]
-        !! @f$t_{crit}@f$ is evaluated for a given significance level and a given degree of freedom
-        !! using the t-distribution.
         real(r8), intent(in)            :: x(:)
         integer, intent(in)             :: offset
         real(r8), intent(in)            :: alpha

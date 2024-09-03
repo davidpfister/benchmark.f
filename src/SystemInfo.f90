@@ -2,46 +2,37 @@
 !> @brief Collect system related information
 !! <h2>Examples</h2>
 !! The following example demonstrates some of the methods found in the 
-!! @link benchmark_warning benchmark_warning @endlink module.
-!! @n@n
-!! The first example shows how to use the method  
-!! @link benchmark_warning::warning_debug warning_debug @endlink.
+!! @link benchmark_systeminfo benchmark_systeminfo @endlink module.
 !! @n
-!! @code{.f90}
-!! use benchmark_warning
-!!
-!! #ifdef _DEBUG
-!! call warning_debug()
-!! #endif
-!! @endcode
-!! The output message is the following
-!! @verbatim <!>     WARNING     <!> DEBUG profile detected. The results might be unreliable.  @endverbatim
-!! @n
-!! The second example shows how to use the method  
-!! @link benchmark_warning::warning_maxcalls warning_maxcalls @endlink.
-!! @n
-!! @code{.f90}
-!! use benchmark_warning
-!!
-!! if (display_maxcall_warning) then
-!!      call warning_maxcalls()
-!! end if
-!! @endcode
-!! The output message is the following
-!! @verbatim <!>     WARNING     <!> Maximum number of calls reached for some cases. Steady state may not have been reached for all runs.  @endverbatim
+!! @snippet snippet.f90 systeminfo
 !! @n
 !! <h2>Remarks</h2>
 !! This steps retrieves system information at run time. 
-!! The method was inspired by the paramonte library (https://github.com/cdslaborg/paramonte/blob/main/src/fortran/main/pm_sysInfo.F90)
-!! from AmirShahmoradi. 
-!! It has been simplified and adapted to the needs
+!! The method was inspired by the <a href="https://github.com/cdslaborg/paramonte/blob/main/src/fortran/main/pm_sysInfo.F90">paramonte</a> library
+!! from AmirShahmoradi. It has been simplified and adapted to the needs
+!! @attention The method @link benchmark_systeminfo::get_systeminfo get_systeminfo() @endlink saves system related 
+!! information in a file named `sys.info`. That file is used as cache 
+!! in the subsequent calls. It is usually located next to the running 
+!! program and as such one shall have write permission when using
+!! this function. 
+!! @note If the configuration of the computer changed (os version, hardware,...)
+!! make sure to delete the cache before starting the program again.
 !! @{
 module benchmark_systeminfo
     use benchmark_output_unit
     
-    implicit none
+    implicit none; private
+
+    public :: get_systeminfo, &
+              get_os_type, &
+              os_name
     
+    !> @name Enums
+    !! @{
+    !! <h3>OS_ENUM</h3>
+    !! @cond
     enum, bind(c)
+    !! @endcond
         enumerator :: OS_UNKNOWN = 0
         enumerator :: OS_LINUX   = 1
         enumerator :: OS_MACOS   = 2
@@ -50,15 +41,28 @@ module benchmark_systeminfo
         enumerator :: OS_SOLARIS = 5
         enumerator :: OS_FREEBSD = 6
         enumerator :: OS_OPENBSD = 7
+    !! @cond
     end enum
+    !! @endcond
+    !> @}
+
+    integer, parameter, public :: OS_ENUM = kind(OS_UNKNOWN)
     
     contains
     
+    !> @brief Generate and display a summary of the operating 
+    !!        system and platform specifications. The system information is obtained by first 
+    !!        identifying the operating system and the runtime shell and then calling one of 
+    !!        the following commands:
+    !!        - Darwin (macOS): The commands `uname -a` + `sysctl -a | grep machdep.cpu` + `system_profiler SPHardwareDataType`.
+    !!        - Linux: The commands `uname -a + lscpu` + `cat /proc/cpuinfo`.
+    !!        - Windows: The commands `systeminfo`.
     subroutine get_systeminfo()
         !private
         character(:), allocatable   :: tmpout, output, cmsg
         character(:), allocatable   :: cmd
-        integer :: os, lu, ios
+        integer(OS_ENUM) :: os
+        integer :: lu, ios
         integer :: ierr,  cstat
         character(200) :: line
         logical :: exists
@@ -108,12 +112,12 @@ module benchmark_systeminfo
     end subroutine
     
     !> @brief Returns the OS type.
-    !> @details At first, the environment variable `OS` is checked, which is usually
+    !!        At first, the environment variable `OS` is checked, which is usually
     !! found on Windows. Then, `OSTYPE` is read in and compared with common
     !! names. If this fails too, check the existence of files that can be
     !! found on specific system types only.
-    !> @returns an integer. Returns OS_UNKNOWN if the operating system cannot be determined.
-    integer function get_os_type() result(r)
+    !! @returns an integer(OS_ENUM). Returns OS_UNKNOWN if the operating system cannot be determined.
+    integer(OS_ENUM) function get_os_type() result(r)
         !private        
         character(255)              :: val
         integer                     :: length, rc
@@ -218,21 +222,24 @@ module benchmark_systeminfo
         end if
     end function
     
+    !> @brief Return string describing the OS type flag. 
+    !!        That function was taken from <a href="https://github.com/fortran-lang/fpm/blob/main/src/fpm_environment.f90">fpm</a>
+    !! @returns The name of the OS.
     pure function os_name(os)
-        integer, intent(in) :: os
+        integer(OS_ENUM), intent(in) :: os
         !private
-        character(:), allocatable :: OS_name
+        character(:), allocatable :: os_name
 
         select case (os)
-            case (OS_LINUX);   OS_NAME =  "Linux"
-            case (OS_MACOS);   OS_NAME =  "macOS"
-            case (OS_WINDOWS); OS_NAME =  "Windows"
-            case (OS_CYGWIN);  OS_NAME =  "Cygwin"
-            case (OS_SOLARIS); OS_NAME =  "Solaris"
-            case (OS_FREEBSD); OS_NAME =  "FreeBSD"
-            case (OS_OPENBSD); OS_NAME =  "OpenBSD"
-            case (OS_UNKNOWN); OS_NAME =  "Unknown"
-            case default     ; OS_NAME =  "Unknown"
+            case (OS_LINUX);   os_name =  "Linux"
+            case (OS_MACOS);   os_name =  "macOS"
+            case (OS_WINDOWS); os_name =  "Windows"
+            case (OS_CYGWIN);  os_name =  "Cygwin"
+            case (OS_SOLARIS); os_name =  "Solaris"
+            case (OS_FREEBSD); os_name =  "FreeBSD"
+            case (OS_OPENBSD); os_name =  "OpenBSD"
+            case (OS_UNKNOWN); os_name =  "Unknown"
+            case default     ; os_name =  "Unknown"
         end select
     end function
 end module
