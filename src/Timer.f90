@@ -2,7 +2,7 @@
 !! @brief Returns the actual time in milliseconds.
 !! @par
 !! <h2>Examples</h2>
-!! The following example uses the @ref clock subroutine to get the 
+!! The following example uses the @ref benchmark_timer::clock subroutine to get the 
 !! actual time in milliseconds. 
 !! @n
 !! @snippet snippet.f90 timer
@@ -42,10 +42,10 @@ module benchmark_timer
     
     !> @brief Returns the actual time in milliseconds.
     !! @param[inout] r The parameter containing the clock time in milliseconds
-    !! @param[in] option (optional) clock type. 
+    !! @param[in] option (optional) Clock type. 
     !!
     !! @b Remarks
-    !! @n
+    !!
     !! Possible values are 
     !! - CPUTIME
     !! - DATETIME

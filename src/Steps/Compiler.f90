@@ -72,7 +72,7 @@ module benchmark_steps_compiler
         COMPILER_LFORTRAN
     end enum
     
-    integer, parameter, public :: COMPILER_ENUM = kind(COMPILER_UNKNOWN)
+    integer, parameter, public :: COMPILER_ENUM = kind(COMPILER_UNKNOWN) !< Compiler enum type
     !> @}
 
     !> @class compilerinfo
@@ -95,10 +95,10 @@ module benchmark_steps_compiler
     !! ```
     !! @b Remarks
     type, public :: compilerinfo
-        integer(COMPILER_ENUM) :: id
-        character(20)          :: name
-        character(20)          :: vendor
-        character(20)          :: version
+        integer(COMPILER_ENUM) :: id        !< Compiler ID
+        character(20)          :: name      !< Compiler name
+        character(20)          :: vendor    !< Compiler vendor
+        character(20)          :: version   !< Compiler release version
     end type
     
     !> @interface compiler

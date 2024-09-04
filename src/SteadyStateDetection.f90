@@ -33,7 +33,7 @@ module benchmark_steady_state_detection
     !!        than, then that time instant or point is steady and if greater than, then it is unsteady
     !!        where the aggregation is computed over the window approximating a probability or
     !!        frequency of being at steady-state. 
-    !! @param[in] input sample of real(r8) values
+    !! @param[in] x Sample of real(r8) values
     !! @param[in] offset Index of the first values inside the periodic array x
     !! @param[in] alpha Significance level for the student test.
     !! 
@@ -54,6 +54,8 @@ module benchmark_steady_state_detection
     !! @f]
     !! @f$t_{crit}@f$ is evaluated for a given significance level and a given degree of freedom
     !! using the t-distribution.
+    !!
+    !! @b Remarks
     real(r8) function ssd(x, offset, alpha) result(res)
         real(r8), intent(in)            :: x(:)
         integer, intent(in)             :: offset

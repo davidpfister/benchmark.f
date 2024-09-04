@@ -35,7 +35,7 @@ module benchmark_string
     !! s = string('foo')
     !! ```
     type, public :: string
-        character(:), allocatable :: chars
+        character(:), allocatable :: chars !< Variable length character array
     contains
         procedure, pass(this), public   :: len => string_len
         procedure, pass(lhs), private   :: character_assign_string
@@ -115,7 +115,7 @@ module benchmark_string
     !! @param[in] fmt (optional) The format value
     !!
     !! @b Examples
-    !! ```fortran
+    !! @code{.f90}
     !! pure function to_string(this) result(s)
     !!      class(arg), intent(in) :: this
     !!      character(:), allocatable :: s
@@ -126,10 +126,12 @@ module benchmark_string
     !!          s = str(this%value)
     !!      end if
     !! end function
-    !! ```
+    !! @endcode
     !! @returns A character array corresponding to the 
     !!          character representation of the value 
     !!          argument.
+    !!
+    !! @b Remarks
     pure recursive function str(value, fmt) result(chars)
         class(*), intent(in)               :: value
         character(*), intent(in), optional :: fmt

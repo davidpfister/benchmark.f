@@ -39,6 +39,7 @@ module benchmark_method
     !! At the moment, the @ref method class handles procedures using up to 7 dummy arguments.
     !! <h2>Constructors</h2>
     !! Initializes a new instance of the @ref method class
+    !!
     !! <h3>method(integer, procedure)</h3>
     !! @verbatim type(method) function method(integer nargs, procedure f)@endverbatim
     !! 
@@ -46,10 +47,11 @@ module benchmark_method
     !! @param f The procedure
     !! 
     !! @b Examples
-    !! ```fortran
+    !! @code{.f90}
     !! type(method) :: m
     !!  m = method(2, foo)
-    !! ```
+    !! @endcode
+    !!
     !! <h3>method(procedure, procedure)</h3>
     !! @verbatim type(method) function method(procedure f, procedure caller)@endverbatim
     !! 
@@ -57,22 +59,88 @@ module benchmark_method
     !! @param caller The caller wrapper
     !! 
     !! @b Examples
-    !! ```fortran
+    !! @code{.f90}
     !! type(method) :: m
     !!  m = method(foo)
-    !! ```
+    !! @endcode
+    !!
     !! <h3>method(procedure, class(*), procedure)</h3>
     !! @verbatim type(method) function method(procedure f, class(*) a1, procedure caller)@endverbatim
     !! 
     !! @param f The procedure pointer
-    !! @param[in] args The method argument
-    !! @param caller The caller wrapper
+    !! @param[in] a1 The method argument
+    !! @param caller (optional) The caller wrapper
     !! 
     !! @b Examples
-    !! ```fortran
+    !! @code{.f90}
     !! type(method) :: m
     !!  m = method(foo, arg(1, 'a1'))
-    !! ```
+    !! @endcode
+    !!
+    !! <h3>method(procedure, class(*), class(*), procedure)</h3>
+    !! @verbatim type(method) function method(procedure f, class(*) a1, class(*) a2, procedure caller)@endverbatim
+    !! 
+    !! @param f The procedure pointer
+    !! @param[in] a1 The method argument
+    !! @param[in] a2 The method argument
+    !! @param caller (optional) The caller wrapper
+    !!
+    !! <h3>method(procedure, class(*), class(*), class(*), procedure)</h3>
+    !! @verbatim type(method) function method(procedure f, class(*) a1, class(*) a2, class(*) a3, procedure caller)@endverbatim
+    !! 
+    !! @param f The procedure pointer
+    !! @param[in] a1 The method argument
+    !! @param[in] a2 The method argument
+    !! @param[in] a3 The method argument
+    !! @param caller (optional) The caller wrapper
+    !!
+    !! <h3>method(procedure, class(*), class(*), class(*), class(*), procedure)</h3>
+    !! @verbatim type(method) function method(procedure f, class(*) a1, class(*) a2, class(*) a3, class(*) a4, procedure caller)@endverbatim
+    !! 
+    !! @param f The procedure pointer
+    !! @param[in] a1 The method argument
+    !! @param[in] a2 The method argument
+    !! @param[in] a3 The method argument
+    !! @param[in] a4 The method argument
+    !! @param caller (optional) The caller wrapper
+    !!
+    !! <h3>method(procedure, class(*), class(*), class(*), class(*), class(*), procedure)</h3>
+    !! @verbatim type(method) function method(procedure f, class(*) a1, class(*) a2, class(*) a3, class(*) a4, class(*) a5, procedure caller)@endverbatim
+    !! 
+    !! @param f The procedure pointer
+    !! @param[in] a1 The method argument
+    !! @param[in] a2 The method argument
+    !! @param[in] a3 The method argument
+    !! @param[in] a4 The method argument
+    !! @param[in] a5 The method argument
+    !! @param caller (optional) The caller wrapper
+    !!
+    !! <h3>method(procedure, class(*), class(*), class(*), class(*), class(*), class(*), procedure)</h3>
+    !! @verbatim type(method) function method(procedure f, class(*) a1, class(*) a2, class(*) a3, class(*) a4, class(*) a5, class(*) a6, procedure caller)@endverbatim
+    !! 
+    !! @param f The procedure pointer
+    !! @param[in] a1 The method argument
+    !! @param[in] a2 The method argument
+    !! @param[in] a3 The method argument
+    !! @param[in] a4 The method argument
+    !! @param[in] a5 The method argument
+    !! @param[in] a6 The method argument
+    !! @param caller (optional) The caller wrapper
+    !!
+    !! <h3>method(procedure, class(*), class(*), class(*), class(*), class(*), class(*), class(*), procedure)</h3>
+    !! @verbatim type(method) function method(procedure f, class(*) a1, class(*) a2, class(*) a3, class(*) a4, class(*) a5, class(*) a6, class(*) a7, procedure caller)@endverbatim
+    !! 
+    !! @param f The procedure pointer
+    !! @param[in] a1 The method argument
+    !! @param[in] a2 The method argument
+    !! @param[in] a3 The method argument
+    !! @param[in] a4 The method argument
+    !! @param[in] a5 The method argument
+    !! @param[in] a6 The method argument
+    !! @param[in] a7 The method argument
+    !! @param caller (optional) The caller wrapper
+    !!
+    !! @b Remarks
     type :: method
         private
         integer, public                         :: nargs !< Number of dummy arguments
@@ -265,22 +333,24 @@ module benchmark_method
         ADD_ARGUMENT(7)
     end function
 
-    !! @brief Bound procedure to invoke a method
+    !> @brief Bound procedure to invoke a method
     !! 
-    !! @param[in] this The bound type
+    !! @param[in] this The type bound to the method
     !!
     !! @b Examples
-    !! ```fortran
+    !! @code{.f90}
     !! type(method) :: mtd
     !!
     !! mtd = method(f)
     !! call mtd%invoke()
-    !! ```
+    !! @endcode
     !! @b Remarks
     !! 
     !! @note This function is either used with a 0-arguments
     !! method, or with any method whose arguments have been set in the 
     !! constructor.
+    !!
+    !! @b Remarks
     subroutine invoke_a0(this)
         class(method), intent(inout)    :: this
         select case (this%nargs)
@@ -400,29 +470,30 @@ module benchmark_method
         end select
     end subroutine
 
-    !! @brief Bound procedure to invoke a method
+    !> @brief Bound procedure to invoke a method
     !! 
-    !! @param[in] this The bound type
+    !! @param[in] this The type bound to the method
     !! @param[in] a1 dummy argument
     !!
     !! @b Examples
     !!
     !! The first example demonstrate how to invoke the method 
     !! by passing the arguments to the `invoke` procedure.
-    !! ```fortran
+    !! @code{.f90}
     !! type(method) :: mtd
     !!
-    !! mtd = method(7, f)
+    !! mtd = method(1, f)
     !! call mtd%invoke(arg(a1, 'a1'))
-    !! ```
+    !! @endcode
     !! Alternatively, on can also set the arguments directly from 
     !! the method constructor.
-    !! ```fortran
+    !! @code{.f90}
     !! type(method) :: mtd
     !!
     !! mtd = method(f, arg(a1, 'a1'))
     !! call mtd%invoke()
-    !! ```
+    !! @endcode
+    !!
     !! @b Remarks
     subroutine invoke_a1(this, a1)
         class(method), intent(inout)    :: this
@@ -440,9 +511,9 @@ module benchmark_method
         end associate
     end subroutine
     
-    !! @brief Bound procedure to invoke a method
+    !> @brief Bound procedure to invoke a method
     !! 
-    !! @param[in] this The bound type
+    !! @param[in] this The type bound to the method
     !! @param[in] a1 dummy argument
     !! @param[in] a2 dummy argument
     !!
@@ -450,20 +521,21 @@ module benchmark_method
     !!
     !! The first example demonstrate how to invoke the method 
     !! by passing the arguments to the `invoke` procedure.
-    !! ```fortran
+    !! @code{.f90}
     !! type(method) :: mtd
     !!
-    !! mtd = method(7, f)
+    !! mtd = method(2, f)
     !! call mtd%invoke(arg(a1, 'a1'), arg(a2, 'a2'))
-    !! ```
+    !! @endcode
     !! Alternatively, on can also set the arguments directly from 
     !! the method constructor.
-    !! ```fortran
+    !! @code{.f90}
     !! type(method) :: mtd
     !!
     !! mtd = method(f, arg(a1, 'a1'), arg(a2, 'a2'))
     !! call mtd%invoke()
-    !! ```
+    !! @endcode
+    !!
     !! @b Remarks
     subroutine invoke_a2(this, a1, a2)
         class(method), intent(inout)    :: this
@@ -482,9 +554,9 @@ module benchmark_method
         end associate
     end subroutine
     
-    !! @brief Bound procedure to invoke a method
+    !> @brief Bound procedure to invoke a method
     !! 
-    !! @param[in] this The bound type
+    !! @param[in] this The type bound to the method
     !! @param[in] a1 dummy argument
     !! @param[in] a2 dummy argument
     !! @param[in] a3 dummy argument
@@ -493,20 +565,21 @@ module benchmark_method
     !!
     !! The first example demonstrate how to invoke the method 
     !! by passing the arguments to the `invoke` procedure.
-    !! ```fortran
+    !! @code{.f90}
     !! type(method) :: mtd
     !!
-    !! mtd = method(7, f)
+    !! mtd = method(3, f)
     !! call mtd%invoke(arg(a1, 'a1'), arg(a2, 'a2'), arg(a3, 'a3'))
-    !! ```
+    !! @endcode
     !! Alternatively, on can also set the arguments directly from 
     !! the method constructor.
-    !! ```fortran
+    !! @code{.f90}
     !! type(method) :: mtd
     !!
     !! mtd = method(f, arg(a1, 'a1'), arg(a2, 'a2'), arg(a3, 'a3'))
     !! call mtd%invoke()
-    !! ```
+    !! @endcode
+    !!
     !! @b Remarks
     subroutine invoke_a3(this, a1, a2, a3)
         class(method), intent(inout)    :: this
@@ -528,9 +601,9 @@ module benchmark_method
         end associate
     end subroutine
     
-    !! @brief Bound procedure to invoke a method
+    !> @brief Bound procedure to invoke a method
     !! 
-    !! @param[in] this The bound type
+    !! @param[in] this The type bound to the method
     !! @param[in] a1 dummy argument
     !! @param[in] a2 dummy argument
     !! @param[in] a3 dummy argument
@@ -540,22 +613,23 @@ module benchmark_method
     !!
     !! The first example demonstrate how to invoke the method 
     !! by passing the arguments to the `invoke` procedure.
-    !! ```fortran
+    !! @code{.f90}
     !! type(method) :: mtd
     !!
-    !! mtd = method(7, f)
+    !! mtd = method(4, f)
     !! call mtd%invoke(arg(a1, 'a1'), arg(a2, 'a2'), arg(a3, 'a3'), &
     !!                 arg(a4, 'a4'))
-    !! ```
+    !! @endcode
     !! Alternatively, on can also set the arguments directly from 
     !! the method constructor.
-    !! ```fortran
+    !! @code{.f90}
     !! type(method) :: mtd
     !!
     !! mtd = method(f, arg(a1, 'a1'), arg(a2, 'a2'), arg(a3, 'a3'), &
     !!                 arg(a4, 'a4'))
     !! call mtd%invoke()
-    !! ```
+    !! @endcode
+    !!
     !! @b Remarks
     subroutine invoke_a4(this, a1, a2, a3, a4)
         class(method), intent(inout)    :: this
@@ -579,9 +653,9 @@ module benchmark_method
         end associate
     end subroutine
     
-    !! @brief Bound procedure to invoke a method
+    !> @brief Bound procedure to invoke a method
     !! 
-    !! @param[in] this The bound type
+    !! @param[in] this The type bound to the method
     !! @param[in] a1 dummy argument
     !! @param[in] a2 dummy argument
     !! @param[in] a3 dummy argument
@@ -592,22 +666,23 @@ module benchmark_method
     !!
     !! The first example demonstrate how to invoke the method 
     !! by passing the arguments to the `invoke` procedure.
-    !! ```fortran
+    !! @code{.f90}
     !! type(method) :: mtd
     !!
-    !! mtd = method(7, f)
+    !! mtd = method(5, f)
     !! call mtd%invoke(arg(a1, 'a1'), arg(a2, 'a2'), arg(a3, 'a3'), &
     !!                 arg(a4, 'a4'), arg(a5, 'a5'))
-    !! ```
+    !! @endcode
     !! Alternatively, on can also set the arguments directly from 
     !! the method constructor.
-    !! ```fortran
+    !! @code{.f90}
     !! type(method) :: mtd
     !!
     !! mtd = method(f, arg(a1, 'a1'), arg(a2, 'a2'), arg(a3, 'a3'), &
     !!                 arg(a4, 'a4'), arg(a5, 'a5'))
     !! call mtd%invoke()
-    !! ```
+    !! @endcode
+    !!
     !! @b Remarks
     subroutine invoke_a5(this, a1, a2, a3, a4, a5)
         class(method), intent(inout)    :: this
@@ -633,9 +708,9 @@ module benchmark_method
         end associate
     end subroutine
     
-    !! @brief Bound procedure to invoke a method
+    !> @brief Bound procedure to invoke a method
     !! 
-    !! @param[in] this The bound type
+    !! @param[in] this The type bound to the method
     !! @param[in] a1 dummy argument
     !! @param[in] a2 dummy argument
     !! @param[in] a3 dummy argument
@@ -647,22 +722,23 @@ module benchmark_method
     !!
     !! The first example demonstrate how to invoke the method 
     !! by passing the arguments to the `invoke` procedure.
-    !! ```fortran
+    !! @code{.f90}
     !! type(method) :: mtd
     !!
-    !! mtd = method(7, f)
+    !! mtd = method(6, f)
     !! call mtd%invoke(arg(a1, 'a1'), arg(a2, 'a2'), arg(a3, 'a3'), &
     !!                 arg(a4, 'a4'), arg(a5, 'a5'), arg(a6, 'a6'))
-    !! ```
+    !! @endcode
     !! Alternatively, on can also set the arguments directly from 
     !! the method constructor.
-    !! ```fortran
+    !! @code{.f90}
     !! type(method) :: mtd
     !!
     !! mtd = method(f, arg(a1, 'a1'), arg(a2, 'a2'), arg(a3, 'a3'), &
     !!                 arg(a4, 'a4'), arg(a5, 'a5'), arg(a6, 'a6'))
     !! call mtd%invoke()
-    !! ```
+    !! @endcode
+    !!
     !! @b Remarks
     subroutine invoke_a6(this, a1, a2, a3, a4, a5, a6)
         class(method), intent(inout)    :: this
@@ -692,7 +768,7 @@ module benchmark_method
     
     !> @brief Bound procedure to invoke a method
     !! 
-    !! @param[in] this The bound type
+    !! @param[in] this The type bound to the method
     !! @param[in] a1 dummy argument
     !! @param[in] a2 dummy argument
     !! @param[in] a3 dummy argument
@@ -705,22 +781,23 @@ module benchmark_method
     !!
     !! The first example demonstrate how to invoke the method 
     !! by passing the arguments to the `invoke` procedure.
-    !! ```fortran
+    !! @code{.f90}
     !! type(method) :: mtd
     !!
     !! mtd = method(7, f)
     !! call mtd%invoke(arg(a1, 'a1'), arg(a2, 'a2'), arg(a3, 'a3'), &
     !!                 arg(a4, 'a4'), arg(a5, 'a5'), arg(a6, 'a6'), arg(a7, 'a7'))
-    !! ```
+    !! @endcode
     !! Alternatively, on can also set the arguments directly from 
     !! the method constructor.
-    !! ```fortran
+    !! @code{.f90}
     !! type(method) :: mtd
     !!
     !! mtd = method(f, arg(a1, 'a1'), arg(a2, 'a2'), arg(a3, 'a3'), &
     !!                 arg(a4, 'a4'), arg(a5, 'a5'), arg(a6, 'a6'), arg(a7, 'a7'))
     !! call mtd%invoke()
-    !! ```
+    !! @endcode
+    !!
     !! @b Remarks
     subroutine invoke_a7(this, a1, a2, a3, a4, a5, a6, a7)
         class(method), intent(inout)    :: this
@@ -752,9 +829,9 @@ module benchmark_method
     
     !> @brief Assignment overloading. Assign a method to another 
     !!        method
-    !! @param[inout] lhs type(method)
-    !! @param[in] rhs type(method)
-    !! 
+    !! @param[inout] lhs The target method
+    !! @param[in] rhs The source method
+    !!
     !! @b Remarks
     subroutine method_assign_method(lhs, rhs)
         class(method), intent(inout)  :: lhs

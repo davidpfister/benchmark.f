@@ -1,4 +1,4 @@
-!> @defgroup group_benchmark benchmark_library
+!> @defgroup group_benchmark_library benchmark_library
 !> @brief Benchmark library module
 module benchmark_library
     use, intrinsic :: iso_c_binding
@@ -20,15 +20,15 @@ module benchmark_library
     class(workflow), pointer                :: current
 
     !> @class runner
-    !! @ingroup group_benchmark
-    !! @brief Provides properties and instance methods for the execution 
+    !! @ingroup group_benchmark_library
+    !> @brief Provides properties and instance methods for the execution 
     !!        a benchmarking run. The @ref runner class extends the base
     !!        class @link benchmark_options::runner_options runner_options @endlink.
     !! <h2>Examples</h2>
     !! The following examples demonstrate some of the main members of the @ref runner. 
     !! @n
     !! The first example shows a simple benchmark of the methods `foo` and `bar`
-    !! passing two dummy arguments. This example make use of the preprocessing macros
+    !! passing two Dummy arguments. This example make use of the preprocessing macros
     !! found in the include file `benchmark.inc`. 
     !! @n
     !! @snippet snippet.f90 benchmark_ex1
@@ -82,16 +82,29 @@ module benchmark_library
                                   benchmark_a5, &
                                   benchmark_a6, &
                                   benchmark_a7
-        procedure, pass(this), public       :: write => benchmark_save
-        procedure, pass(this), public       :: read => benchmark_load 
+        procedure, pass(this), public       :: write => benchmark_write
+        procedure, pass(this), public       :: read => benchmark_read 
         procedure, pass(this), public       :: dispose
         final :: finalize
     end type
 
 contains
 
-    !> @brief Load
-    subroutine benchmark_load(this, path)
+    !> @brief Read runner options from namelist
+    !! 
+    !! @b Example
+    !!
+    !! @code{.f90}
+    !! use benchmark_kinds
+    !! use benchmark_library
+    !!    
+    !! type(runner) :: br
+    !!
+    !! call br2%read('benchmark.nml')
+    !! @endcode
+    !!
+    !! @b Remarks
+    subroutine benchmark_read(this, path)
         class(runner), intent(inout)    :: this
         character(*), intent(in)        :: path
         !private
@@ -108,8 +121,46 @@ contains
         end if
     end subroutine
     
-    !> @brief Save
-    subroutine benchmark_save(this, path)
+    !> @brief Write runner options to namelist
+    !! 
+    !! @b Example
+    !!
+    !! @code{.f90}
+    !! use benchmark_kinds
+    !! use benchmark_library
+    !!    
+    !! type(runner) :: br
+    !! integer :: lu
+    !!
+    !! br%maxcalls = 10
+    !! br%csv_unit = -10
+    !! br%mintime = 50_r8
+    !! br%maxtime = 100_r8
+    !! br%offset = 20.0_r8
+    !! br%sampling_window = 10
+    !! br%ssd_threshold = 0.025_r8
+    !!
+    !! call br%write('benchmark.nml')
+    !! @endcode
+    !!
+    !! The output file is a namelist. It looks as follows
+    !! ```
+    !! &CONFIG
+    !!  BENCH%MAXCALLS=10         ,
+    !!  BENCH%CSV_UNIT=-10        ,
+    !!  BENCH%MINTIME=  50.000000000000000     ,
+    !!  BENCH%MAXTIME=  100.00000000000000     ,
+    !!  BENCH%OFFSET=  20.000000000000000     ,
+    !!  BENCH%SAMPLING_WINDOW=10         ,
+    !!  BENCH%SSD_THRESHOLD=  2.5000000000000001E-002,
+    !!  BENCH%SKIP_PRELUDE=F,
+    !!  BENCH%COUNT=0          ,
+    !!  BENCH%NAME=',
+    !!  /
+    !! ```
+    !!
+    !! @b Remarks
+    subroutine benchmark_write(this, path)
         class(runner), intent(inout)    :: this
         character(*), intent(in)        :: path
         !private
@@ -122,17 +173,44 @@ contains
         end if
     end subroutine
     
-    !! @brief Set the function caller to wrap function call.
+    !> @brief Set the function caller to wrap function call.
     !! 
-    !! @param[in] this The bound type
-    !! @param caller function wrapper
+    !! @param[in] this The type bound to the method
+    !! @param caller Function wrapper
     !!
     !! @b Examples
+    !! The following example demonstrate how to use the `caller` wrapper. 
+    !! By doing so, one can enforce a specific interface to the procedure 
+    !! argument. This is especially handy when benchmarking functions or 
+    !! requiring `inout` and `out` intents
     !! ```fortran
     !! type(runner) :: br
     !!
-    !! call br%run()
+    !! call br%set_caller(foo)
     !! ```
+    !! Where `foo` is defined as follows.
+    !! ```fortran
+    !! subroutine foo(f, a)
+    !!     procedure(foo_x) :: f
+    !!     type(string), intent(in) :: a
+    !!    
+    !!     block
+    !!         character(len(a)) :: res
+    !!            
+    !!         res = f(a%chars)
+    !!     end block
+    !! end subroutine
+    !! ```
+    !! With the following interface
+    !! ```fortran
+    !! interface
+    !!     pure function foo_x(str) result(res)
+    !!         character(*), intent(in)   :: str 
+    !!         character(len(str)) :: res
+    !!     end function
+    !! end interface
+    !! ```
+    !! @b Remarks
     subroutine set_caller(this, caller)
         class(runner), intent(inout) :: this
         procedure() :: caller
@@ -140,9 +218,10 @@ contains
         this%caller => caller
     end subroutine 
     
-    !! @brief Bound procedure to run the benchmark
+    !> @brief Bound procedure to run the benchmark
     !! 
-    !! @param[in] this The bound type
+    !! @param[in] this The type bound to the method
+    !! @param f The procedure to benchmark
     !!
     !! @b Examples
     !! ```fortran
@@ -150,6 +229,7 @@ contains
     !!
     !! call br%run()
     !! ```
+    !! @b Remarks
     subroutine benchmark_void(this, f)
         class(runner), intent(inout)        :: this
         procedure()                         :: f
@@ -172,10 +252,11 @@ contains
         
     end subroutine
 
-    !! @brief Bound procedure to run the benchmark
+    !> @brief Bound procedure to run the benchmark
     !! 
-    !! @param[in] this The bound type
-    !! @param[in] a1 dummy argument
+    !! @param[in] this The type bound to the method
+    !! @param[in] a1 Dummy argument
+    !! @param f The procedure to benchmark
     !!
     !! @b Examples
     !! ```fortran
@@ -183,6 +264,7 @@ contains
     !!
     !! call br%run('a1')
     !! ```
+    !! @b Remarks
     subroutine benchmark_a1(this, a1, f)
         class(runner), intent(inout)        :: this
         class(*), intent(in)                :: a1
@@ -204,11 +286,12 @@ contains
         current => current%run()
     end subroutine
     
-    !! @brief Bound procedure to run the benchmark
+    !> @brief Bound procedure to run the benchmark
     !! 
-    !! @param[in] this The bound type
-    !! @param[in] a1 dummy argument
-    !! @param[in] a2 dummy argument
+    !! @param[in] this The type bound to the method
+    !! @param[in] a1 Dummy argument
+    !! @param[in] a2 Dummy argument
+    !! @param f The procedure to benchmark
     !!
     !! @b Examples
     !! ```fortran
@@ -216,6 +299,7 @@ contains
     !!
     !! call br%run('a1', 'a2')
     !! ```
+    !! @b Remarks
     subroutine benchmark_a2(this, a1, a2, f)
         class(runner), intent(inout)        :: this
         class(*), intent(in)                :: a1, a2
@@ -238,12 +322,13 @@ contains
         current => current%run()
     end subroutine
     
-    !! @brief Bound procedure to run the benchmark
+    !> @brief Bound procedure to run the benchmark
     !! 
-    !! @param[in] this The bound type
-    !! @param[in] a1 dummy argument
-    !! @param[in] a2 dummy argument
-    !! @param[in] a3 dummy argument
+    !! @param[in] this The type bound to the method
+    !! @param[in] a1 Dummy argument
+    !! @param[in] a2 Dummy argument
+    !! @param[in] a3 Dummy argument
+    !! @param f The procedure to benchmark
     !!
     !! @b Examples
     !! ```fortran
@@ -251,6 +336,7 @@ contains
     !!
     !! call br%run('a1', 'a2', 'a3')
     !! ```
+    !! @b Remarks
     subroutine benchmark_a3(this, a1, a2, a3, f)
         class(runner), intent(inout)        :: this
         class(*), intent(in)                :: a1, a2, a3
@@ -273,13 +359,14 @@ contains
         current => current%run()
     end subroutine
     
-    !! @brief Bound procedure to run the benchmark
+    !> @brief Bound procedure to run the benchmark
     !! 
-    !! @param[in] this The bound type
-    !! @param[in] a1 dummy argument
-    !! @param[in] a2 dummy argument
-    !! @param[in] a3 dummy argument
-    !! @param[in] a4 dummy argument
+    !! @param[in] this The type bound to the method
+    !! @param[in] a1 Dummy argument
+    !! @param[in] a2 Dummy argument
+    !! @param[in] a3 Dummy argument
+    !! @param[in] a4 Dummy argument
+    !! @param f The procedure to benchmark
     !!
     !! @b Examples
     !! ```fortran
@@ -287,6 +374,7 @@ contains
     !!
     !! call br%run('a1', 'a2', 'a3', 'a4')
     !! ```
+    !! @b Remarks
     subroutine benchmark_a4(this, a1, a2, a3, a4, f)
         class(runner), intent(inout)        :: this
         class(*), intent(in)                :: a1, a2, a3, a4
@@ -310,14 +398,15 @@ contains
         current => current%run()
     end subroutine
     
-    !! @brief Bound procedure to run the benchmark
+    !> @brief Bound procedure to run the benchmark
     !! 
-    !! @param[in] this The bound type
-    !! @param[in] a1 dummy argument
-    !! @param[in] a2 dummy argument
-    !! @param[in] a3 dummy argument
-    !! @param[in] a4 dummy argument
-    !! @param[in] a5 dummy argument
+    !! @param[in] this The type bound to the method
+    !! @param[in] a1 Dummy argument
+    !! @param[in] a2 Dummy argument
+    !! @param[in] a3 Dummy argument
+    !! @param[in] a4 Dummy argument
+    !! @param[in] a5 Dummy argument
+    !! @param f The procedure to benchmark
     !!
     !! @b Examples
     !! ```fortran
@@ -325,6 +414,7 @@ contains
     !!
     !! call br%run('a1', 'a2', 'a3', 'a4', 'a5')
     !! ```
+    !! @b Remarks
     subroutine benchmark_a5(this, a1, a2, a3, a4, a5, f)
         class(runner), intent(inout)        :: this
         class(*), intent(in)                :: a1, a2, a3, a4, a5
@@ -348,15 +438,16 @@ contains
         current => current%run()
     end subroutine
     
-    !! @brief Bound procedure to run the benchmark
+    !> @brief Bound procedure to run the benchmark
     !! 
-    !! @param[in] this The bound type
-    !! @param[in] a1 dummy argument
-    !! @param[in] a2 dummy argument
-    !! @param[in] a3 dummy argument
-    !! @param[in] a4 dummy argument
-    !! @param[in] a5 dummy argument
-    !! @param[in] a6 dummy argument
+    !! @param[in] this The type bound to the method
+    !! @param[in] a1 Dummy argument
+    !! @param[in] a2 Dummy argument
+    !! @param[in] a3 Dummy argument
+    !! @param[in] a4 Dummy argument
+    !! @param[in] a5 Dummy argument
+    !! @param[in] a6 Dummy argument
+    !! @param f The procedure to benchmark
     !!
     !! @b Examples
     !! ```fortran
@@ -364,6 +455,7 @@ contains
     !!
     !! call br%run('a1', 'a2', 'a3', 'a4', 'a5', 'a6')
     !! ```
+    !! @b Remarks
     subroutine benchmark_a6(this, a1, a2, a3, a4, a5, a6, f)
         class(runner), intent(inout)        :: this
         class(*), intent(in)                :: a1, a2, a3, a4, a5, a6
@@ -387,16 +479,17 @@ contains
         current => current%run()
     end subroutine
     
-    !! @brief Bound procedure to run the benchmark
+    !> @brief Bound procedure to run the benchmark
     !! 
-    !! @param[in] this The bound type
-    !! @param[in] a1 dummy argument
-    !! @param[in] a2 dummy argument
-    !! @param[in] a3 dummy argument
-    !! @param[in] a4 dummy argument
-    !! @param[in] a5 dummy argument
-    !! @param[in] a6 dummy argument
-    !! @param[in] a7 dummy argument
+    !! @param[in] this The type bound to the method
+    !! @param[in] a1 Dummy argument
+    !! @param[in] a2 Dummy argument
+    !! @param[in] a3 Dummy argument
+    !! @param[in] a4 Dummy argument
+    !! @param[in] a5 Dummy argument
+    !! @param[in] a6 Dummy argument
+    !! @param[in] a7 Dummy argument
+    !! @param f The procedure to benchmark
     !!
     !! @b Examples
     !! ```fortran
@@ -404,6 +497,8 @@ contains
     !!
     !! call br%run('a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7')
     !! ```
+    !!
+    !! @b Remarks
     subroutine benchmark_a7(this, a1, a2, a3, a4, a5, a6, a7, f)
         class(runner), intent(inout)        :: this
         class(*), intent(in)                :: a1, a2, a3, a4, a5, a6, a7
@@ -542,8 +637,10 @@ contains
     end function
     
     !> @brief Dispose resources associated with 
-    !!        the bound type.
+    !!        The type bound to the method.
     !! @param[inout] this The type bound to the method
+    !!
+    !! @b Remarks
     subroutine dispose(this)
         class(runner), intent(inout) :: this
         

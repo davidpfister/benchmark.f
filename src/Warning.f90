@@ -45,6 +45,8 @@ module benchmark_warning
     contains
     
     !> @brief Warning triggered when a DEBUG profile is detected.
+    !!
+    !! @b Remarks
     subroutine warning_debug() 
         write (output_unit, '(A)') new_line('A'), &
                             &                '                                  <!>     WARNING     <!>'
@@ -53,7 +55,10 @@ module benchmark_warning
     end subroutine
     
     !> @brief Warning triggered when the maximum number of function calls
-    !!          is readched. The maximum value can be set in @link benchmark_options::runner_options runner_options @endlink
+    !!        is readched. The maximum value can be set in 
+    !!        @link benchmark_options::runner_options runner_options @endlink
+    !!
+    !! @b Remarks
     subroutine warning_maxcalls()
         write (output_unit, '(A)') new_line('A'), &
                             &                '                                  <!>     WARNING     <!>'

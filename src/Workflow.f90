@@ -37,10 +37,10 @@ module benchmark_workflow
     !! @param[in] a The action to be performed
     !! 
     !! @b Examples
-    !! ```fortran
+    !! @code{.f90}
     !! !foo() is a subroutine of type subroutine work(class(workflow))
     !!  wf = workflow(foo())
-    !! ```
+    !! @endcode
     !! @b Remarks
     type, public :: workflow
         private
@@ -80,7 +80,9 @@ module benchmark_workflow
     !> @brief Add a step to an existing workflow, described by a
     !!        workflow object.
     !! @param[inout] this The type bound to the method
-    !! @param[in] w the workflow to be added
+    !! @param[in] w The workflow to be added
+    !!
+    !! @b Remarks
     subroutine workflow_add(this, w)
         class(workflow), intent(inout), target :: this
         class(workflow), intent(in)             :: w
@@ -100,7 +102,9 @@ module benchmark_workflow
     !!        action object. The action is a s procedure implementing
     !!        the @link benchmark_workflow::work work@endlink interface
     !! @param[inout] this The type bound to the method
-    !! @param[in] a the action to be added
+    !! @param[in] a The action to be added
+    !!
+    !! @b Remarks
     subroutine workflow_add_action(this, a)
         class(workflow), intent(inout), target :: this
         procedure(work) :: a
@@ -121,8 +125,10 @@ module benchmark_workflow
     !!        action object. The action is a s procedure implementing
     !!        the @link benchmark_workflow::work work@endlink interface
     !! @param[inout] this The type bound to the method
-    !! @return a pointer of type class(@ref workflow), pointing
+    !! @return A pointer of type class(@ref workflow), pointing
     !!         to the next available step
+    !!
+    !! @b Remarks
     function workflow_run(this) result(p)
         class(workflow), intent(inout), target :: this
         !private
@@ -145,14 +151,15 @@ module benchmark_workflow
     !> @brief Dispose resources associated with 
     !!        the bound type.
     !! @param[inout] this The type bound to the method
+    !!
+    !! @b Remarks
     subroutine dispose(this)
         class(workflow), intent(inout) :: this
         
         call finalize(this)
     end subroutine
 
-    !> @brief Type finalizer
-    !! @param[inout] this The type bound to the method
+    !> @private
     recursive subroutine finalize(this)
         type(workflow), intent(inout) :: this
         

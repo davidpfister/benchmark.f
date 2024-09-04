@@ -31,13 +31,12 @@ module benchmark_output_unit
     !! <h3>output()</h3>
     !! @verbatim type(output) :: o @endverbatim
     !! 
-    !! 
     !! @b Examples
-    !! ```fortran
+    !! @code{.f90}
     !! use benchmark_output_unit
     !!
     !! type(output) :: o
-    !! ```
+    !! @endcode
     !! @b Remarks
     type, public :: output
     contains
@@ -51,12 +50,8 @@ module benchmark_output_unit
     contains
     
     !> @brief Overloading of the assigment procedure.
-    !! @param[inout] lhs class(output)
-    !! @param[in] rhs integer
-    !!
-    !! @b Remarks
-    !! 
-    !! The value of lhs is not used and only the static variable @ref output will be used. 
+    !! @param[inout] lhs The output variable
+    !! @param[in] rhs Integer value
     !! 
     !! @b Examples
     !! 
@@ -68,6 +63,10 @@ module benchmark_output_unit
     !! prop = unit
     !! if (output_unit /= 15) stop
     !! @endcode
+    !!
+    !! @b Remarks
+    !! 
+    !! The value of lhs is not used and only the static variable @ref output will be used. 
     subroutine iprop_equals_int(lhs, rhs)
        class(output), intent(inout) :: lhs
        integer, intent(in) :: rhs
@@ -76,12 +75,8 @@ module benchmark_output_unit
     end subroutine
     
     !> @brief Overloading of the assigment procedure.
-    !! @param[inout] lhs integer
-    !! @param[in] rhs class(output)
-    !!
-    !! @b Remarks
-    !! 
-    !! The value of rhs is not used and only the static variable @ref output will be used. 
+    !! @param[inout] lhs Integer value
+    !! @param[in] rhs The output variable
     !! 
     !! @b Examples
     !! 
@@ -94,6 +89,10 @@ module benchmark_output_unit
     !! unit = prop
     !! if (unit /= stdout) stop
     !! @endcode
+    !!
+    !! @b Remarks
+    !! 
+    !! The value of rhs is not used and only the static variable @ref output will be used. 
     subroutine int_equals_iprop(lhs, rhs)
        integer, intent(inout) :: lhs
        class(output), intent(in) :: rhs

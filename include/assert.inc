@@ -28,16 +28,7 @@
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   */
 # define ESCAPE achar(27)
-# ifdef __GFORTRAN__
-#    define MACRO_SAME(A) A
-#    define MACRO_CAT2(A,B) MACRO_SAME(A)B
-#    define MACRO_CAT3(A,B,C) MACRO_CAT2(A,B)C
-#    define MACRO_STRINGIFY(A) "A"
-# else
-#    define MACRO_CAT2(A,B) A ## B
-#    define MACRO_CAT3(A,B,C) A ## B ## C
-#    define MACRO_STRINGIFY(A) #A
-# endif
+#include <concat.inc>
 # define LOWERCASE(sin, sout)                                          \
 do i = 1, len(sin);                                                    \
 j = iachar(sin(i:i));                                                  \
@@ -373,35 +364,35 @@ end block;
   */
 # define EXPECT_FLOAT_EQ(val1, val2) \
 START_BLOCK(EXPECT_FLOAT_EQ) \
-if(abs(real(val1, real32) - real(val2, real32)) .le. epsilon(real(val2, real32))) then; \
+if(abs(real(val1, real32) - real(val2, real32)) .le. 2.0*spacing(max(abs(real(val1, real32)),abs(real(val2, real32))))) then; \
 END_BLOCK(val2, val1, .false.)
 # define EXPECT_FLOAT_NE(val1, val2) \
 START_BLOCK(EXPECT_FLOAT_NE) \
-if(abs(real(val1, real32) - real(val2, real32)) .gt. epsilon(real(val2, real32))) then; \
+if(abs(real(val1, real32) - real(val2, real32)) .gt. 2.0*spacing(max(abs(real(val1, real32)),abs(real(val2, real32))))) then; \
 END_BLOCK(val2, val1, .false.)
 # define EXPECT_DOUBLE_EQ(val1, val2) \
 START_BLOCK(EXPECT_DOUBLE_EQ) \
-if(dabs(real(val1, real64) - real(val2, real64)) .le. epsilon(real(val2, real64))) then; \
+if(abs(real(val1, real64) - real(val2, real64)) .le. 2.0*spacing(max(abs(real(val1, real64)),abs(real(val2, real64))))) then; \
 END_BLOCK(val2, val1, .false.)
 # define EXPECT_DOUBLE_NE(val1, val2) \
 START_BLOCK(EXPECT_DOUBLE_NE) \
-if(dabs(real(val1, real64) - real(val2, real64)) .gt. epsilon(real(val2, real64))) then; \
+if(abs(real(val1, real64) - real(val2, real64)) .gt. 2.0*spacing(max(abs(real(val1, real64)),abs(real(val2, real64))))) then; \
 END_BLOCK(val2, val1, .false.)
 # define ASSERT_FLOAT_EQ(val1, val2) \
 START_BLOCK(ASSERT_FLOAT_EQ) \
-if(abs(real(val1, real32) - real(val2, real32)) .le. epsilon(real(val2, real32))) then; \
+if(abs(real(val1, real32) - real(val2, real32)) .le. 2.0*spacing(max(abs(real(val1, real32)),abs(real(val2, real32))))) then; \
 END_BLOCK(val2, val1, .true.)
 # define ASSERT_FLOAT_NE(val1, val2) \
 START_BLOCK(ASSERT_FLOAT_NE) \
-if(abs(real(val1, real32) - real(val2, real32)) .gt. epsilon(real(val2, real32))) then; \
+if(abs(real(val1, real32) - real(val2, real32)) .gt. 2.0*spacing(max(abs(real(val1, real32)),abs(real(val2, real32))))) then; \
 END_BLOCK(val2, val1, .true.)
 # define ASSERT_DOUBLE_EQ(val1, val2) \
 START_BLOCK(ASSERT_DOUBLE_EQ) \
-if(dabs(real(val1, real64) - real(val2, real64)) .le. epsilon(real(val2, real64))) then; \
+if(abs(real(val1, real64) - real(val2, real64)) .le. 2.0*spacing(max(abs(real(val1, real64)),abs(real(val2, real64))))) then; \
 END_BLOCK(val2, val1, .true.)
 # define ASSERT_DOUBLE_NE(val1, val2) \
 START_BLOCK(ASSERT_DOUBLE_NE) \
-if(dabs(real(val1, real64) - real(val2, real64)) .gt. epsilon(real(val2, real64))) then; \
+if(abs(real(val1, real64) - real(val2, real64)) .gt. 2.0*spacing(max(abs(real(val1, real64)),abs(real(val2, real64))))) then; \
 END_BLOCK(val2, val1, .true.)
 # define EXPECT_NEAR(val1, val2, abs_error) \
 START_BLOCK(EXPECT_NEAR) \

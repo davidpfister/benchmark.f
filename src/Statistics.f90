@@ -61,15 +61,11 @@ module benchmark_statistics
     contains
     
     !> @brief Compute mean, standard deviation and 
-    !! variance of a given vector.
+    !! variance of a Type bound to the method
     !! @param[inout] this bound argument
-    !! @param[in] y sample array
+    !! @param[in] y Sample array
     !!
-    !! @b Remarks @n
-    !! 
-    !! @note At the moment it only works for real(r8) arrays
-    !!
-    !! @b Examples @n
+    !! @b Examples
     !! 
     !! @code{.f90}
     !! type(stats) :: s
@@ -79,6 +75,10 @@ module benchmark_statistics
     !! call random_number(array)
     !! call s%compute(array)
     !! @endcode
+    !!
+    !! @b Remarks
+    !! 
+    !! @note At the moment it only works for real(r8) arrays
     subroutine stats_compute(this, y)
         class(stats), intent(inout) :: this
         real(r8), intent(in) :: y(:)

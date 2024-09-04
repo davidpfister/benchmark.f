@@ -3,7 +3,7 @@
 TESTPROGRAM(main)
 
     TEST(test_arguments)
-        use benchmark_method_argument
+        use benchmark_argument
         use benchmark_kinds
         use benchmark_string
         use test_utility
@@ -75,12 +75,12 @@ TESTPROGRAM(main)
         br%sampling_window = 10
         br%ssd_threshold = 0.025_r8
         
-        call br%save('benchmark.nml')
+        call br%write('benchmark.nml')
         
         inquire(file='benchmark.nml', exist=exists)
         EXPECT_TRUE(exists)
         
-        call br2%load('benchmark.nml')
+        call br2%read('benchmark.nml')
         
         EXPECT_EQ(br2%maxcalls, 10)
         EXPECT_EQ(br2%csv_unit, -10)

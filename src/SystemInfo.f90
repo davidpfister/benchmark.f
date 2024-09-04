@@ -25,8 +25,17 @@ module benchmark_systeminfo
 
     public :: get_systeminfo, &
               get_os_type, &
-              os_name
-    
+              os_name, &
+            !> @cond
+              OS_UNKNOWN, &
+              OS_LINUX, &
+              OS_MACOS, &
+              OS_WINDOWS, &
+              OS_CYGWIN, &
+              OS_SOLARIS, &
+              OS_FREEBSD, &
+              OS_OPENBSD
+              !> @endcond              
     !> @name Enums
     !! @{
     !! <h3>OS_ENUM</h3>
@@ -57,6 +66,8 @@ module benchmark_systeminfo
     !!        - Darwin (macOS): The commands `uname -a` + `sysctl -a | grep machdep.cpu` + `system_profiler SPHardwareDataType`.
     !!        - Linux: The commands `uname -a + lscpu` + `cat /proc/cpuinfo`.
     !!        - Windows: The commands `systeminfo`.
+    !!
+    !! @b Remarks
     subroutine get_systeminfo()
         !private
         character(:), allocatable   :: tmpout, output, cmsg
@@ -113,10 +124,12 @@ module benchmark_systeminfo
     
     !> @brief Returns the OS type.
     !!        At first, the environment variable `OS` is checked, which is usually
-    !! found on Windows. Then, `OSTYPE` is read in and compared with common
-    !! names. If this fails too, check the existence of files that can be
-    !! found on specific system types only.
-    !! @returns an integer(OS_ENUM). Returns OS_UNKNOWN if the operating system cannot be determined.
+    !!        found on Windows. Then, `OSTYPE` is read in and compared with common
+    !!        names. If this fails too, check the existence of files that can be
+    !!        found on specific system types only.
+    !! @returns An integer(OS_ENUM). Returns OS_UNKNOWN if the operating system cannot be determined.
+    !!
+    !! @b Remarks
     integer(OS_ENUM) function get_os_type() result(r)
         !private        
         character(255)              :: val
@@ -223,8 +236,11 @@ module benchmark_systeminfo
     end function
     
     !> @brief Return string describing the OS type flag. 
-    !!        That function was taken from <a href="https://github.com/fortran-lang/fpm/blob/main/src/fpm_environment.f90">fpm</a>
+    !!        That function was taken from 
+    !!        <a href="https://github.com/fortran-lang/fpm/blob/main/src/fpm_environment.f90">fpm</a>
     !! @returns The name of the OS.
+    !!
+    !! @b Remarks
     pure function os_name(os)
         integer(OS_ENUM), intent(in) :: os
         !private
