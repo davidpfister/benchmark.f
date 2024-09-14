@@ -24,7 +24,7 @@
 <!-- TABLE OF CONTENTS -->
 [TOC]
 
-# Introduction {#mainpage}
+# Introduction
 <!-- ABOUT THE PROJECT -->
 ## About the Project
 

@@ -27,9 +27,7 @@ module benchmark_timer
         enumerator :: CPUTIME = 0 !< Value related to the function `cpu_time`
         enumerator :: DATETIME = 1 !< Value related to the function `date_and_time`
         enumerator :: SYSTEMTIME = 2 !< Value related to the function `system_clock`
-    !! @cond
     end enum
-    !! @endcond
     !> @}
 
     integer, parameter, public :: CLOCK_ENUM = kind(CPUTIME)
@@ -56,7 +54,7 @@ module benchmark_timer
         !private
         integer(CLOCK_ENUM) :: dft_option
         
-        dft_option = DATETIME
+        dft_option = SYSTEMTIME
         if (present(option)) dft_option = option
 #ifdef _OPENMP
         if (with_openmp()) then

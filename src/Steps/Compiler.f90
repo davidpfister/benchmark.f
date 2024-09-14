@@ -32,7 +32,7 @@
 !!|crayftn       | compiler_cray                       |                                                                                                                                 | `_CRAYFTN`                                    | -O0, -g[n]                    |
 !!|lf95          | compiler_lahey                      | Lahey/Fujitsu Fortran 95 Compiler Release L6.10a                                                                                | `__COMPILER_LAHEY`                            | -O0, -g                       |
 !!|lfortran      | compiler_lfortran                   | LFortran version 0.36.0                                                                                                         |                                               |                               |
-!> @{
+!! @{
 module benchmark_steps_compiler
     use, intrinsic :: iso_fortran_env, only : compiler_version, compiler_options
     use benchmark_workflow, only: workflow
@@ -46,8 +46,6 @@ module benchmark_steps_compiler
     
     public :: compiler
 
-    !> @name Enums
-    !! @{
     enum, bind(c)
     enumerator :: &
         COMPILER_UNKNOWN, &
@@ -71,16 +69,13 @@ module benchmark_steps_compiler
         COMPILER_LAHEY, &
         COMPILER_LFORTRAN
     end enum
-    
+
     integer, parameter, public :: COMPILER_ENUM = kind(COMPILER_UNKNOWN) !< Compiler enum type
-    !> @}
+    
 
     !> @class compilerinfo
-    !! @ingroup group_steps_compiler
-    !! @brief 
+    !! @brief Provides base class for storing compiler information
     !! @verbatim type, public :: compilerinfo @endverbatim
-    !! <h2>Examples</h2>
-    !! <h2>Remarks</h2>
     !! @par
     !! <h2>Constructors</h2>
     !! Initializes a new instance of the @ref compilerinfo class
@@ -103,10 +98,9 @@ module benchmark_steps_compiler
     
     !> @interface compiler
     !! @ingroup group_steps_compiler
+    !! @ingroup group_steps_compiler
     !! @brief 
     !! @verbatim interface compiler @endverbatim
-    !! <h2>Examples</h2>
-    !! <h2>Remarks</h2>
     !! @par
     !! <h2>Constructors</h2>
     !! Initializes a new instance of the @ref compilerinfo class
@@ -403,3 +397,4 @@ module benchmark_steps_compiler
         end select
     end function
 end module
+!! @}
