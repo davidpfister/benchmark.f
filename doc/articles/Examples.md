@@ -1,7 +1,8 @@
 ## Examples {#examples_toc}
 
-* Page @subpage example_simple
-* Page @subpage example_allocation
-* Page @subpage example_upper
-* Page @subpage example_parsers
+* @subpage example_simple
+* @subpage example_poisson
+* @subpage example_allocation
+* @subpage example_upper
+* @subpage example_parsers
 

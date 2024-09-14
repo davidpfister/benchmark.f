@@ -28,7 +28,7 @@ module benchmark_statistics
     !! write(*, '(A)') str(s%mean, '(f12.3)') // ' ms'//' +/- '//str(s%stddev, '(f12.3)') // ' ms'
     !! @endcode
     !! <h2>Remarks</h2>
-    !! The statistics computed at the moment are limited to mean and standard 
+    !! The statistics computed at the moment are limited to mean, min, max and standard 
     !! deviations. The implementation is quite naive and serve only the purpose
     !! of the current library. 
     !! @par
@@ -51,6 +51,8 @@ module benchmark_statistics
         private
         integer             :: n !< Sample size
         real(r8), public    :: mean     = 0.0_r8 !< Mean value of the sample
+        real(r8), public    :: min     = 0.0_r8 !< Minimal value of the sample
+        real(r8), public    :: max     = 0.0_r8 !< Maximal value of the sample
         real(r8), public    :: stddev   = 0.0_r8 !< Standard deviation of the sample
         real(r8), public    :: variance = 0.0_r8 !< Variance of the sample
         !> @}
@@ -85,6 +87,8 @@ module benchmark_statistics
 
         this%n = size(y)
         this%mean = sum(y)/real(this%n, r8)
+        this%min = minval(y)
+        this%max = maxval(y)
         this%variance = sum((y - this%mean)**2)/real(this%n-1, r8)
         this%stddev = sqrt(this%variance)
     end subroutine

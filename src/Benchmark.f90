@@ -1,7 +1,6 @@
 !> @defgroup group_benchmark_library benchmark_library
 !> @brief Benchmark library module
 module benchmark_library
-    use, intrinsic :: iso_c_binding
     use benchmark_kinds
     use benchmark_method
     use benchmark_workflow
@@ -652,7 +651,7 @@ contains
         type(runner), intent(inout) :: this
         
         if (display_maxcall_warning) call warning_maxcalls()
-        
+        this%unit = stdout
         nullify(current)
         if (allocated(root)) deallocate(root)
     end subroutine

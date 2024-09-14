@@ -6,6 +6,8 @@ module benchmark_output_unit
     implicit none
     
     private
+
+    public :: stdout
       
     !> @name Variables
     !! @{

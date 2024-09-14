@@ -1,5 +1,5 @@
 !> @defgroup group_arg benchmark_argument
-!! @brief Argument module
+!! @brief @link benchmark_argument_base::arg_base Argument @endlink module
 module benchmark_argument
     use, intrinsic :: iso_c_binding
     use benchmark_kinds

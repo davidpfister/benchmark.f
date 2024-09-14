@@ -1,3 +1,0 @@
-Method Name;Mean;Standard Deviation
-poisson_naive(1.0d-6,30);164.000;5.604
-poisson_optimized(1.0d-6,30);95.700;5.414

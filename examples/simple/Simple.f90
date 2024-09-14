@@ -21,7 +21,7 @@ program simple
     read(*,*)
 end program
 
-!> @brief Gregory-Liebniz series for calculating Pi
+!> @brief Gregory-Leibniz series for calculating Pi
 real(r8) function compute_pi(n) result(x)
     use benchmark_kinds
     

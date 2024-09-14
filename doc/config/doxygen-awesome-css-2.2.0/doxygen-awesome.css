@@ -1126,6 +1126,9 @@ table.params .paramname {
     line-height: var(--table-line-height);
 }
 
+.paramname em {
+    color: var(--primary-color)
+}
 h1.glow, h2.glow, h3.glow, h4.glow, h5.glow, h6.glow {
     text-shadow: 0 0 15px var(--primary-light-color);
 }
