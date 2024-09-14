@@ -27,23 +27,23 @@ implicit-external = true
 [install]
 library = false
 
-# [[example]]
-# name = "simple"
-# source-dir = "examples/simple"
-# main = "Simple.f90"
+[[example]]
+name = "simple"
+source-dir = "examples/simple"
+main = "Simple.f90"
+
+[[example]]
+name = "poisson"
+source-dir = "examples/poisson"
+main = "Poisson.f90"
+
+[[example]]
+name = "allocation"
+source-dir = "examples/allocation"
+main = "Allocation.f90"
 
 # [[example]]
-# name = "poisson"
-# source-dir = "examples/poisson"
-# main = "Poisson.f90"
-
-# [[example]]
-# name = "allocation"
-# source-dir = "examples/allocation"
-# main = "Allocation.f90"
-
-# [[example]]
-# name = "prsers"
+# name = "parsers"
 # source-dir = "examples/parsers"
 # main = "Parsers.f90"
 

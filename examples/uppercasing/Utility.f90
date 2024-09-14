@@ -31,7 +31,7 @@ module utility
         type(string), intent(in) :: a
         
         block
-            character(len(a)) :: res
+            character(a%len()) :: res
                 
             res = f(a%chars)
         end block
