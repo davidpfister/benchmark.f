@@ -166,6 +166,8 @@ module benchmark_method
                                      invoke_a7
         procedure, pass(lhs), private :: method_assign_method
         generic, public :: assignment(=) => method_assign_method
+        procedure, pass(this), public :: dispose
+        final :: finalize
     end type
     
     interface method
@@ -849,6 +851,25 @@ module benchmark_method
         if (allocated(lhs%args)) deallocate(lhs%args)
         allocate(lhs%args(rhs%nargs), source = rhs%args)
         !
+    end subroutine
+
+    !> @brief Dispose resources associated with 
+    !!        the bound type.
+    !! @param[inout] this The type bound to the method
+    !!
+    !! @b Remarks
+    subroutine dispose(this)
+        class(method), intent(inout) :: this
+        
+        call finalize(this)
+    end subroutine
+
+    !> @private
+    recursive subroutine finalize(this)
+        type(method), intent(inout) :: this
+        
+        if (associated(this%f)) this%f => null()
+        if (associated(this%caller)) this%caller => null()
     end subroutine
     
 end module

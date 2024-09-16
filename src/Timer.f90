@@ -77,14 +77,14 @@ module benchmark_timer
             ctime = ctime * 1000_r8
         case (DATETIME) 
             block
-                integer(i4) :: dt(8)
+                integer(i8) :: dt(8)
 
                 call date_and_time(values=dt)
                 ctime = (dt(5) * 3600_r8 + dt(6) * 60_r8 + dt(7)) * 1000_r8 + dt(8) * 1_r8
             end block
         case (SYSTEMTIME)
             block
-                integer(i4) :: clock_max, clock_rate, clock_reading
+                integer(i8) :: clock_max, clock_rate, clock_reading
 
                 call system_clock(clock_reading, clock_rate, clock_max)
                 ctime = 1000_r8 * real(clock_reading, r8) / real(clock_rate, r8)

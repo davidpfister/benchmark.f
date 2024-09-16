@@ -159,6 +159,24 @@ block
    end block
 
    block
+   !> [benchmark_ex3]
+
+   type(runner) :: br
+   type(c_funptr) :: cfunptr
+   procedure(), pointer :: f
+
+   cfunptr = c_funloc(compute_pi)
+   call c_f_procpointer(cfunptr, f)
+
+   benchmark(br, run(10000000, f))
+   benchmark(br, run(100000000, f))
+   benchmark(br, run(200000000, f))
+
+   f => null()
+   !> [benchmark_ex3]
+   end block
+
+   block
       !> [benchmark_ex2]
       use benchmark_kinds
       use benchmark_library

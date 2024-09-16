@@ -8,10 +8,9 @@ program simple
     type(runner) :: br
     
     interface
-        real(r8) function compute_pi(n) result(x)
-            import r8
+        subroutine compute_pi(n)
             integer, intent(in) :: n
-        end function
+        end subroutine
     end interface
 
     benchmark(br, run(10000000, compute_pi))
@@ -22,7 +21,7 @@ program simple
 end program
 
 !> @brief Gregory-Leibniz series for calculating Pi
-real(r8) function compute_pi(n) result(x)
+subroutine compute_pi(n)
     use benchmark_kinds
     
     implicit none
@@ -30,7 +29,8 @@ real(r8) function compute_pi(n) result(x)
     integer, intent(in) :: n
     !private
     integer :: i
-    
+    real(r8) :: x
+
     x = 1.0_r8
     do i = 1, n
         if (mod(i, 2) == 1) then
@@ -41,5 +41,5 @@ real(r8) function compute_pi(n) result(x)
     end do
     
     x = 4.0_r8*x
-end function
+end subroutine
             

@@ -46,7 +46,7 @@ This project aims at providing an easy interface to benchmark functions and subr
 
 To build that library you need
 
-- a Fortran 2008 compliant compiler, or better, a Fortran 2018 compliant compiler (GCC Fortran and Intel Fortran compilers are known to work for *benchmark.f*)
+- a Fortran 2008 compliant compiler, or better, a Fortran 2018 compliant compiler (Intel Fortran compiler is known to work well for *benchmark.f*. gfortran has some limitations when using implicit procedures and sometimes produces strange results.)
 
 The following compilers are tested on the default branch of *benchmark.f*:
 <center>

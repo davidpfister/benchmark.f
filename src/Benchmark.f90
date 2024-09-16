@@ -37,8 +37,21 @@ module benchmark_library
     !! as namelist on disk. 
     !! @n
     !! @snippet snippet.f90 benchmark_ex2
+    !! @n
+    !! The third example demonstarte how functions can be passed using the `iso_c_binbing`
+    !! module. The address of the procedure is first obtained using `c_funloc` and then casted 
+    !! into an implicit procedure using `c_f_procpointer`.
+    !! @n
+    !! @snippet snippet.f90 benchmark_ex3
     !! <h2>Remarks</h2>
     !! @note This class is best used together with the include file `benchmark.inc`. 
+    !! @warning Due to a bug (?) in gfortran, functions cannot be passed as argument using
+    !! implicit `procedure()`. This means that benchmarking only works for `subroutine`s with 
+    !! gfortran. PROCEDURE() with no type or interface name is supposed to work as a dummy 
+    !! procedure or procedure pointer that can handle either a function or a subroutine, 
+    !! so long as it isn't referenced. Many compilers assume that it means a subroutine, 
+    !! or just can't deal with it. 
+    !! (<a href="https://github.com/klausler/fortran-wringer-tests/blob/main/no-iface-procedure.f90">more info</a>)
     type, extends(runner_options), public   :: runner
         private
         type(output), public                :: unit !< Output unit. By default the standard output is used.
