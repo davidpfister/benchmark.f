@@ -42,6 +42,11 @@ name = "allocation"
 source-dir = "examples/allocation"
 main = "Allocation.f90"
 
+[[example]]
+name = "uppercasing"
+source-dir = "examples/uppercasing"
+main = "UpperCasing.f90"
+
 # [[example]]
 # name = "parsers"
 # source-dir = "examples/parsers"

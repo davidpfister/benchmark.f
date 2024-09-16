@@ -6,28 +6,31 @@ program uppercasing
     
     implicit none
     
-    integer :: i
-    type(runner) :: br   
-    type(string) :: s(3)
+    block
+        integer :: i
+        type(runner) :: br   
+        type(string) :: s(3)
     
-    s(1) = 'abcdefghijklmnopqrstuvwxyz'
-    s(2) = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    s(3) = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '           // &
-                  'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'  // &
-                  ' Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris' // &
-                  ' nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in ' // &
-                  'reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla '// &
-                  'pariatur. Excepteur sint occaecat cupidatat non proident, sunt in '  // &
-                  'culpa qui officia deserunt mollit anim id est laborum'
+        s(1) = 'abcdefghijklmnopqrstuvwxyz'
+        s(2) = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        s(3) = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '           // &
+                      'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'  // &
+                      ' Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris' // &
+                      ' nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in ' // &
+                      'reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla '// &
+                      'pariatur. Excepteur sint occaecat cupidatat non proident, sunt in '  // &
+                      'culpa qui officia deserunt mollit anim id est laborum'
 
     
-    call br%set_caller(upper_caller)
-    do i = 1, 3
-        br%name = 'upper1'; call br%run(s(i), upper1)
-        br%name = 'upper2'; call br%run(s(i), upper2)
-        br%name = 'upper3'; call br%run(s(i), upper3)
-    end do
+        call br%set_caller(upper_caller)
+        do i = 1, 3
+            br%name = 'upper1'; call br%run(s(i), upper1)
+            br%name = 'upper2'; call br%run(s(i), upper2)
+            br%name = 'upper3'; call br%run(s(i), upper3)
+        end do
 
+    end block
+    
     read(*,*)
 end program
             

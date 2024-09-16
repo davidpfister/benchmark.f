@@ -19,6 +19,9 @@ module benchmark_steps_dryrun
     
     type, extends(workflow) :: benchmark_dryrun
         type(runner_options), pointer :: options => null()
+    contains
+        procedure, pass(this), public :: dispose
+        final :: finalize
     end type
        
     interface dryrun
@@ -40,7 +43,7 @@ module benchmark_steps_dryrun
         class(workflow), intent(inout) :: step
         !private
         integer :: k, count
-        real(r8) :: start, finish, offset
+        real(r8) :: start, finish, overhead
         type(method) :: mtd
         integer :: repeat
         
@@ -62,15 +65,33 @@ module benchmark_steps_dryrun
                 end do
                 repeat = repeat + 1
             end do
-            offset = (finish - start)/real(count, r8)
-            step%options%offset = offset
+            overhead = (finish - start)/real(count, r8)
+            step%options%overhead = overhead
             nullify(step%options)
         end select
-        ! write (output_unit, '(A)') new_line('A'), '                            Offset:                   '//str(offset, '(f12.3)') // ' us'
+        ! write (output_unit, '(A)') new_line('A'), '                          Overhead:                   '//str(overhead, '(f12.3)') // ' us'
     end subroutine
     
     subroutine dummy_empty()
         !do nothing
+    end subroutine
+
+    !> @brief Dispose resources associated with 
+    !!        the bound type.
+    !! @param[inout] this The type bound to the method
+    !!
+    !! @b Remarks
+    subroutine dispose(this)
+        class(benchmark_dryrun), intent(inout) :: this
+        
+        call finalize(this)
+    end subroutine
+
+    !> @private
+    recursive subroutine finalize(this)
+        type(benchmark_dryrun), intent(inout) :: this
+        
+        if (associated(this%options)) nullify(this%options)
     end subroutine
     
 end module

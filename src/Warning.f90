@@ -52,6 +52,7 @@ module benchmark_warning
                             &                '                                  <!>     WARNING     <!>'
         write (output_unit, '(A)')                     '                           DEBUG profile detected. The results'//&
         ' might be unreliable.'
+        flush(output_unit)
     end subroutine
     
     !> @brief Warning triggered when the maximum number of function calls
@@ -64,6 +65,7 @@ module benchmark_warning
                             &                '                                  <!>     WARNING     <!>'
         write (output_unit, '(A)') '                           Maximum number of calls reached for some cases. Steady state'//&
         ' may not have been reached for all runs.'
+        flush(output_unit)
     end subroutine
 
 end module

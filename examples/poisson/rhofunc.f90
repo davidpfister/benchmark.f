@@ -10,18 +10,29 @@ module rhofunc
     contains
     
     pure subroutine poisson_naive(treshold, m)
+#ifndef __INTEL_COMPILER
+        class(*), intent(in) :: treshold
+        class(*), intent(in)  :: m
+        
+        select type(treshold)
+        type is (real(rp))
+            select type(m)
+            type is (integer)
+                block
+#else
         real(rp), intent(in) :: treshold
         integer, intent(in)  :: m
+#endif
         !private
         integer :: i, j, iter
         real(rp) :: delta, b, e, phiprime(m,m), phi(m,m), a2, rhoarr(m,m), temp(m,m)
     
-
         delta = 1.0_rp
         iter = 0
         phiprime(:,:) = 0.0_rp
         phi(:,:) = 0.0_rp
     
+        
         do while (delta > treshold)
             iter = iter + 1
             a2 = a**2.0_rp
@@ -36,11 +47,26 @@ module rhofunc
             phi = phiprime 
             phiprime = temp
         end do
+#ifndef __INTEL_COMPILER
+                end block
+            end select
+        end select
+#endif
     end subroutine
     
     pure subroutine poisson_optimized(treshold, m)
+#ifndef __INTEL_COMPILER
+        class(*), intent(in) :: treshold
+        class(*), intent(in)  :: m
+        select type(treshold)
+        type is (real(rp))
+            select type(m)
+            type is (integer)
+                block
+#else
         real(rp), intent(in) :: treshold
         integer, intent(in)  :: m
+#endif
         !private
         integer :: i,j, iter
         real(rp) :: delta, phiprime(m,m), phi(m,m), a2, rhoarr(m,m)
@@ -68,6 +94,11 @@ module rhofunc
             delta = maxval(abs(phiprime - phi))
             phi = phiprime 
         end do
+#ifndef __INTEL_COMPILER
+                end block
+            end select
+        end select
+#endif
     end subroutine
     
     pure real(rp) function rho(x,y)

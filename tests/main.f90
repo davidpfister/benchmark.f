@@ -71,7 +71,6 @@ TESTPROGRAM(main)
         br%csv_unit = -10
         br%mintime = 50_r8
         br%maxtime = 100_r8
-        br%offset = 20.0_r8
         br%sampling_window = 10
         br%ssd_threshold = 0.025_r8
         
@@ -86,7 +85,6 @@ TESTPROGRAM(main)
         EXPECT_EQ(br2%csv_unit, -10)
         EXPECT_EQ(br2%mintime, 50_r8)
         EXPECT_EQ(br2%maxtime, 100_r8)
-        EXPECT_EQ(br2%offset, 20.0_r8)
         EXPECT_EQ(br2%sampling_window, 10)
         EXPECT_EQ(br2%ssd_threshold, 0.025_r8)
         

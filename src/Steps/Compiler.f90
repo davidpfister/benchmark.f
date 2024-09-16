@@ -7,32 +7,6 @@
 !!          and version, as well as compilation options. It uses the intrinsic 
 !!          functions `compiler_options` and `compiler_version` from the 
 !!          module `iso_fortran_env`
-!! @par
-!! <h2>Remarks</h2>
-!! The different compilers all come with there own macros, debug options and version information.
-!! Some pieces of information are collected in the following table:
-!!|compiler      | id                                  | outcome                                                                                                                         | macro                                         | debug                         |
-!!|:------------:|:-----------------------------------:|:-------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------:|:-----------------------------:|
-!!|gfortran      | compiler_gcc                        | GCC version 14.1.0                                                                                                              |  `__GFORTRAN__`                               | -O0, -g[n]                    |
-!!|f95           | compiler_f95                        |                                                                                                                                 |                                               |                               |
-!!|caf           | compiler_caf                        | GCC version 12.3.0                                                                                                              |                                               |                               |
-!!|ifort         | compiler_intel_classic_nix          | Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on Intel(R) 64, Version 2021.12.0 Build 20240211_000000  | `__INTEL_COMPILER`                            | -g[n], -debug, -O0            |
-!!|ifort         | compiler_intel_classic_mac          |                                                                                                                                 | `__INTEL_COMPILER`                            | -g[n], -debug, -O0            |
-!!|ifort         | compiler_intel_classic_windows (x64)| Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on Intel(R) 64, Version 2021.3.0 Build 20210609_000000   | `__INTEL_COMPILER`                            | /Zi, /Z7, /debug /Od          |
-!!|ia32          | compiler_intel_classic_windows (x86)| Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on IA-32, Version 2021.12.0 Build 20240222_000000        | `__INTEL_COMPILER`                            | /Zi, /Z7, /debug:full /Od     |
-!!|ifx           | compiler_intel_llvm_nix             | Intel(R) Fortran Compiler for applications running on Intel(R) 64, Version 2024.1.2 Build 20240508                              | `__INTEL_COMPILER` and `__INTEL_LLVM_COMPILER`| /Zi, /Z7, /debug:full /Od     |
-!!|ifx           | compiler_intel_llvm_windows         | Intel(R) Fortran Compiler for applications running on Intel(R) 64, Version 2024.1.0 Build 20240308                              | `__INTEL_COMPILER` and `__INTEL_LLVM_COMPILER`| /Zi, /Z7, /debug:full /Od     |
-!!|pgfortran     | compiler_pgi                        |                                                                                                                                 | `__PGI`                                       | -O0, -g (not -gopt)           |
-!!|nvfortran     | compiler_nvhpc                      | nvfortran 21.5-0 LLVM                                                                                                           | `__NVCOMPILER` (and `__PGI` for some versions)| -O0, -g[n]                    |
-!!|nagfor        | compiler_nag                        | NAG Fortran Compiler Release 7.2(Shin-Urayasu) Build 7205                                                                       | `NAGFOR`                                      | -O0, -g[n]                    |
-!!|flang         | compiler_flang                      |                                                                                                                                 | `__PGLLVM__`                                  | -O0, -g[n]                    |
-!!|flang         | compiler_flang_new                  | flang version 19.0.0                                                                                                            | `__flang__`                                   | -O0, -g[n]                    |
-!!|f18           | compiler_f18                        |                                                                                                                                 |                                               |                               |
-!!|xlf90         | compiler_ibmxl                      | IBM XL Fortran for AIX, 16.1 (5765-J14, 5725-C74) Version: 16.01.0000.0000                                                      | `__IBMC__`                                    | -qnoopt, -O0, -g              |
-!!|crayftn       | compiler_cray                       |                                                                                                                                 | `_CRAYFTN`                                    | -O0, -g[n]                    |
-!!|lf95          | compiler_lahey                      | Lahey/Fujitsu Fortran 95 Compiler Release L6.10a                                                                                | `__COMPILER_LAHEY`                            | -O0, -g                       |
-!!|lfortran      | compiler_lfortran                   | LFortran version 0.36.0                                                                                                         |                                               |                               |
-!! @{
 module benchmark_steps_compiler
     use, intrinsic :: iso_fortran_env, only : compiler_version, compiler_options
     use benchmark_workflow, only: workflow
@@ -74,6 +48,7 @@ module benchmark_steps_compiler
     
 
     !> @class compilerinfo
+    !! @ingroup group_steps_compiler
     !! @brief Provides base class for storing compiler information
     !! @verbatim type, public :: compilerinfo @endverbatim
     !! @par
@@ -88,7 +63,31 @@ module benchmark_steps_compiler
     !!
     !!  type(compilerinfo) :: ci
     !! ```
-    !! @b Remarks
+    !! @par
+    !! <h2>Remarks</h2>
+    !! The different compilers all come with there own macros, debug options and version information.
+    !! Some pieces of information are collected in the following table:
+    !!|compiler      | id                                  | outcome                                                                                                                         | macro                                         | debug                         |
+    !!|:------------:|:-----------------------------------:|:-------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------:|:-----------------------------:|
+    !!|gfortran      | compiler_gcc                        | GCC version 14.1.0                                                                                                              |  `__GFORTRAN__`                               | -O0, -g[n]                    |
+    !!|f95           | compiler_f95                        |                                                                                                                                 |                                               |                               |
+    !!|caf           | compiler_caf                        | GCC version 12.3.0                                                                                                              |                                               |                               |
+    !!|ifort         | compiler_intel_classic_nix          | Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on Intel(R) 64, Version 2021.12.0 Build 20240211_000000  | `__INTEL_COMPILER`                            | -g[n], -debug, -O0            |
+    !!|ifort         | compiler_intel_classic_mac          |                                                                                                                                 | `__INTEL_COMPILER`                            | -g[n], -debug, -O0            |
+    !!|ifort         | compiler_intel_classic_windows (x64)| Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on Intel(R) 64, Version 2021.3.0 Build 20210609_000000   | `__INTEL_COMPILER`                            | /Zi, /Z7, /debug /Od          |
+    !!|ia32          | compiler_intel_classic_windows (x86)| Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on IA-32, Version 2021.12.0 Build 20240222_000000        | `__INTEL_COMPILER`                            | /Zi, /Z7, /debug:full /Od     |
+    !!|ifx           | compiler_intel_llvm_nix             | Intel(R) Fortran Compiler for applications running on Intel(R) 64, Version 2024.1.2 Build 20240508                              | `__INTEL_COMPILER` and `__INTEL_LLVM_COMPILER`| /Zi, /Z7, /debug:full /Od     |
+    !!|ifx           | compiler_intel_llvm_windows         | Intel(R) Fortran Compiler for applications running on Intel(R) 64, Version 2024.1.0 Build 20240308                              | `__INTEL_COMPILER` and `__INTEL_LLVM_COMPILER`| /Zi, /Z7, /debug:full /Od     |
+    !!|pgfortran     | compiler_pgi                        |                                                                                                                                 | `__PGI`                                       | -O0, -g (not -gopt)           |
+    !!|nvfortran     | compiler_nvhpc                      | nvfortran 21.5-0 LLVM                                                                                                           | `__NVCOMPILER` (and `__PGI` for some versions)| -O0, -g[n]                    |
+    !!|nagfor        | compiler_nag                        | NAG Fortran Compiler Release 7.2(Shin-Urayasu) Build 7205                                                                       | `NAGFOR`                                      | -O0, -g[n]                    |
+    !!|flang         | compiler_flang                      |                                                                                                                                 | `__PGLLVM__`                                  | -O0, -g[n]                    |
+    !!|flang         | compiler_flang_new                  | flang version 19.0.0                                                                                                            | `__flang__`                                   | -O0, -g[n]                    |
+    !!|f18           | compiler_f18                        |                                                                                                                                 |                                               |                               |
+    !!|xlf90         | compiler_ibmxl                      | IBM XL Fortran for AIX, 16.1 (5765-J14, 5725-C74) Version: 16.01.0000.0000                                                      | `__IBMC__`                                    | -qnoopt, -O0, -g              |
+    !!|crayftn       | compiler_cray                       |                                                                                                                                 | `_CRAYFTN`                                    | -O0, -g[n]                    |
+    !!|lf95          | compiler_lahey                      | Lahey/Fujitsu Fortran 95 Compiler Release L6.10a                                                                                | `__COMPILER_LAHEY`                            | -O0, -g                       |
+    !!|lfortran      | compiler_lfortran                   | LFortran version 0.36.0                                                                                                         |                                               |                               |   
     type, public :: compilerinfo
         integer(COMPILER_ENUM) :: id        !< Compiler ID
         character(20)          :: name      !< Compiler name

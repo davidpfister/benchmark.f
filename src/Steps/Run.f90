@@ -29,6 +29,9 @@ module benchmark_steps_benchmark_run
     type, extends(workflow) :: benchmark_run
         type(runner_options), pointer :: options => null()
         type(method), pointer :: method => null()
+    contains
+        procedure, pass(this), public :: dispose
+        final :: finalize
     end type
        
     interface benchmarker
@@ -210,6 +213,25 @@ module benchmark_steps_benchmark_run
         if (present(csv_unit)) then
             write (csv_unit, '(A)') csv
         end if
+    end subroutine
+
+    !> @brief Dispose resources associated with 
+    !!        the bound type.
+    !! @param[inout] this The type bound to the method
+    !!
+    !! @b Remarks
+    subroutine dispose(this)
+        class(benchmark_run), intent(inout) :: this
+        
+        call finalize(this)
+    end subroutine
+
+    !> @private
+    recursive subroutine finalize(this)
+        type(benchmark_run), intent(inout) :: this
+        
+        if (associated(this%method)) nullify(this%method)
+        if (associated(this%options)) nullify(this%options)
     end subroutine
     
 end module

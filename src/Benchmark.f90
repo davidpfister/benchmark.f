@@ -148,7 +148,6 @@ contains
     !! br%csv_unit = -10
     !! br%mintime = 50_r8
     !! br%maxtime = 100_r8
-    !! br%offset = 20.0_r8
     !! br%sampling_window = 10
     !! br%ssd_threshold = 0.025_r8
     !!
@@ -162,7 +161,6 @@ contains
     !!  BENCH%CSV_UNIT=-10        ,
     !!  BENCH%MINTIME=  50.000000000000000     ,
     !!  BENCH%MAXTIME=  100.00000000000000     ,
-    !!  BENCH%OFFSET=  20.000000000000000     ,
     !!  BENCH%SAMPLING_WINDOW=10         ,
     !!  BENCH%SSD_THRESHOLD=  2.5000000000000001E-002,
     !!  BENCH%SKIP_PRELUDE=F,

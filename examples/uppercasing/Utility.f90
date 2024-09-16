@@ -12,10 +12,10 @@ module utility
     integer :: i
     
     interface
-        pure function upper_x(str) result(res)
-            character(*), intent(in)   :: str 
-            character(len(str)) :: res
-        end function
+        pure subroutine upper_x(str, res)
+            character(*), intent(in)            :: str 
+            character(len(str)), intent(out)    :: res
+        end subroutine
     end interface
     
     character(1000) :: string_data(1:3)
@@ -27,19 +27,22 @@ module utility
     contains
     
     subroutine upper_caller(f, a)
-        procedure(upper_x) :: f
-        type(string), intent(in) :: a
+        procedure(upper_x)      :: f
+        class(*), intent(in)    :: a
         
-        block
-            character(a%len()) :: res
+        select type(a)
+        type is (string)
+            block
+                character(a%len()) :: res
                 
-            res = f(a%chars)
-        end block
+                call f(a%chars, res)
+            end block
+        end select
     end subroutine
     
-    pure function upper1(str) result(res)
-        character(*), intent(in)   :: str 
-        character(len(str)) :: res
+    subroutine upper1(str, res)
+        character(*), intent(in)            :: str 
+        character(len(str)), intent(out)    :: res
         !private
         integer :: i, ade_char
         integer, parameter :: ade_a = iachar('a'), ade_z = iachar('z')
@@ -52,11 +55,11 @@ module utility
         end do
         if (len(str) == 0) res = str
 
-    end function
+    end subroutine
 
-    pure function upper2(str) result(res)
-        character(*), intent(in)   :: str
-        character(len(str)) :: res
+    subroutine upper2(str, res)
+        character(*), intent(in)            :: str 
+        character(len(str)), intent(out)    :: res
         !private
         integer                       :: i
         integer, parameter :: diff = iachar('A') - iachar('a')
@@ -69,11 +72,11 @@ module utility
         end do
         if (len(str) == 0) res = str
 
-    end function
+    end subroutine
 
-    pure function upper3(str) result(res)
-        character(*), intent(in)   :: str 
-        character(len_trim(str)) :: res
+   subroutine upper3(str, res)
+        character(*), intent(in)            :: str 
+        character(len(str)), intent(out)    :: res
         !private
         integer :: i, ch
         integer, parameter :: diff = iachar('A') - iachar('a')
@@ -88,5 +91,5 @@ module utility
         end do
         if (len(str) == 0) res = str
 
-    end function
+    end subroutine
 end module
