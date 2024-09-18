@@ -485,7 +485,7 @@ contains
                 str = str(ipos:)
             case ('+', '-')
                 chtemp = uppercase(str(ipos - 1:ipos - 1))
-                if (is_letter(str(1:1)) .eqv. .true. .or. chtemp /= 'E') then
+                if (is_letter(str(1:1)) .or. chtemp /= 'E') then
                     tok%char = str(1:ipos - 1)
                     tok%type = 'S'
                     icp = 0
@@ -605,7 +605,7 @@ contains
 
 ! Assign val to sym if sym is already in symbol table
         usym = uppercase(sym)
-        if (is_letter(sym(1:1)) .eqv. .false. .or. len_trim(sym) > 24) then
+        if (.not. is_letter(sym(1:1)) .or. len_trim(sym) > 24) then
             ierr = 11
             write (*, *) 'Error: symbol ', trim(sym), ' has improper format'
             write (*, *)
@@ -725,7 +725,7 @@ contains
         integer :: ios
         ierr = 0
 
-        if (is_letter(xinchar(1:1)) .eqv. .true.) then ! xinchar is a symbol
+        if (is_letter(xinchar(1:1))) then ! xinchar is a symbol
             call getparam(xinchar, cval)
         else ! xinchar is a number string
             call value(xinchar, rval, ios) ! rval is the value of xinchar
@@ -799,7 +799,7 @@ contains
         integer :: ifind, j
         ierr = 0
         sym = adjustl(sym)
-        if (is_letter(sym(1:1)) .eqv. .false. .or. len_trim(sym) > 24) then
+        if (.not. is_letter(sym(1:1)) .or. len_trim(sym) > 24) then
             ierr = 11
             write (*, *) 'Error: symbol ', trim(sym), ' has incorrect format'
             write (*, *)
@@ -861,7 +861,7 @@ contains
         complex(kc8) :: vard
 
         call getparam_dc(sym, vard)
-        var = real(vard, kr4)
+        var = real(vard)
 
     end subroutine getparam_sr
 

@@ -32,10 +32,18 @@ module parser_runner
     end subroutine
     
     subroutine runner_test(eq)
+#ifndef __INTEL_COMPILER
+        class(*), intent(in) :: eq
+#else
         character(200), intent(in) :: eq
+#endif
         !private
         real(r8) :: res
         if (.not. allocated(current_parser%interpretor)) return
+#ifndef __INTEL_COMPILER
+        select type(eq)
+        type is (character(*))
+#endif
         associate(x => current_parser%interpretor)
             res = x%compute(trim(eq))
 #ifdef _DEBUG
@@ -44,5 +52,8 @@ module parser_runner
             end if
 #endif
         end associate
+#ifndef __INTEL_COMPILER
+        end select
+#endif
     end subroutine
 end module
