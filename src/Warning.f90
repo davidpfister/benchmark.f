@@ -48,11 +48,13 @@ module benchmark_warning
     !!
     !! @b Remarks
     subroutine warning_debug() 
+#ifndef _QUIET
         write (output_unit, '(A)') new_line('A'), &
                             &                '                                  <!>     WARNING     <!>'
         write (output_unit, '(A)')                     '                           DEBUG profile detected. The results'//&
         ' might be unreliable.'
         flush(output_unit)
+#endif
     end subroutine
     
     !> @brief Warning triggered when the maximum number of function calls
@@ -61,11 +63,13 @@ module benchmark_warning
     !!
     !! @b Remarks
     subroutine warning_maxcalls()
+#ifndef _QUIET
         write (output_unit, '(A)') new_line('A'), &
                             &                '                                  <!>     WARNING     <!>'
         write (output_unit, '(A)') '                           Maximum number of calls reached for some cases. Steady state'//&
         ' may not have been reached for all runs.'
         flush(output_unit)
+#endif
     end subroutine
 
 end module

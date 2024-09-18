@@ -2,7 +2,7 @@ name = "fee"
 
 [preprocess]
 cpp.suffixes = ["F90", "f90"]
-cpp.macros = ["_WIN32", "_FPM"]
+cpp.macros = ["_FPM"]
 
 [library]
 source-dir = "./"

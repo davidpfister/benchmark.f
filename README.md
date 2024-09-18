@@ -116,6 +116,10 @@ option build --flag '-ffree-line-length-none'
 
 @test
 options test --flag '-ffree-line-length-none'
+
+@doc
+option clean --all
+system cd ./doc & doxygen ./Doxyfile.in & cd ..
 ```
 
 The toml files contains two items that are worth commenting: 
@@ -123,9 +127,8 @@ The toml files contains two items that are worth commenting:
 ```toml
 [preprocess]
 cpp.suffixes = ["F90", "f90"]
-cpp.macros = ["_WIN32", "_FPM"]
+cpp.macros = ["_FPM"]
 ```
-The `_WIN32` macro definition is necessary when building the project with gfortran on Windows since it is not defined by default (unlike with ifort). For non-Windows users, that macro should be removed. 
 The `_FPM` macro is used to differenciate the build when compiling with *fpm* or *Visual Studio*. This is mostly present to adapt the hard coded paths that differs in both cases.
 
 2. The code must also be compiled allowing implicit procedures. This is reflected in the following option. 

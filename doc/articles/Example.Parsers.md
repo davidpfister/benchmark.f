@@ -98,7 +98,8 @@ The parsers have been tested against the following expressions
 For convenience all fortran equation parsers have been added to the repo. 
 However, symengine test folder only contains the Fortran wrapper and 
 the [C++ library](https://github.com/symengine/symengine)
-needs to be installed on the computer.
+needs to be installed on the computer. Linking to the symengine library might be tedious so 
+it is excluded in standard build. To be included in the project, simply define the preprocessor macro `_INCLUDE_SYMENGINE`
 
 ## Notes
 

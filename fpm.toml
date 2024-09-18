@@ -11,11 +11,11 @@ homepage = "https://github.com/davidpfister/benchmark.f"
 auto-executables = true
 auto-tests = true
 auto-examples = true
-external-modules = ["omp_lib"]
+external-modules = ["omp_lib","symengine"]
 
 [preprocess]
 cpp.suffixes = ["F90", "f90"]
-cpp.macros = ["_WIN32", "_FPM"]
+cpp.macros = ["_FPM"]
 
 [library]
 source-dir = "src"
