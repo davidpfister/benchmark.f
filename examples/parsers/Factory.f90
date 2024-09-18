@@ -24,9 +24,12 @@ module parser_factory
     
     character(80) :: eq_parsers(1:11)
     integer :: j
-    
-    data(eq_parsers(j), j=1, 11)/ &
-        'equationparser', & !https://github.com/ScottBoyce/bif/blob/main/src/math_numbers/EquationParser.f90
+  
+#ifdef _INCLUDE_SYMENGINE    
+    data(eq_parsers(j), j=1, 10)/ &
+#else
+    data(eq_parsers(j), j=1, 9)/ &
+#endif
         'evaluate', & !https://gbenthien.net/strings/index.html
         'feq-parse', & !https://github.com/fluidnumerics/feq-parse   
         'function_parser', & !https://github.com/jacobwilliams/fortran_function_parser
@@ -34,8 +37,10 @@ module parser_factory
         'fortranparser', & !https://github.com/jacopo-chevallard/FortranParser
         'fparser', & !http://fparser.sourceforge.net
         'fee', & !https://github.com/ivomarb/Fortran-Expression-Evaluator
-        'M_calculator', & !https://urbanjost.github.io/M_calculator  
+        'M_calculator', & !https://urbanjost.github.io/M_calculator
+#ifdef _INCLUDE_SYMENGINE    
         'symengine', & !https://github.com/symengine/symengine.f90
+#endif
         'reference'/
     
     type, public :: factory
@@ -85,8 +90,8 @@ contains
             allocate (e, source=ffparser())
         elseif (parser == 'fee') then
             allocate (e, source=fee_parser())
-        elseif (parser == 'symengine') then
 #ifdef _INCLUDE_SYMENGINE
+        elseif (parser == 'symengine') then
             allocate (e, source=symengine_parser())
 #endif
         elseif (parser == 'equationparser') then
