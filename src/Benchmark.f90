@@ -663,7 +663,7 @@ contains
         
         if (display_maxcall_warning) call warning_maxcalls()
         this%unit = stdout
-        nullify(current)
         if (allocated(root)) deallocate(root)
+        current => null()
     end subroutine
 end module

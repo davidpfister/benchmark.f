@@ -868,8 +868,8 @@ module benchmark_method
     recursive subroutine finalize(this)
         type(method), intent(inout) :: this
         
-        if (associated(this%f)) nullify(this%f)
-        if (associated(this%caller)) nullify(this%caller)
+        if (associated(this%f)) this%f => null()
+        if (associated(this%caller)) this%caller => null()
     end subroutine
     
 end module

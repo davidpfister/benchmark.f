@@ -21,8 +21,11 @@ module parser_factory
     
     public :: eq_parsers, &
               parser_x
-    
-    character(80) :: eq_parsers(1:11)
+#ifdef _INCLUDE_SYMENGINE     
+    character(80) :: eq_parsers(10)
+#else
+    character(80) :: eq_parsers(9)
+#endif
     integer :: j
   
 #ifdef _INCLUDE_SYMENGINE    

@@ -91,7 +91,7 @@ module benchmark_steps_dryrun
     recursive subroutine finalize(this)
         type(benchmark_dryrun), intent(inout) :: this
         
-        if (associated(this%options)) nullify(this%options)
+        if (associated(this%options)) this%options => null()
     end subroutine
     
 end module

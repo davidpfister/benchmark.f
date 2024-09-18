@@ -230,8 +230,8 @@ module benchmark_steps_benchmark_run
     recursive subroutine finalize(this)
         type(benchmark_run), intent(inout) :: this
         
-        if (associated(this%method)) nullify(this%method)
-        if (associated(this%options)) nullify(this%options)
+        if (associated(this%method)) this%method => null()
+        if (associated(this%options)) this%options => null()
     end subroutine
     
 end module
