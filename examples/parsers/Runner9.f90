@@ -1,4 +1,4 @@
-module test_M_calculator
+module runner9
     use parser_abstract
     use M_calculator, only : dnum0
     use parameters

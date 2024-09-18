@@ -5,8 +5,7 @@ module parser_runner
     private 
     
     public :: runner_test, &
-              current_parser, &
-              parsers
+              current_parser
     
     type, public :: parser
         character(:), allocatable :: name
@@ -28,6 +27,7 @@ module parser_runner
         this%name = name 
         this%index = 0
         this%interpretor = fact%build(name)
+        if (.not. allocated(current_parser%interpretor)) return
         call this%interpretor%initialize()
     end subroutine
     
@@ -35,7 +35,7 @@ module parser_runner
         character(200), intent(in) :: eq
         !private
         real(r8) :: res
-
+        if (.not. allocated(current_parser%interpretor)) return
         associate(x => current_parser%interpretor)
             res = x%compute(trim(eq))
 #ifdef _DEBUG

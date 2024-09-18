@@ -59,7 +59,7 @@ The following compilers are tested on the default branch of *benchmark.f*:
 </center>
 - a preprocessor. *benchmark.f* uses quite some preprocessor macros. It is known to work both with intel `fpp` an gnu `cpp`.  
 
-Unit test rely on the micro framework [assert.f](https://github.com/davidpfister/assert.f). Since the whole framework fits in a single file, it has been added directly to the repo. 
+Unit test rely on the the header file `assert.inc`. Since the whole framework fits in a single file, it has been added directly to the repo. 
 
 Linting, indentation, and styling is done with [fprettify](https://github.com/fortran-lang/fprettify) with the following settings
 ```bash

@@ -1,4 +1,4 @@
-module test_fee
+module runner8
     use parser_abstract
     use fee
     use parameters
@@ -7,10 +7,10 @@ module test_fee
     
     private
     
-    integer, parameter	 :: realkind = selected_real_kind(p=13,r=200)
-    integer, parameter :: wp = 8
+    integer, parameter  :: rk = selected_real_kind(p=13,r=200)
+    integer, parameter  :: wp = 8
     character(10) :: var(11)
-    real(realkind) :: x(11)
+    real(rk) :: val(11)
     
     type, extends(parser_x), public :: fee_parser
         private
@@ -30,19 +30,19 @@ contains
     end function
     
     subroutine initialize()
-        var = ['x', 'y', 'z', 'x1', 'x2', &
-            'a', 'b', 'c', 'd', 'e', 'f']
-        x(1) = 0.175_realkind
-        x(2) = 0.110_realkind
-        x(3) = 0.900_realkind
-        x(4) = 0.508_realkind
-        x(5) = 30.000_realkind
-        x(6) = 0.900_realkind
-        x(7) = 0.100_realkind
-        x(8) = 0.110_realkind
-        x(9) = 0.120_realkind
-        x(10) = 0.120_realkind
-        x(11) = 0.140_realkind
+        var = ['x ', 'y ', 'z ', 'x1', 'x2', &
+        'a ', 'b ', 'c ', 'd ', 'e ', 'f ']
+        val(1) = 0.175_realkind
+        val(2) = 0.110_realkind
+        val(3) = 0.900_realkind
+        val(4) = 0.508_realkind
+        val(5) = 30.000_realkind
+        val(6) = 0.900_realkind
+        val(7) = 0.100_realkind
+        val(8) = 0.110_realkind
+        val(9) = 0.120_realkind
+        val(10) = 0.120_realkind
+        val(11) = 0.140_realkind
     end subroutine
     
     real(r8) function compute(eq)
@@ -54,7 +54,7 @@ contains
         func = eq
 
         call init (func, var, status)
-        res = evaluate(x)
+        res = evaluate(val)
         call destroyfunc()
         compute = res
     end function

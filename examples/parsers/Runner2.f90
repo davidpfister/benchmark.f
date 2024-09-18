@@ -1,4 +1,4 @@
-module test_evaluate
+module runner2
     use parser_abstract
     use evaluate
 
@@ -6,9 +6,9 @@ module test_evaluate
 
     private
 
-    character(len=*), dimension(11), parameter :: var = ['x', 'y', 'z', 'x1', 'x2', &
-                                                         'a', 'b', 'c', 'd', 'e', 'f']
-    real(kind=kind(0.0d0)), dimension(11) :: x
+    character(len=*), dimension(11), parameter :: var = ['x ', 'y ', 'z ', 'x1', 'x2', &
+    'a ', 'b ', 'c ', 'd ', 'e ', 'f ']
+    real(kind=kind(0.0d0)), dimension(11) :: val
 
     type, extends(parser_x), public :: eqnevaluate
         private

@@ -1,0 +1,14 @@
+name = "FEQParse"
+
+[preprocess]
+cpp.suffixes = ["F90", "f90"]
+cpp.macros = ["_WIN32", "_FPM"]
+
+[library]
+source-dir = "./"
+
+[fortran]
+implicit-external = true
+
+[install]
+library = false

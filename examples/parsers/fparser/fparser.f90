@@ -23,7 +23,8 @@ MODULE fparser
   ! The function parser concept i4 based on a C++ class library written by  Juha 
   ! Nieminen <warp@iki.fi> available from http://warp.povusers.org/FunctionParser/
   !------- -------- --------- --------- --------- --------- --------- --------- -------
-  USE parameters, ONLY: r8,i4               ! Import KIND parameters
+   use, intrinsic :: iso_fortran_env, only:  i4 => int32, &
+                                             r8 => real64
   IMPLICIT NONE
   !------- -------- --------- --------- --------- --------- --------- --------- -------
   PUBLIC                     :: initf,    & ! Initialize function parser for n functions

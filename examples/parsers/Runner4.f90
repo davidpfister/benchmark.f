@@ -1,4 +1,4 @@
-module test_function_parser
+module runner4
     use parser_abstract
     use function_parser, wp => fparser_rk
     use parameters
@@ -7,9 +7,9 @@ module test_function_parser
     
     private
     
-    character(len=*), dimension(11), parameter :: var = ['x', 'y', 'z', 'x1', 'x2', &
-            'a', 'b', 'c', 'd', 'e', 'f']
-    real(wp), dimension(11) :: x
+    character(len=*), dimension(11), parameter :: var = ['x ', 'y ', 'z ', 'x1', 'x2', &
+    'a ', 'b ', 'c ', 'd ', 'e ', 'f ']
+    real(wp), dimension(11) :: val
     
     type, extends(parser_x), public :: ffunction_parser
         private
@@ -29,17 +29,17 @@ contains
     end function
     
     subroutine initialize()
-        x(1) = 0.175_wp
-        x(2) = 0.110_wp
-        x(3) = 0.900_wp
-        x(4) = 0.508_wp
-        x(5) = 30.000_wp
-        x(6) = 0.900_wp
-        x(7) = 0.100_wp
-        x(8) = 0.110_wp
-        x(9) = 0.120_wp
-        x(10) = 0.120_wp
-        x(11) = 0.140_wp
+        val(1) = 0.175_wp
+        val(2) = 0.110_wp
+        val(3) = 0.900_wp
+        val(4) = 0.508_wp
+        val(5) = 30.000_wp
+        val(6) = 0.900_wp
+        val(7) = 0.100_wp
+        val(8) = 0.110_wp
+        val(9) = 0.120_wp
+        val(10) = 0.120_wp
+        val(11) = 0.140_wp
     end subroutine
     
     real(r8) function compute(eq)
@@ -48,7 +48,7 @@ contains
         !private
         type(fparser) :: parser
         call parser%parse(eq, var, .false.) 
-        call parser%evaluate(x, res)
+        call parser%evaluate(val, res)
         compute = res
     end function
     

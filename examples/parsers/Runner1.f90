@@ -1,4 +1,4 @@
-module test_equationparser
+module runner1
     use parser_abstract
     use EquationParser
     use parameters
@@ -7,9 +7,9 @@ module test_equationparser
     
     private 
     
-    character(len=*), dimension(11), parameter :: var = ['x', 'y', 'z', 'x1', 'x2', &
-            'a', 'b', 'c', 'd', 'e', 'f']
-    real(kind=kind(0.0d0)), dimension(11) :: x
+    character(len=*), dimension(11), parameter :: var = ['x ', 'y ', 'z ', 'x1', 'x2', &
+    'a ', 'b ', 'c ', 'd ', 'e ', 'f ']
+    real(kind=kind(0.0d0)), dimension(11) :: val
     
     type, extends(parser_x), public :: equation_parser
         private
@@ -29,21 +29,21 @@ contains
     end function
     
     subroutine initialize()
-        x(1) = 0.175_r8
-        x(2) = 0.110_r8
-        x(3) = 0.900_r8
-        x(4) = 0.508_r8
-        x(5) = 30.000_r8
-        x(6) = 0.900_r8
-        x(7) = 0.100_r8
-        x(8) = 0.110_r8
-        x(9) = 0.120_r8
-        x(10) = 0.120_r8
-        x(11) = 0.140_r8
+        val(1) = 0.175_r8
+        val(2) = 0.110_r8
+        val(3) = 0.900_r8
+        val(4) = 0.508_r8
+        val(5) = 30.000_r8
+        val(6) = 0.900_r8
+        val(7) = 0.100_r8
+        val(8) = 0.110_r8
+        val(9) = 0.120_r8
+        val(10) = 0.120_r8
+        val(11) = 0.140_r8
     end subroutine
     
     real(r8) function compute(eq)
         character(*), intent(in) :: eq
-        compute = EVAL(eq, var, x)
+        compute = EVAL(eq, var, val)
     end function
 end module

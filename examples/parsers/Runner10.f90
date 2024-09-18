@@ -1,4 +1,5 @@
-module test_symengine
+#ifdef _INCLUDE_SYMENGINE
+module runner10
     use parser_abstract
     use parameters
     use symengine
@@ -8,8 +9,8 @@ module test_symengine
     private
     
     type(Symbol) :: var(11)
-    type(RealDouble) :: x(11)
-    type(Basic) :: f
+    type(RealDouble) :: val(11)
+    type(Basic) :: func
     
     type, extends(parser_x), public :: symengine_parser
         private
@@ -30,30 +31,31 @@ contains
     
     subroutine initialize()
         var = [Symbol('x'), Symbol('y'), Symbol('z'), Symbol('x1'), Symbol('x2'), &
-            Symbol('a'), Symbol('b'), Symbol('c'), Symbol('d'), Symbol('e'), Symbol('f')]
-        x(1) = RealDouble(0.175)
-        x(2) = RealDouble(0.110)
-        x(3) = RealDouble(0.900)
-        x(4) = RealDouble(0.508)
-        x(5) = RealDouble(30.000)
-        x(6) = RealDouble(0.900)
-        x(7) = RealDouble(0.100)
-        x(8) = RealDouble(0.110)
-        x(9) = RealDouble(0.120)
-        x(10) = RealDouble(0.120)
-        x(11) = RealDouble(0.140)
+            Symbol('a'), Symbol('b'), Symbol('c'), Symbol('d'), Symbol('e'), Symbol('func')]
+        val(1) = RealDouble(0.175)
+        val(2) = RealDouble(0.110)
+        val(3) = RealDouble(0.900)
+        val(4) = RealDouble(0.508)
+        val(5) = RealDouble(30.000)
+        val(6) = RealDouble(0.900)
+        val(7) = RealDouble(0.100)
+        val(8) = RealDouble(0.110)
+        val(9) = RealDouble(0.120)
+        val(10) = RealDouble(0.120)
+        val(11) = RealDouble(0.140)
     end subroutine
     
     real(r8) function compute(eq)
         character(*), intent(in) :: eq
         !private
-        type(Basic) :: f
+        type(Basic) :: func
         integer :: j
-        f = parse(eq)
+        func = parse(eq)
         do j=1,11
-            f = f%subs(var(j), x(j))
+            func = func%subs(var(j), val(j))
         end do
-        f = f%evalf()
-        compute = f%dbl()
+        func = func%evalf()
+        compute = func%dbl()
     end function
 end module
+#endif

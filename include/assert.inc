@@ -28,7 +28,16 @@
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   */
 # define ESCAPE achar(27)
-#include <concat.inc>
+# ifdef __GFORTRAN__
+#    define MACRO_SAME(A) A
+#    define MACRO_CAT2(A,B) MACRO_SAME(A)B
+#    define MACRO_CAT3(A,B,C) MACRO_CAT2(A,B)C
+#    define MACRO_STRINGIFY(A) "A"
+# else
+#    define MACRO_CAT2(A,B) A ## B
+#    define MACRO_CAT3(A,B,C) A ## B ## C
+#    define MACRO_STRINGIFY(A) #A
+# endif
 # define LOWERCASE(sin, sout)                                          \
 do i = 1, len(sin);                                                    \
 j = iachar(sin(i:i));                                                  \
@@ -160,7 +169,6 @@ END_BLOCK(.false., condition, .true.)
 # define EXPECT_SAME(val1, val2) \
 START_BLOCK(EXPECT_SAME) \
 block ; \
-integer(kind=1), allocatable :: mold(:); \
 logical :: equals_; \
 equals_ = same_type_as(val1, val2) .and. loc(val1) == loc(val2) .and. storage_size(val1) == storage_size(val2) ;\
 if(equals_) then ; \
@@ -169,7 +177,6 @@ end block
 # define EXPECT_NSAME(val1, val2) \
 START_BLOCK(EXPECT_NSAME) \
 block ; \
-integer(kind=1), allocatable :: mold(:); \
 logical :: equals_; \
 equals_ = same_type_as(val1, val2) .and. loc(val1) == loc(val2) .and. storage_size(val1) == storage_size(val2) ;\
 if(.not. equals_) then; \

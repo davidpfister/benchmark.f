@@ -47,10 +47,21 @@ name = "uppercasing"
 source-dir = "examples/uppercasing"
 main = "UpperCasing.f90"
 
-# [[example]]
-# name = "parsers"
-# source-dir = "examples/parsers"
-# main = "Parsers.f90"
+[[example]]
+name = "parsers"
+source-dir = "examples/parsers"
+main = "Parsers.f90"
+[example.dependencies]
+equationparser = {path = "./examples/parsers/equationparser"}
+evaluate = {path = "./examples/parsers/evaluate"}
+FEQParse = {path = "./examples/parsers/feq-parse"}
+function_parser = {path = "./examples/parsers/fortran_function_parser"}
+interpreter = {path = "./examples/parsers/fortran_parser"}
+fortranparser = {path = "./examples/parsers/FortranParser"}
+fparser = {path = "./examples/parsers/fparser"}
+fee = {path = "./examples/parsers/FunctionParser"}
+M_calculator = {path = "./examples/parsers/M_calculator"}
+# symengine = {path = "./examples/parsers/symengine"}
 
 [[test]]
 name = "test"

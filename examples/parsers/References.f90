@@ -1,11 +1,11 @@
-module test_reference
+module references
     use parser_abstract
     use parameters
     
     implicit none; private
     
     integer :: count = 0
-    character(200) :: eqstring = ' '
+    character(200) :: currenteq = ' '
     
     type, extends(parser_x), public :: reference
         procedure(double precision), nopass, pointer :: ptr
@@ -55,9 +55,9 @@ module test_reference
     
     real(r8) function compute(eq) result(res)
         character(*), intent(in) :: eq
-        if (eqstring /= eq) then
+        if (currenteq /= eq) then
             count = count + 1
-            eqstring = eq
+            currenteq = eq
         end if
         res = refs(count)%ptr(eq)
     end function

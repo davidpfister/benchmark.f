@@ -1,16 +1,19 @@
 module parser_factory
     use parser_abstract
-    use test_evaluate
-    use test_M_calculator
-    use test_FEQParse
-    use test_function_parser
-    use test_interpreter
-    use test_fortranparser
-    use test_fparser
-    use test_fee
-    use test_symengine
-    use test_reference
-    use test_equationparser
+    use runner1
+    use runner2
+    use runner3
+    use runner4
+    use runner5
+    use runner6
+    use runner7
+    use runner8
+    use runner9
+#ifdef _INCLUDE_SYMENGINE
+    use runner10
+#endif
+    use references
+    
     
     implicit none
     
@@ -83,7 +86,9 @@ contains
         elseif (parser == 'fee') then
             allocate (e, source=fee_parser())
         elseif (parser == 'symengine') then
+#ifdef _INCLUDE_SYMENGINE
             allocate (e, source=symengine_parser())
+#endif
         elseif (parser == 'equationparser') then
             allocate (e, source=equation_parser())
         elseif (parser == 'reference') then

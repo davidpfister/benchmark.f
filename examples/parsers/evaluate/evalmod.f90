@@ -139,7 +139,7 @@ contains
         type(item):: token(numtok) ! List of tokens ( a token is an operator or
         ! operand) in postfix order
         type(item) :: x, junk, tok
-
+        integer :: i, icp, insp, isum, ntok
         ierr = 0
         token(1:)%char = ' '
 
@@ -414,7 +414,7 @@ contains
         character(len=*) :: str
         character :: cop, chtemp
         type(item) :: tok
-        integer :: icp
+        integer :: icp, isp, inext, ipos, lstr, ntok
 
         lstr = len_trim(str)
         if (lstr == 0) then
@@ -485,7 +485,7 @@ contains
                 str = str(ipos:)
             case ('+', '-')
                 chtemp = uppercase(str(ipos - 1:ipos - 1))
-                if (is_letter(str(1:1)) == .true. .or. chtemp /= 'E') then
+                if (is_letter(str(1:1)) .eqv. .true. .or. chtemp /= 'E') then
                     tok%char = str(1:ipos - 1)
                     tok%type = 'S'
                     icp = 0
@@ -593,7 +593,7 @@ contains
         character(len=*) :: sym
         character(len=len_trim(sym)) :: usym
         complex(kc8) :: val
-
+        integer :: i
         ierr = 0
         if (nparams == 0) then ! Initialize symbol table
             params(1)%symbol = 'PI'
@@ -605,7 +605,7 @@ contains
 
 ! Assign val to sym if sym is already in symbol table
         usym = uppercase(sym)
-        if (is_letter(sym(1:1)) == .false. .or. len_trim(sym) > 24) then
+        if (is_letter(sym(1:1)) .eqv. .false. .or. len_trim(sym) > 24) then
             ierr = 11
             write (*, *) 'Error: symbol ', trim(sym), ' has improper format'
             write (*, *)
@@ -722,10 +722,10 @@ contains
         character(len=*):: xinchar
         complex(kc8) :: cval
         real(kr8) :: rval
-
+        integer :: ios
         ierr = 0
 
-        if (is_letter(xinchar(1:1)) == .true.) then ! xinchar is a symbol
+        if (is_letter(xinchar(1:1)) .eqv. .true.) then ! xinchar is a symbol
             call getparam(xinchar, cval)
         else ! xinchar is a number string
             call value(xinchar, rval, ios) ! rval is the value of xinchar
@@ -796,10 +796,10 @@ contains
         character(len=*) :: sym
         character(len=len_trim(sym)) :: usym
         complex(kc8) :: var
-
+        integer :: ifind, j
         ierr = 0
         sym = adjustl(sym)
-        if (is_letter(sym(1:1)) == .false. .or. len_trim(sym) > 24) then
+        if (is_letter(sym(1:1)) .eqv. .false. .or. len_trim(sym) > 24) then
             ierr = 11
             write (*, *) 'Error: symbol ', trim(sym), ' has incorrect format'
             write (*, *)
@@ -861,7 +861,7 @@ contains
         complex(kc8) :: vard
 
         call getparam_dc(sym, vard)
-        var = real(vard)
+        var = real(vard, kr4)
 
     end subroutine getparam_sr
 
@@ -896,7 +896,7 @@ contains
 !**********************************************************************
 
     subroutine EVALEQN(eqn) ! Evaluate an equation
-
+        integer :: nargs
         character(len=*) :: eqn
         character(len=len(eqn)) :: args(2)
         complex(kc8) :: val
@@ -910,7 +910,7 @@ contains
 !**********************************************************************
 
     subroutine LISTVAR ! List all variables and their values
-
+        integer :: i
         write (*, '(/a)') ' VARIABLE LIST:'
         if (nparams == 0) then ! Initialize symbol table
             params(1)%symbol = 'PI'
