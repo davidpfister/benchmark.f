@@ -38,9 +38,11 @@ module parser_runner
 
         associate(x => current_parser%interpretor)
             res = x%compute(trim(eq))
+#ifdef _DEBUG
             if (abs(results(current_parser%index)- res > 0.001_r8)) then 
                 pause
             end if
+#endif
         end associate
     end subroutine
 end module

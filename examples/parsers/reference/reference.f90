@@ -5,6 +5,7 @@ module test_reference
     implicit none; private
     
     integer :: count = 0
+    character(200) :: eqstring = ' '
     
     type, extends(parser_x), public :: reference
         procedure(double precision), nopass, pointer :: ptr
@@ -54,7 +55,10 @@ module test_reference
     
     real(r8) function compute(eq) result(res)
         character(*), intent(in) :: eq
-        count = count + 1
+        if (eqstring /= eq) then
+            count = count + 1
+            eqstring = eq
+        end if
         res = refs(count)%ptr(eq)
     end function
     

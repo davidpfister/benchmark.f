@@ -1,3 +1,4 @@
+#include <benchmark.inc>
 module rhofunc
     implicit none
     
@@ -14,10 +15,8 @@ module rhofunc
         class(*), intent(in) :: treshold
         class(*), intent(in)  :: m
         
-        select type(treshold)
-        type is (real(rp))
-            select type(m)
-            type is (integer)
+        cast(treshold, real(rp))
+            cast(m, integer)
                 block
 #else
         real(rp), intent(in) :: treshold
@@ -49,8 +48,8 @@ module rhofunc
         end do
 #ifndef __INTEL_COMPILER
                 end block
-            end select
-        end select
+            endcast
+        endcast
 #endif
     end subroutine
     
@@ -58,10 +57,8 @@ module rhofunc
 #ifndef __INTEL_COMPILER
         class(*), intent(in) :: treshold
         class(*), intent(in)  :: m
-        select type(treshold)
-        type is (real(rp))
-            select type(m)
-            type is (integer)
+        cast(treshold, real(rp))
+            cast(m, integer)
                 block
 #else
         real(rp), intent(in) :: treshold
@@ -96,8 +93,8 @@ module rhofunc
         end do
 #ifndef __INTEL_COMPILER
                 end block
-            end select
-        end select
+            endcast
+        endcast
 #endif
     end subroutine
     
@@ -105,7 +102,7 @@ module rhofunc
         real(rp), intent(in) :: x,y
         if (x > 0.6_rp .and. x < 0.8_rp .and. y > 0.6_rp .and. y < 0.8_rp) then
             rho = 1.0_rp
-        else if (x> 0.2_rp .and. x < 0.4_rp .and. y > 0.2_rp .and. y < 0.4_rp) then
+        else if (x > 0.2_rp .and. x < 0.4_rp .and. y > 0.2_rp .and. y < 0.4_rp) then
             rho = -1.0_rp
         else
             rho = 0.0_rp

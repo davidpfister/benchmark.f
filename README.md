@@ -248,15 +248,15 @@ Distributed under the MIT License.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/davidpfister/benchmark.f.svg?style=for-the-badge
 [contributors-url]: https://github.com/davidpfister/benchmark.f/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
+[forks-shield]: https://img.shields.io/github/forks/davidpfister/benchmark.f.svg?style=for-the-badge
 [forks-url]: https://github.com/davidpfister/benchmark.f/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
+[stars-shield]: https://img.shields.io/github/stars/davidpfister/benchmark.f.svg?style=for-the-badge
 [stars-url]: https://github.com/davidpfister/benchmark.f/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
+[issues-shield]: https://img.shields.io/github/issues/davidpfister/benchmark.f.svg?style=for-the-badge
 [issues-url]: https://github.com/davidpfister/benchmark.f/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/davidpfister/benchmark.f.svg?style=for-the-badge
 [license-url]: https://github.com/davidpfister/benchmark.f/blob/master/LICENSE
 [product-screenshot]: doc/images/screenshot.png
 [gfortran]: https://img.shields.io/badge/gfortran-000000?style=for-the-badge&logo=gnu&logoColor=white

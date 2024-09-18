@@ -13,17 +13,30 @@ module allocation_library
     contains
     
     subroutine buffer_reallocation(bs, n)
-        integer, intent(in) :: bs
-        integer, intent(in) :: n
+#ifndef __INTEL_COMPILER    
+        class(*), intent(in) :: bs
+        class(*), intent(in) :: n
+#else
+        integer(i4), intent(in) :: bs
+        integer(i4), intent(in) :: n
+#endif
         !private
         integer, allocatable :: array(:)
         integer :: i, j
-        
+#ifndef __INTEL_COMPILER  
+        select type(n)
+        type is (integer(i4))
+        select type(bs)
+        type is (integer(i4))
+#endif         
         j = 0
         do i = 0, n
             call add_to(array, i, j, bs, finished = (i == n))
         end do
-        
+#ifndef __INTEL_COMPILER 
+        end select
+        end select
+#endif         
     contains
     
         pure subroutine add_to(vec, val, n, chunk_size, finished)
@@ -64,36 +77,66 @@ module allocation_library
     end subroutine
     
     subroutine naive_reallocation(n)
-        integer, intent(in) :: n
+#ifndef __INTEL_COMPILER    
+        class(*), intent(in) :: n
+#else
+        integer(i4), intent(in) :: n
+#endif
         !private 
         integer, allocatable :: array(:)
         integer :: i
-        
+#ifndef __INTEL_COMPILER  
+        select type(n)
+        type is (integer(i4))
+#endif           
         allocate(array(0))
         do i = 1, n
             array = [array, i]
         end do
+#ifndef __INTEL_COMPILER 
+    end select
+#endif 
     end subroutine
     
     subroutine array_constructor(n)
-        integer, intent(in) :: n
+#ifndef __INTEL_COMPILER    
+        class(*), intent(in) :: n
+#else
+        integer(i4), intent(in) :: n
+#endif
         !private 
         integer :: i
-        integer :: array(n) 
-        
-        array = [(i, i = 1,n)]    
+        integer, allocatable :: array(:) 
+#ifndef __INTEL_COMPILER  
+        select type(n)
+        type is (integer(i4))
+#endif       
+        array = [(i, i = 1,n)]   
+#ifndef __INTEL_COMPILER 
+        end select
+#endif 
     end subroutine
     
     subroutine array_preallocation(n)
-        integer, intent(in) :: n
+#ifndef __INTEL_COMPILER    
+        class(*), intent(in) :: n
+#else
+        integer(i4), intent(in) :: n
+#endif
         !private 
         integer, allocatable :: array(:)
         integer :: i
-        
+#ifndef __INTEL_COMPILER  
+        select type(n)
+        type is (integer(i4))
+#endif           
         allocate(array(n))
         do i = 1, n
             array(i) = i
         end do
+#ifndef __INTEL_COMPILER 
+        end select
+#endif 
     end subroutine
         
 end module

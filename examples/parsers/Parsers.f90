@@ -11,7 +11,7 @@ program parsers
         integer :: i, j, k
         type(runner) :: br
 
-        do j = 1, 11
+        do j = 2, 11
             call current_parser%initialize(eq_parsers(j))
             br%name = trim(eq_parsers(j))
             do i = 1, 23
