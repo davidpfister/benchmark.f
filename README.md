@@ -169,7 +169,7 @@ and generates this kind of table:
      |test_poisson(1.0d-6,30)                        |            99250.000 us|            +/- 7588.643|
      |test_poisson(.10E-05,30)                       |           176550.000 us|          +/- 135795.609|
 
-_For more examples, please refer to the [Documentation](doc/html/index.html)_
+_For more examples, please refer to the [Documentation](https://davidpfister.github.io/benchmark.f.github.io/examples_toc.html)_
 
 The library takes care of everything else for you
 - Collection of system information
