@@ -1,0 +1,22 @@
+@pretiffy
+option clean --all
+system fprettify .\app\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations
+system fprettify .\src\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations
+system fprettify .\tests\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations
+
+@clean
+option clean --all
+
+@rebuild
+system rmdir /s /q build
+option build --flag '-ffree-line-length-none'
+
+@build
+option build --flag '-ffree-line-length-none'
+
+@test
+options test --flag '-ffree-line-length-none' '-D_QUIET' 
+
+@doc
+option clean --all
+system cd ./doc & doxygen ./Doxyfile.in & cd ..
