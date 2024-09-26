@@ -215,7 +215,7 @@ minimal back-and-forth.
 
 ### Pull request
 
-If you have a suggestion that would make this project better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+If you have a suggestion that would make this project better, please create a pull request. You can also simply open an issue with the tag "enhancement".
 Don't forget to give the project a star! Thanks again!
 1. Open a [new issue](https://github.com/davidpfister/benchmark.f/issues/new) to
    describe a bug or propose a new feature.
@@ -224,11 +224,10 @@ Don't forget to give the project a star! Thanks again!
    **When actively working on code towards a PR, please assign yourself to the
    issue on GitHub.**
    This is good collaborative practice to avoid duplicated effort and also inform others what you are currently working on.
-3. Fork the Project
-4. Create your Feature Branch (```git checkout -b feature/AmazingFeature```)
-5. Commit your Changes (```git commit -m 'Add some AmazingFeature'```)
-6. Push to the Branch (```git push origin feature/AmazingFeature```)
-7. Open a Pull Request with your contribution.
+3. Create your Feature Branch (```git checkout -b feature/AmazingFeature```)
+4. Commit your Changes (```git commit -m 'Add some AmazingFeature'```)
+5. Push to the Branch (```git push origin feature/AmazingFeature```)
+6. Open a Pull Request with your contribution.
    The body of the PR should at least include a bullet-point summary of the
    changes, and a detailed description is encouraged.
    If the PR completely addresses the issue you opened in step 1, include in
@@ -260,7 +259,7 @@ Distributed under the MIT License.
 [issues-shield]: https://img.shields.io/github/issues/davidpfister/benchmark.f.svg?style=for-the-badge
 [issues-url]: https://github.com/davidpfister/benchmark.f/issues
 [license-shield]: https://img.shields.io/github/license/davidpfister/benchmark.f.svg?style=for-the-badge
-[license-url]: https://github.com/davidpfister/benchmark.f/blob/master/LICENSE
+[license-url]: https://github.com/davidpfister/benchmark.f/master/LICENSE
 [product-screenshot]: doc/images/screenshot.png
 [gfortran]: https://img.shields.io/badge/gfortran-000000?style=for-the-badge&logo=gnu&logoColor=white
 [gfortran-url]: https://gcc.gnu.org/wiki/GFortran
