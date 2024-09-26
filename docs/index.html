@@ -9,7 +9,6 @@
     <meta name="generator" content="Doxygen 1.11.0"/>
   <title>Benchmark: Benchmark</title>
   <link href="tabs.css" rel="stylesheet" type="text/css"/>
-  <link rel="icon" type="image/svg+xml" href="logo.drawio.svg"/>
   <script type="text/javascript" src="jquery.js"></script>
   <script type="text/javascript" src="dynsections.js"></script>
   <script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
@@ -17,7 +16,6 @@
   <script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
   <script type="text/javascript" src="doxygen-awesome-interactive-toc.js"></script>
   <script type="text/javascript" src="doxygen-awesome-tabs.js"></script>
-  <script type="text/javascript" src="toggle-alternative-theme.js"></script>
   <script type="text/javascript">
       DoxygenAwesomeFragmentCopyButton.init()
       DoxygenAwesomeDarkModeToggle.init()
@@ -33,10 +31,17 @@
   <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
+  <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  extensions: ["tex2jax.js"],
+  jax: ["input/TeX","output/HTML-CSS"],
+});
+</script>
+<script type="text/javascript" async="async" src="./mathjax/MathJax.js"></script>
   <link href="doxygen.css" rel="stylesheet" type="text/css" />
   <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
   <link rel="stylesheet" href="devibeans.css">
-  <script src="highlight.min.js"></script>
+  <script src="highlight.js"></script>
 <script>
 $(function() {
 	hljs.configure({useBR: false});
@@ -257,12 +262,12 @@ Usage</h2>
 <div class="line"><span class="keywordtype">type</span>(runner) :: br</div>
 <div class="line"> </div>
 <div class="line">benchmark(br, run(1.0d-6, 30, test_function))</div>
-</div><!-- fragment --><p> and generates this kind of table: </p><pre class="fragment"> |              Method Name                      |          Mean          |    Standard Deviation  |
- |_______________________________________________|________________________|________________________|
- |test_poisson(1.0d-6,30)                        |           217350.000 us|          +/- 161306.626|
- |test_poisson(1.0d-6,30)                        |            99250.000 us|            +/- 7588.643|
- |test_poisson(.10E-05,30)                       |           176550.000 us|          +/- 135795.609|
-</pre><p> <em>For more examples, please refer to the <a href="https://davidpfister.github.io/benchmark.f/examples_toc.html">Documentation</a></em></p>
+</div><!-- fragment --><p> and generates this kind of table: </p><pre class="fragment"> |         Method Name      |          Mean          |    Standard Deviation  |
+ |__________________________|________________________|________________________|
+ |test_poisson(1.0d-6,30)   |           217350.000 us|          +/- 161306.626|
+ |test_poisson(1.0d-6,30)   |            99250.000 us|            +/- 7588.643|
+ |test_poisson(.10E-05,30)  |           176550.000 us|          +/- 135795.609|
+</pre><p> <em>For more examples, please refer to the <a href="https://davidpfister.github.io/benchmark.f.github.io/examples_toc.html">Documentation</a></em></p>
 <p>The library takes care of everything else for you</p><ul>
 <li>Collection of system information</li>
 <li>Collection of compiler information</li>
@@ -272,7 +277,7 @@ Usage</h2>
 <h3><a class="anchor" id="autotoc_md23"></a>
 Contributing</h3>
 <p>Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are <b>greatly appreciated</b>. So, thank you for considering contributing to <em>benchmark.f</em>. Please review and follow these guidelines to make the contribution process simple and effective for all involved. It will help communicate that you respect the time of the developers. In return, the developers will help address your problem, evaluate changes, and guide you through your pull requests.</p>
-<p>By contributing to <em>benchmark.f</em>, you certify that you own or are allowed to share the content of your contribution under the [same license](LICENSE).</p>
+<p>By contributing to <em>benchmark.f</em>, you certify that you own or are allowed to share the content of your contribution under the same license.</p>
 <h3><a class="anchor" id="autotoc_md24"></a>
 Style</h3>
 <p>Please follow the style used in this repository for any Fortran code that you contribute. This allows focusing on substance rather than style.</p>

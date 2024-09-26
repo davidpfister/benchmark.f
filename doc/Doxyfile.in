@@ -1390,7 +1390,9 @@ HTML_EXTRA_FILES       = ./config//doxygen-awesome-css-2.2.0/doxygen-awesome-dar
                          ./config//doxygen-awesome-css-2.2.0/doxygen-awesome-fragment-copy-button.js \
                          ./config//doxygen-awesome-css-2.2.0/doxygen-awesome-paragraph-link.js \
                          ./config//doxygen-awesome-css-2.2.0/doxygen-awesome-interactive-toc.js \
-                         ./config//highlight.min.js \
+                         ./config//doxygen-awesome-css-2.2.0/doxygen-awesome-tabs.js \
+                         ./config//highlight.js \
+                         ./config//MathJax.js \
                          ./config//devibeans.css
 
 # The HTML_COLORSTYLE tag can be used to specify if the generated HTML output
@@ -1769,7 +1771,7 @@ FORMULA_FONTSIZE       = 14
 # The default value is: NO.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-USE_MATHJAX            = NO
+USE_MATHJAX            = YES
 
 # With MATHJAX_VERSION it is possible to specify the MathJax version to be used.
 # Note that the different versions of MathJax have different requirements with
@@ -1811,7 +1813,7 @@ MATHJAX_FORMAT         = HTML-CSS
 # - in case of MathJax version 3: https://cdn.jsdelivr.net/npm/mathjax@3
 # This tag requires that the tag USE_MATHJAX is set to YES.
 
-MATHJAX_RELPATH        = http://cdn.mathjax.org/mathjax/latest
+MATHJAX_RELPATH        = ./mathjax
 
 # The MATHJAX_EXTENSIONS tag can be used to specify one or more MathJax
 # extension names that should be enabled during MathJax rendering. For example

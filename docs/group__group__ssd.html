@@ -9,7 +9,6 @@
     <meta name="generator" content="Doxygen 1.11.0"/>
   <title>Benchmark: benchmark_steady_state_detection</title>
   <link href="tabs.css" rel="stylesheet" type="text/css"/>
-  <link rel="icon" type="image/svg+xml" href="logo.drawio.svg"/>
   <script type="text/javascript" src="jquery.js"></script>
   <script type="text/javascript" src="dynsections.js"></script>
   <script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
@@ -17,7 +16,6 @@
   <script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
   <script type="text/javascript" src="doxygen-awesome-interactive-toc.js"></script>
   <script type="text/javascript" src="doxygen-awesome-tabs.js"></script>
-  <script type="text/javascript" src="toggle-alternative-theme.js"></script>
   <script type="text/javascript">
       DoxygenAwesomeFragmentCopyButton.init()
       DoxygenAwesomeDarkModeToggle.init()
@@ -33,10 +31,17 @@
   <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
+  <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  extensions: ["tex2jax.js"],
+  jax: ["input/TeX","output/HTML-CSS"],
+});
+</script>
+<script type="text/javascript" async="async" src="./mathjax/MathJax.js"></script>
   <link href="doxygen.css" rel="stylesheet" type="text/css" />
   <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
   <link rel="stylesheet" href="devibeans.css">
-  <script src="highlight.min.js"></script>
+  <script src="highlight.js"></script>
 <script>
 $(function() {
 	hljs.configure({useBR: false});
@@ -239,21 +244,21 @@ $(function(){initNavTree('group__group__ssd.html',''); initResizable(true); });
   </dd>
 </dl>
 <p>The mean is defined as:   </p><p class="formulaDsp">
-<img class="formulaDsp" alt="\[
+\[
          \mu = \frac{1}{n}\left(\sum x-m\sum i\right)
-         \]" src="form_0.png" width="182" height="37"/>
+         \]
 </p>
-<p> where <img class="formulaInl" alt="$m$" src="form_1.png" width="18" height="9"/> is the slope of a linear drift. In the present case, <img class="formulaInl" alt="$m=0$" src="form_2.png" width="49" height="12"/> It comes that the standard deviation is given by   </p><p class="formulaDsp">
-<img class="formulaDsp" alt="\[
+<p> where \(m\) is the slope of a linear drift. In the present case, \(m=0\) It comes that the standard deviation is given by   </p><p class="formulaDsp">
+\[
          \sigma = \sqrt{\frac{1}{n-2}\sum (x-\mu)^2}
-         \]" src="form_3.png" width="189" height="44"/>
+         \]
 </p>
-<p> At this point along with a specified Student-t critical or threshold value at a particu100 lar significance level α and degrees-of-freedom n, all of the necessary information is available to test the null-hypothesis that the process signal is steady or is stationary about <img class="formulaInl" alt="$\mu$" src="form_4.png" width="12" height="12"/>   </p><p class="formulaDsp">
-<img class="formulaDsp" alt="\[
+<p> At this point along with a specified Student-t critical or threshold value at a particu100 lar significance level α and degrees-of-freedom n, all of the necessary information is available to test the null-hypothesis that the process signal is steady or is stationary about \(\mu\)   </p><p class="formulaDsp">
+\[
          if\  x - \mu &lt; t_{crit}-\sigma\ , then\  1,\  else\  0
-         \]" src="form_5.png" width="271" height="18"/>
+         \]
 </p>
-<p> <img class="formulaInl" alt="$t_{crit}$" src="form_6.png" width="32" height="16"/> is evaluated for a given significance level and a given degree of freedom using the t-distribution.</p>
+<p> \(t_{crit}\) is evaluated for a given significance level and a given degree of freedom using the t-distribution.</p>
 <p><b>Remarks</b> </p>
 
 <p class="definition">Definition at line <a class="el" href="_steady_state_detection_8f90_source.html#l00059">59</a> of file <a class="el" href="_steady_state_detection_8f90_source.html">SteadyStateDetection.f90</a>.</p>

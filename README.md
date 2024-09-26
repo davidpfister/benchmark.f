@@ -163,11 +163,11 @@ benchmark(br, run(1.0d-6, 30, test_function))
 ```
 and generates this kind of table: 
 
-     |              Method Name                      |          Mean          |    Standard Deviation  |
-     |_______________________________________________|________________________|________________________|
-     |test_poisson(1.0d-6,30)                        |           217350.000 us|          +/- 161306.626|
-     |test_poisson(1.0d-6,30)                        |            99250.000 us|            +/- 7588.643|
-     |test_poisson(.10E-05,30)                       |           176550.000 us|          +/- 135795.609|
+     |         Method Name      |          Mean          |    Standard Deviation  |
+     |__________________________|________________________|________________________|
+     |test_poisson(1.0d-6,30)   |           217350.000 us|          +/- 161306.626|
+     |test_poisson(1.0d-6,30)   |            99250.000 us|            +/- 7588.643|
+     |test_poisson(.10E-05,30)  |           176550.000 us|          +/- 135795.609|
 
 _For more examples, please refer to the [Documentation](https://davidpfister.github.io/benchmark.f.github.io/examples_toc.html)_
 
@@ -183,7 +183,7 @@ The library takes care of everything else for you
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**. So, thank you for considering contributing to *benchmark.f*.
 Please review and follow these guidelines to make the contribution process simple and effective for all involved. It will help communicate that you respect the time of the developers. In return, the developers will help address your problem, evaluate changes, and guide you through your pull requests.
 
-By contributing to *benchmark.f*, you certify that you own or are allowed to share the content of your contribution under the [same license](LICENSE).
+By contributing to *benchmark.f*, you certify that you own or are allowed to share the content of your contribution under the same license.
 
 ### Style
 
@@ -249,7 +249,6 @@ In brief,
 Distributed under the MIT License.
 
 <!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/davidpfister/benchmark.f.svg?style=for-the-badge
 [contributors-url]: https://github.com/davidpfister/benchmark.f/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/davidpfister/benchmark.f.svg?style=for-the-badge

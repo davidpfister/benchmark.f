@@ -9,7 +9,6 @@
     <meta name="generator" content="Doxygen 1.11.0"/>
   <title>Benchmark: Upper Case</title>
   <link href="tabs.css" rel="stylesheet" type="text/css"/>
-  <link rel="icon" type="image/svg+xml" href="logo.drawio.svg"/>
   <script type="text/javascript" src="jquery.js"></script>
   <script type="text/javascript" src="dynsections.js"></script>
   <script type="text/javascript" src="doxygen-awesome-darkmode-toggle.js"></script>
@@ -17,7 +16,6 @@
   <script type="text/javascript" src="doxygen-awesome-paragraph-link.js"></script>
   <script type="text/javascript" src="doxygen-awesome-interactive-toc.js"></script>
   <script type="text/javascript" src="doxygen-awesome-tabs.js"></script>
-  <script type="text/javascript" src="toggle-alternative-theme.js"></script>
   <script type="text/javascript">
       DoxygenAwesomeFragmentCopyButton.init()
       DoxygenAwesomeDarkModeToggle.init()
@@ -33,10 +31,17 @@
   <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
+  <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  extensions: ["tex2jax.js"],
+  jax: ["input/TeX","output/HTML-CSS"],
+});
+</script>
+<script type="text/javascript" async="async" src="./mathjax/MathJax.js"></script>
   <link href="doxygen.css" rel="stylesheet" type="text/css" />
   <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
   <link rel="stylesheet" href="devibeans.css">
-  <script src="highlight.min.js"></script>
+  <script src="highlight.js"></script>
 <script>
 $(function() {
 	hljs.configure({useBR: false});
@@ -131,29 +136,29 @@ $(function(){initNavTree('example_upper.html',''); initResizable(true); });
 <div class="textblock"><p><a class="anchor" id="md__c_1_2_users_2dev_2_documents_2_git_hub_2sandbox_2benchmark_8f_2doc_2articles_2_example_8_upper"></a> This examples demonstrate for pieces of code to convert a text into upper case. It is based on the discussion <a href="https://github.com/fortran-lang/stdlib/issues/703">https://github.com/fortran-lang/stdlib/issues/703</a></p>
 <p>This example demonstrate the use of the <code>caller</code> functionality and casting into explicit interface.</p>
 <div class="fragment"><div class="line">block</div>
-<div class="line">    <span class="keywordtype">integer</span> :: i</div>
-<div class="line">    <span class="keywordtype">type</span>(runner) :: br   </div>
-<div class="line">    <span class="keywordtype">type</span>(string) :: s(3)</div>
+<div class="line">    integer :: i</div>
+<div class="line">    type(runner) :: br   </div>
+<div class="line">    type(string) :: s(3)</div>
 <div class="line"> </div>
-<div class="line">    s(1) = <span class="stringliteral">&#39;abcdefghijklmnopqrstuvwxyz&#39;</span></div>
-<div class="line">    s(2) = <span class="stringliteral">&#39;ABCDEFGHIJKLMNOPQRSTUVWXYZ&#39;</span></div>
-<div class="line">    s(3) = <span class="stringliteral">&#39;Lorem ipsum dolor sit amet, consectetur adipiscing elit, &#39;</span>  <span class="comment">         // &amp;</span></div>
-<div class="line"><span class="comment"></span>                    <span class="stringliteral">&#39;sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.&#39;</span><span class="comment">  // &amp;</span></div>
-<div class="line"><span class="comment"></span>                    <span class="stringliteral">&#39; Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris&#39;</span><span class="comment"> // &amp;</span></div>
-<div class="line"><span class="comment"></span>                    <span class="stringliteral">&#39; nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in &#39;</span><span class="comment"> // &amp;</span></div>
-<div class="line"><span class="comment"></span>                    <span class="stringliteral">&#39;reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla &#39;</span><span class="comment">// &amp;</span></div>
-<div class="line"><span class="comment"></span>                    <span class="stringliteral">&#39;pariatur. Excepteur sint occaecat cupidatat non proident, sunt in &#39;</span><span class="comment">  // &amp;</span></div>
-<div class="line"><span class="comment"></span>                    <span class="stringliteral">&#39;culpa qui officia deserunt mollit anim id est laborum&#39;</span></div>
+<div class="line">    s(1) = &#39;abcdefghijklmnopqrstuvwxyz&#39;</div>
+<div class="line">    s(2) = &#39;ABCDEFGHIJKLMNOPQRSTUVWXYZ&#39;</div>
+<div class="line">    s(3) = &#39;Lorem ipsum dolor sit amet, consectetur adipiscing elit, &#39;           // &amp;</div>
+<div class="line">                    &#39;sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.&#39;  // &amp;</div>
+<div class="line">                    &#39; Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris&#39; // &amp;</div>
+<div class="line">                    &#39; nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in &#39; // &amp;</div>
+<div class="line">                    &#39;reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla &#39;// &amp;</div>
+<div class="line">                    &#39;pariatur. Excepteur sint occaecat cupidatat non proident, sunt in &#39;  // &amp;</div>
+<div class="line">                    &#39;culpa qui officia deserunt mollit anim id est laborum&#39;</div>
 <div class="line"> </div>
 <div class="line"> </div>
-<div class="line">    <span class="keyword">call </span>br%set_caller(upper_caller)</div>
-<div class="line">    <span class="keywordflow">do</span> i = 1, 3</div>
-<div class="line">        br%name = <span class="stringliteral">&#39;upper1&#39;</span>; <span class="keyword">call </span>br%run(s(i), upper1)</div>
-<div class="line">        br%name = <span class="stringliteral">&#39;upper2&#39;</span>; <span class="keyword">call </span>br%run(s(i), upper2)</div>
-<div class="line">        br%name = <span class="stringliteral">&#39;upper3&#39;</span>; <span class="keyword">call </span>br%run(s(i), upper3)</div>
-<div class="line"><span class="keywordflow">    end do</span></div>
+<div class="line">    call br%set_caller(upper_caller)</div>
+<div class="line">    do i = 1, 3</div>
+<div class="line">        br%name = &#39;upper1&#39;; call br%run(s(i), upper1)</div>
+<div class="line">        br%name = &#39;upper2&#39;; call br%run(s(i), upper2)</div>
+<div class="line">        br%name = &#39;upper3&#39;; call br%run(s(i), upper3)</div>
+<div class="line">    end do</div>
 <div class="line"> </div>
-<div class="line"><span class="keyword">end </span>block</div>
+<div class="line">end block</div>
 </div><!-- fragment --><p>The results are as follows:</p>
 <center> <table class="markdownTable">
 <tr class="markdownTableHead">
