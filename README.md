@@ -27,9 +27,11 @@
 # Introduction
 <!-- ABOUT THE PROJECT -->
 ## About the Project
+<center>
 
-[![Benchmark Screen Shot][product-screenshot]](./images/screenshot.png)
+![Benchmark Screen Shot](https://github.com/davidpfister/benchmark.f/blob/master/.dox/images/screenshot.png?raw=true)
 
+</center>
 Fortran is the fastest language on earth, so they say. But can we prove it? <br><br>
 And despite its legendary speed when it comes to crunching numbers, Fortran is no exception when it comes to writing code: it's also very possible to write terribly slow pieces of code. This is where benchmarking different implementations of the same function can help developing better and faster algorithms.  
 
@@ -260,7 +262,6 @@ Distributed under the MIT License.
 [issues-url]: https://github.com/davidpfister/benchmark.f/issues
 [license-shield]: https://img.shields.io/github/license/davidpfister/benchmark.f.svg?style=for-the-badge
 [license-url]: https://github.com/davidpfister/benchmark.f/master/LICENSE
-[product-screenshot]: doc/images/screenshot.png
 [gfortran]: https://img.shields.io/badge/gfortran-000000?style=for-the-badge&logo=gnu&logoColor=white
 [gfortran-url]: https://gcc.gnu.org/wiki/GFortran
 [ifort]: https://img.shields.io/badge/ifort-000000?style=for-the-badge&logo=Intel&logoColor=61DAFB
