@@ -53,8 +53,11 @@ module benchmark_timer
         integer(CLOCK_ENUM), intent(in), optional   :: option
         !private
         integer(CLOCK_ENUM) :: dft_option
-        
+#ifdef _DEFAULT_CLOCK        
+        dft_option = _DEFAULT_CLOCK
+#else
         dft_option = SYSTEMTIME
+#endif
         if (present(option)) dft_option = option
 #ifdef _OPENMP
         if (with_openmp()) then

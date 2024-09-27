@@ -171,9 +171,9 @@ Benchmark Screen Shot</div></div>
      </a></p>
 <p>Fortran is the fastest language on earth, so they say. But can we prove it? <br  />
 <br  />
- And despite its legendary calculation speed when it comes to crunching numbers, Fortran is no exception when it comes to writing code: it is also very possible to write terribly slow pieces of code. This is where benchmarking different implementations of the same function can help developing better and faster algorithms. <br  />
+ And despite its legendary speed when it comes to crunching numbers, Fortran is no exception when it comes to writing code: it's also very possible to write terribly slow pieces of code. This is where benchmarking different implementations of the same function can help developing better and faster algorithms. <br  />
 </p>
-<p>This project aims at providing an easy interface to benchmark functions and subroutines while taking care of warming up the machine, collecting system information, computing statistics and reporting the results.</p>
+<p>This project aims at providing an easy interface to benchmark functions and subroutines while taking care of warming up the machine, collecting system information, computing statistics and reporting results.</p>
 <ul>
 <li><a href="https://fpm.fortran-lang.org/"><img src="https://img.shields.io/badge/fpm-000000?style=for-the-badge&amp;logo=Fortran&amp;logoColor=734F96" alt="fpm" class="inline"/></a></li>
 <li><a href="https://www.intel.com/content/www/us/en/developer/tools/oneapi/fortran-compiler.html"><img src="https://img.shields.io/badge/ifort-000000?style=for-the-badge&amp;logo=Intel&amp;logoColor=61DAFB" alt="ifort" class="inline"/></a></li>
@@ -185,7 +185,7 @@ Getting Started</h2>
 Requirements</h3>
 <p>To build that library you need</p>
 <ul>
-<li>a Fortran 2008 compliant compiler, or better, a Fortran 2018 compliant compiler (Intel Fortran compiler is known to work well for <em>benchmark.f</em>. gfortran has some limitations when using implicit procedures and unlimited polymorphic arguments. Please refer to the examples to see the difference between compilers).</li>
+<li>a Fortran 2008 compliant compiler, or better, a Fortran 2018 compliant compiler (Intel Fortran compiler is known to work well for <em>benchmark.f</em>. gfortran has some limitations when using implicit procedures and unlimited polymorphic arguments. Please refer to the <a href="https://davidpfister.github.io/benchmark.f/compiler_differences.html">documentation</a> to see the difference between compilers).</li>
 </ul>
 <p>The following compilers are tested on the default branch of <em>benchmark.f</em>: </p><center></center><center><table class="markdownTable">
 <tr class="markdownTableHead">
@@ -212,9 +212,9 @@ Build with fpm</h4>
 <p>The repo is compatible with fpm projects. It can be build using <em>fpm</em> </p><div class="fragment"><div class="line">fpm build --flag &#39;-ffree-line-length-none&#39;</div>
 </div><!-- fragment --><p> For convenience, the repo also contains a response file that can be invoked as follows: </p><div class="fragment"><div class="line">fpm @build</div>
 </div><!-- fragment --><p> (For the Windows users, that command does not work in Powershell since '@' is a reserved symbol. One should use the '&ndash;' as follows: <code>fpm --% @build</code>. This is linked to the following <a href="https://github.com/urbanjost/M_CLI2/issues/19">issue</a>)</p>
-<p>Building with ifort requires to specify the compiler name(gfortran by default) </p><div class="fragment"><div class="line">fpm @build --compiler ifort</div>
-</div><!-- fragment --><p> Alternatively, the compiler can be set using fpm environmental variables. </p><div class="fragment"><div class="line">set FPM_FC=ifort</div>
-</div><!-- fragment --><p>Besides the build command, several command are also available </p><div class="fragment"><div class="line">@pretiffy</div>
+<p>Building with ifort requires to specify the compiler name (gfortran by default) </p><div class="fragment"><div class="line">fpm @build --compiler ifort</div>
+</div><!-- fragment --><p> Alternatively, the compiler can be set using fpm environment variables. </p><div class="fragment"><div class="line">set FPM_FC=ifort</div>
+</div><!-- fragment --><p>Besides the build command, several commands are also available: </p><div class="fragment"><div class="line">@pretiffy</div>
 <div class="line">system fprettify .\examples\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations</div>
 <div class="line">system fprettify .\src\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations</div>
 <div class="line">system fprettify .\tests\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations</div>
@@ -236,10 +236,13 @@ Build with fpm</h4>
 <div class="line">option clean --all</div>
 <div class="line">system cd ./doc &amp; doxygen ./Doxyfile.in &amp; cd ..</div>
 </div><!-- fragment --><p>The toml files contains two items that are worth commenting:</p><ol type="1">
-<li>The settings to the cpp preprocessor are specified in the file. <div class="fragment"><div class="line">[preprocess]</div>
+<li>The settings to the cpp preprocessor are specified in the file.</li>
+</ol>
+<div class="fragment"><div class="line">[preprocess]</div>
 <div class="line">cpp.suffixes = [&quot;F90&quot;, &quot;f90&quot;]</div>
 <div class="line">cpp.macros = [&quot;_FPM&quot;]</div>
-</div><!-- fragment --> The <code>_FPM</code> macro is used to differenciate the build when compiling with <em>fpm</em> or <em>Visual Studio</em>. This is mostly present to adapt the hard coded paths that differs in both cases.</li>
+</div><!-- fragment --><p> The <code>_FPM</code> macro is used to differenciate the build when compiling with <em>fpm</em> or <em>Visual Studio</em>. This is mostly present to adapt the hard coded paths that differs in both cases.</p>
+<ol type="1">
 <li>The code must also be compiled allowing implicit procedures. This is reflected in the following option. <div class="fragment"><div class="line">[fortran]</div>
 <div class="line">implicit-external = true</div>
 </div><!-- fragment --> In order to be able to benchmark functions AND subroutines with any number of dummy arguments (0 to 7 at the moment) of any types (intrinsic or derived types), implicit procedures are a must. While this may be considered as bad practice and a remainder from F77 and the good old external, there would be no other way to provide a generic library without this option.</li>
@@ -276,7 +279,7 @@ Usage</h2>
 </ul>
 <h3><a class="anchor" id="autotoc_md23"></a>
 Contributing</h3>
-<p>Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are <b>greatly appreciated</b>. So, thank you for considering contributing to <em>benchmark.f</em>. Please review and follow these guidelines to make the contribution process simple and effective for all involved. It will help communicate that you respect the time of the developers. In return, the developers will help address your problem, evaluate changes, and guide you through your pull requests.</p>
+<p>Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are <b>greatly appreciated</b>. So, thank you for considering contributing to <em>benchmark.f</em>. Please review and follow these guidelines to make the contribution process simple and effective for all involved. In return, the developers will help address your problem, evaluate changes, and guide you through your pull requests.</p>
 <p>By contributing to <em>benchmark.f</em>, you certify that you own or are allowed to share the content of your contribution under the same license.</p>
 <h3><a class="anchor" id="autotoc_md24"></a>
 Style</h3>

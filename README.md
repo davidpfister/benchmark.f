@@ -31,9 +31,9 @@
 [![Benchmark Screen Shot][product-screenshot]](./images/screenshot.png)
 
 Fortran is the fastest language on earth, so they say. But can we prove it? <br><br>
-And despite its legendary calculation speed when it comes to crunching numbers, Fortran is no exception when it comes to writing code: it is also very possible to write terribly slow pieces of code. This is where benchmarking different implementations of the same function can help developing better and faster algorithms.  
+And despite its legendary speed when it comes to crunching numbers, Fortran is no exception when it comes to writing code: it's also very possible to write terribly slow pieces of code. This is where benchmarking different implementations of the same function can help developing better and faster algorithms.  
 
-This project aims at providing an easy interface to benchmark functions and subroutines while taking care of warming up the machine, collecting system information, computing statistics and reporting the results. 
+This project aims at providing an easy interface to benchmark functions and subroutines while taking care of warming up the machine, collecting system information, computing statistics and reporting results. 
 
 * [![fpm][fpm]][fpm-url]
 * [![ifort][ifort]][ifort-url]
@@ -46,9 +46,9 @@ This project aims at providing an easy interface to benchmark functions and subr
 
 To build that library you need
 
-- a Fortran 2008 compliant compiler, or better, a Fortran 2018 compliant compiler (Intel Fortran compiler is known to work well for *benchmark.f*. gfortran has some limitations when using implicit procedures and unlimited polymorphic arguments. Please refer to the examples to see the difference between compilers).
+- a Fortran 2008 compliant compiler, or better, a Fortran 2018 compliant compiler (Intel Fortran compiler is known to work well for _benchmark.f_. gfortran has some limitations when using implicit procedures and unlimited polymorphic arguments. Please refer to the [documentation](https://davidpfister.github.io/benchmark.f/compiler_differences.html) to see the difference between compilers).
 
-The following compilers are tested on the default branch of *benchmark.f*:
+The following compilers are tested on the default branch of _benchmark.f_:
 <center>
 
 | Name |	Version	| Platform	| Architecture |
@@ -57,7 +57,7 @@ The following compilers are tested on the default branch of *benchmark.f*:
 | Intel oneAPI classic	| 2021.5	| Windows 10 |	x86_64 |
 
 </center>
-- a preprocessor. *benchmark.f* uses quite some preprocessor macros. It is known to work both with intel `fpp` an gnu `cpp`.  
+- a preprocessor. _benchmark.f_ uses quite some preprocessor macros. It is known to work both with intel `fpp` an gnu `cpp`.  
 
 Unit test rely on the the header file `assert.inc`. Since the whole framework fits in a single file, it has been added directly to the repo. 
 
@@ -76,7 +76,7 @@ cd benchmark.f
 
 #### Build with fpm
 
-The repo is compatible with fpm projects. It can be build using *fpm*
+The repo is compatible with fpm projects. It can be build using _fpm_
 ```bash
 fpm build --flag '-ffree-line-length-none'
 ```
@@ -88,16 +88,16 @@ fpm @build
 use the '--%' as follows: `fpm --% @build`.
 This is linked to the following [issue](https://github.com/urbanjost/M_CLI2/issues/19))
 
-Building with ifort requires to specify the compiler name(gfortran by default)
+Building with ifort requires to specify the compiler name (gfortran by default)
 ```cmd
 fpm @build --compiler ifort
 ```
-Alternatively, the compiler can be set using fpm environmental variables.
+Alternatively, the compiler can be set using fpm environment variables.
 ```cmd
 set FPM_FC=ifort
 ```
 
-Besides the build command, several command are also available 
+Besides the build command, several commands are also available:
 ```cmd
 @pretiffy
 system fprettify .\examples\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations
@@ -124,12 +124,13 @@ system cd ./doc & doxygen ./Doxyfile.in & cd ..
 
 The toml files contains two items that are worth commenting: 
 1. The settings to the cpp preprocessor are specified in the file. 
+
 ```toml
 [preprocess]
 cpp.suffixes = ["F90", "f90"]
 cpp.macros = ["_FPM"]
 ```
-The `_FPM` macro is used to differenciate the build when compiling with *fpm* or *Visual Studio*. This is mostly present to adapt the hard coded paths that differs in both cases.
+The `_FPM` macro is used to differenciate the build when compiling with _fpm_ or _Visual Studio_. This is mostly present to adapt the hard coded paths that differs in both cases.
 
 2. The code must also be compiled allowing implicit procedures. This is reflected in the following option. 
 ```
@@ -180,10 +181,10 @@ The library takes care of everything else for you
 <!-- CONTRIBUTING -->
 ### Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**. So, thank you for considering contributing to *benchmark.f*.
-Please review and follow these guidelines to make the contribution process simple and effective for all involved. It will help communicate that you respect the time of the developers. In return, the developers will help address your problem, evaluate changes, and guide you through your pull requests.
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**. So, thank you for considering contributing to _benchmark.f_.
+Please review and follow these guidelines to make the contribution process simple and effective for all involved. In return, the developers will help address your problem, evaluate changes, and guide you through your pull requests.
 
-By contributing to *benchmark.f*, you certify that you own or are allowed to share the content of your contribution under the same license.
+By contributing to _benchmark.f_, you certify that you own or are allowed to share the content of your contribution under the same license.
 
 ### Style
 
@@ -205,7 +206,7 @@ Before opening a bug report:
 A good bug report should include all information needed to reproduce the bug.
 Please be as detailed as possible:
 
-1. Which version of *benchmark.f* are you using? Please be specific.
+1. Which version of _benchmark.f_ are you using? Please be specific.
 2. What are the steps to reproduce the issue?
 3. What is the expected outcome?
 4. What happens instead?
@@ -231,7 +232,7 @@ Don't forget to give the project a star! Thanks again!
    The body of the PR should at least include a bullet-point summary of the
    changes, and a detailed description is encouraged.
    If the PR completely addresses the issue you opened in step 1, include in
-   the PR description the following line: ```Fixes #<issue-number>```. If your PR implements a feature that adds or changes the behavior of *benchmark.f*,
+   the PR description the following line: ```Fixes #<issue-number>```. If your PR implements a feature that adds or changes the behavior of _benchmark.f_,
    your PR must also include appropriate changes to the documentation and associated units tests.
 
 In brief, 
