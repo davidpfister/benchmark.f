@@ -19,4 +19,4 @@ options test --flag '-ffree-line-length-none' '-D_QUIET'
 
 @doc
 option clean --all
-system cd ./doc & doxygen ./Doxyfile.in & cd ..
+system cd ./.dox & doxygen ./Doxyfile.in & cd ..
