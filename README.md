@@ -121,7 +121,7 @@ options test --flag '-ffree-line-length-none'
 
 @doc
 option clean --all
-system cd ./doc & doxygen ./Doxyfile.in & cd ..
+system cd ./.dox & doxygen ./Doxyfile.in & cd ..
 ```
 
 The toml files contains two items that are worth commenting: 
