@@ -275,7 +275,7 @@ module benchmark_steps_compiler
 #elif defined (NAGFOR)
         id = COMPILER_NAG
 #elif defined (__PGI)
-#if defined (__NVCOMPILER]
+#if defined (__NVCOMPILER)
         id = COMPILER_NVHPC
 #else
         id = COMPILER_PGI
@@ -284,7 +284,7 @@ module benchmark_steps_compiler
         id = COMPILER_NVHPC
 #elif defined (_CRAYFTN)
         id = COMPILER_CRAY
-#elif defined (__IBMC__]
+#elif defined (__IBMC__)
         id = COMPILER_IBMXL
 #endif
     end function
