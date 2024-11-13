@@ -97,7 +97,6 @@ module benchmark_steps_compiler
     
     !> @interface compiler
     !! @ingroup group_steps_compiler
-    !! @ingroup group_steps_compiler
     !! @brief 
     !! @verbatim interface compiler @endverbatim
     !! @par
