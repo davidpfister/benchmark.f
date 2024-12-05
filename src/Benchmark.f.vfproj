@@ -2,60 +2,67 @@
 <VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application" Version="11.0" ProjectIdGuid="{AA3CCEFA-E58B-402E-889C-694760AA01FC}">
 	<Platforms>
 		<Platform Name="Win32"/>
-		<Platform Name="x64"/></Platforms>
+		<Platform Name="x64"/>
+	</Platforms>
 	<Configurations>
-		<Configuration Name="Debug|Win32" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\include" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true"/>
-				<Tool Name="VFLibrarianTool"/>
-				<Tool Name="VFResourceCompilerTool"/>
-				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
-				<Tool Name="VFCustomBuildTool"/>
-				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool"/>
-				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
-		<Configuration Name="Debug|x64" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\include" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true"/>
-				<Tool Name="VFLibrarianTool"/>
-				<Tool Name="VFResourceCompilerTool"/>
-				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
-				<Tool Name="VFCustomBuildTool"/>
-				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool"/>
-				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
-		<Configuration Name="Release|Win32" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\include" RuntimeLibrary="rtMultiThreadedDLL"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true"/>
-				<Tool Name="VFLibrarianTool"/>
-				<Tool Name="VFResourceCompilerTool"/>
-				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
-				<Tool Name="VFCustomBuildTool"/>
-				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool"/>
-				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
-		<Configuration Name="Release|x64" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\include" RuntimeLibrary="rtMultiThreadedDLL"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true"/>
-				<Tool Name="VFLibrarianTool"/>
-				<Tool Name="VFResourceCompilerTool"/>
-				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
-				<Tool Name="VFCustomBuildTool"/>
-				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool"/>
-				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
+		<Configuration Name="Debug|Win32" UseCompiler="ifortCompiler" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)" ConfigurationType="typeStaticLibrary">
+			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\include" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
+			<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true"/>
+			<Tool Name="VFLibrarianTool"/>
+			<Tool Name="VFResourceCompilerTool"/>
+			<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+			<Tool Name="VFCustomBuildTool"/>
+			<Tool Name="VFPreLinkEventTool"/>
+			<Tool Name="VFPreBuildEventTool"/>
+			<Tool Name="VFPostBuildEventTool"/>
+			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
+		</Configuration>
+		<Configuration Name="Debug|x64" UseCompiler="ifortCompiler" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)" ConfigurationType="typeStaticLibrary">
+			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\include" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
+			<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true"/>
+			<Tool Name="VFLibrarianTool"/>
+			<Tool Name="VFResourceCompilerTool"/>
+			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+			<Tool Name="VFCustomBuildTool"/>
+			<Tool Name="VFPreLinkEventTool"/>
+			<Tool Name="VFPreBuildEventTool"/>
+			<Tool Name="VFPostBuildEventTool"/>
+			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
+		</Configuration>
+		<Configuration Name="Release|Win32" UseCompiler="ifortCompiler" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)" ConfigurationType="typeStaticLibrary">
+			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\include" RuntimeLibrary="rtMultiThreadedDLL"/>
+			<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true"/>
+			<Tool Name="VFLibrarianTool"/>
+			<Tool Name="VFResourceCompilerTool"/>
+			<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+			<Tool Name="VFCustomBuildTool"/>
+			<Tool Name="VFPreLinkEventTool"/>
+			<Tool Name="VFPreBuildEventTool"/>
+			<Tool Name="VFPostBuildEventTool"/>
+			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
+		</Configuration>
+		<Configuration Name="Release|x64" UseCompiler="ifortCompiler" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)" ConfigurationType="typeStaticLibrary">
+			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\include" RuntimeLibrary="rtMultiThreadedDLL"/>
+			<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true"/>
+			<Tool Name="VFLibrarianTool"/>
+			<Tool Name="VFResourceCompilerTool"/>
+			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+			<Tool Name="VFCustomBuildTool"/>
+			<Tool Name="VFPreLinkEventTool"/>
+			<Tool Name="VFPreBuildEventTool"/>
+			<Tool Name="VFPostBuildEventTool"/>
+			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
+		</Configuration>
+	</Configurations>
 	<Files>
 		<Filter Name="Steps">
-		<File RelativePath=".\Steps\Compiler.f90"/>
-		<File RelativePath=".\Steps\DryRun.f90"/>
-		<File RelativePath=".\Steps\Run.f90"/>
-		<File RelativePath=".\Steps\Setup.f90"/>
-		<File RelativePath=".\Steps\Steps.f90"/>
-		<File RelativePath=".\Steps\System.f90"/></Filter>
+			<File RelativePath=".\Steps\Compiler.f90"/>
+			<File RelativePath=".\Steps\DryRun.f90"/>
+			<File RelativePath=".\Steps\Run.f90"/>
+			<File RelativePath=".\Steps\Setup.f90"/>
+			<File RelativePath=".\Steps\Steps.f90"/>
+			<File RelativePath=".\Steps\System.f90"/>
+		</Filter>
 		<File RelativePath=".\Argument.f90"/>
 		<File RelativePath=".\ArgumentBase.f90"/>
 		<File RelativePath=".\Benchmark.f90"/>
@@ -70,5 +77,7 @@
 		<File RelativePath=".\Timer.f90"/>
 		<File RelativePath=".\Version.f90"/>
 		<File RelativePath=".\Warning.f90"/>
-		<File RelativePath=".\Workflow.f90"/></Files>
-	<Globals/></VisualStudioProject>
+		<File RelativePath=".\Workflow.f90"/>
+	</Files>
+	<Globals/>
+</VisualStudioProject>
