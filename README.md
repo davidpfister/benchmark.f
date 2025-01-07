@@ -59,9 +59,9 @@ The following compilers are tested on the default branch of _benchmark.f_:
 | Intel oneAPI classic	| 2021.5	| Windows 10 |	x86_64 |
 
 </center>
-- a preprocessor. _benchmark.f_ uses quite some preprocessor macros. It is known to work both with intel `fpp` an gnu `cpp`.  
+- a preprocessor. _benchmark.f_ uses quite some preprocessor macros. It is known to work both with intel `fpp` and `cpp`.  
 
-Unit test rely on the the header file `assert.inc`. Since the whole framework fits in a single file, it has been added directly to the repo. 
+Unit test rely on the the header file [`assertion.inc`](https://github.com/davidpfister/fortiche/tree/master/src/assertion). Since the whole framework fits in a single file, it has been added directly to the repo. 
 
 Linting, indentation, and styling is done with [fprettify](https://github.com/fortran-lang/fprettify) with the following settings
 ```bash
@@ -132,7 +132,7 @@ The toml files contains two items that are worth commenting:
 cpp.suffixes = ["F90", "f90"]
 cpp.macros = ["_FPM"]
 ```
-The `_FPM` macro is used to differenciate the build when compiling with _fpm_ or _Visual Studio_. This is mostly present to adapt the hard coded paths that differs in both cases.
+The `_FPM` macro is used to differentiate the build when compiling with _fpm_ or _Visual Studio_. This is mostly present to adapt the hard coded paths that differs in both cases.
 
 2. The code must also be compiled allowing implicit procedures. This is reflected in the following option. 
 ```
