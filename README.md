@@ -27,11 +27,9 @@
 # Introduction
 <!-- ABOUT THE PROJECT -->
 ## About the Project
-<center>
-
-![Benchmark Screen Shot](https://github.com/davidpfister/benchmark.f/blob/master/.dox/images/screenshot.png?raw=true)
-
-</center>
+<p align="center">
+  <img src="https://github.com/davidpfister/benchmark.f/blob/master/.dox/images/screenshot.png?raw=true">
+</p>
 Fortran is the fastest language on earth, so they say. But can we prove it? <br><br>
 And despite its legendary speed when it comes to crunching numbers, Fortran is no exception when it comes to writing code: it's also very possible to write terribly slow pieces of code. This is where benchmarking different implementations of the same function can help developing better and faster algorithms.  
 
