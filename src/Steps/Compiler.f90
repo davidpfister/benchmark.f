@@ -87,7 +87,7 @@ module benchmark_steps_compiler
     !!|xlf90         | compiler_ibmxl                      | IBM XL Fortran for AIX, 16.1 (5765-J14, 5725-C74) Version: 16.01.0000.0000                                                      | `__IBMC__`                                    | -qnoopt, -O0, -g              |
     !!|crayftn       | compiler_cray                       |                                                                                                                                 | `_CRAYFTN`                                    | -O0, -g[n]                    |
     !!|lf95          | compiler_lahey                      | Lahey/Fujitsu Fortran 95 Compiler Release L6.10a                                                                                | `__COMPILER_LAHEY`                            | -O0, -g                       |
-    !!|lfortran      | compiler_lfortran                   | LFortran version 0.36.0                                                                                                         |                                               |                               |   
+    !!|lfortran      | compiler_lfortran                   | LFortran version 0.36.0                                                                                                         | `__LFORTRAN__`                                |                               |   
     type, public :: compilerinfo
         integer(COMPILER_ENUM) :: id        !< Compiler ID
         character(20)          :: name      !< Compiler name
