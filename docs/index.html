@@ -191,7 +191,7 @@ $(function(){initNavTree('index.html',''); initResizable(true); });
 <p><a href="https://github.com/davidpfister/benchmark.f/graphs/contributors"><img src="https://img.shields.io/github/contributors/davidpfister/benchmark.f.svg?style=for-the-badge" alt="Contributors" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/davidpfister/benchmark.f/network/members"><img src="https://img.shields.io/github/forks/davidpfister/benchmark.f.svg?style=for-the-badge" alt="Forks" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/davidpfister/benchmark.f/stargazers"><img src="https://img.shields.io/github/stars/davidpfister/benchmark.f.svg?style=for-the-badge" alt="Stargazers" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/davidpfister/benchmark.f/issues"><img src="https://img.shields.io/github/issues/davidpfister/benchmark.f.svg?style=for-the-badge" alt="Issues" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/davidpfister/benchmark.f/master/LICENSE"><img src="https://img.shields.io/github/license/davidpfister/benchmark.f.svg?style=for-the-badge" alt="MIT License" style="pointer-events: none;" class="inline"/></a></p>
 <p><br  />
  </p><div align="center"> <h3 align="center">Benchmark.f</h3>
-</div><div align="center"></div><div align="center"> </div><div align="center"> A KISS library for benchmarking Fortran functions and subroutines with precision <br  />
+</div><div align="center"></div><div align="center"> </div><div align="center"> A KISS library for benchmarking Fortran functions and subroutines with precision. <br  />
  <a href="https://github.com/davidpfister/benchmark.f"><b>Explore the project »</b></a> <br  />
  </div><div align="center"> </div><h1><a class="anchor" id="autotoc_md14"></a>
 Introduction</h1>
@@ -216,7 +216,8 @@ Requirements</h3>
 <ul>
 <li>a Fortran 2008 compliant compiler, or better, a Fortran 2018 compliant compiler (Intel Fortran compiler is known to work well for <em>benchmark.f</em>. gfortran has some limitations when using implicit procedures and unlimited polymorphic arguments. Please refer to the <a href="https://davidpfister.github.io/benchmark.f/compiler_differences.html">documentation</a> to see the difference between compilers).</li>
 </ul>
-<p>The following compilers are tested on the default branch of <em>benchmark.f</em>: </p><center></center><center><table class="markdownTable">
+<p>The following compilers are tested on the default branch of <em>benchmark.f</em>:</p>
+<center></center><center><table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadCenter">Name   </th><th class="markdownTableHeadCenter">Version   </th><th class="markdownTableHeadCenter">Platform   </th><th class="markdownTableHeadCenter">Architecture    </th></tr>
 <tr class="markdownTableRowOdd">
@@ -238,7 +239,7 @@ Get the code</h4>
 <div class="line">cd benchmark.f</div>
 </div><!-- fragment --><h4><a class="anchor" id="autotoc_md20"></a>
 Build with fpm</h4>
-<p>The repo is compatible with fpm projects. It can be build using <em>fpm</em> </p><div class="fragment"><div class="line">fpm build --flag &#39;-ffree-line-length-none&#39;</div>
+<p>The repo can be build using <em>fpm</em> </p><div class="fragment"><div class="line">fpm build --flag &#39;-ffree-line-length-none&#39;</div>
 </div><!-- fragment --><p> For convenience, the repo also contains a response file that can be invoked as follows: </p><div class="fragment"><div class="line">fpm @build</div>
 </div><!-- fragment --><p> (For the Windows users, that command does not work in Powershell since '@' is a reserved symbol. One should use the '&ndash;' as follows: <code>fpm --% @build</code>. This is linked to the following <a href="https://github.com/urbanjost/M_CLI2/issues/19">issue</a>)</p>
 <p>Building with ifort requires to specify the compiler name (gfortran by default) </p><div class="fragment"><div class="line">fpm @build --compiler ifort</div>
@@ -287,18 +288,20 @@ Usage</h2>
 <li>Instantiate a benchmark runner</li>
 <li>Run the benchmark</li>
 </ol>
-<div class="fragment"><div class="line"><span class="preprocessor">#include &lt;benchmark.inc&gt;</span></div>
+<p>The first step is to create a test function. It can be a function or a subroutine (gfortran only handles subroutine. For more issues related to gfortran, see <a href="https://davidpfister.github.io/benchmark.f/compiler_differences.html">this article</a> ) with any number of arguments between 0 and 7. </p><div class="fragment"><div class="line"><span class="comment">!the funcion to be benchmarked</span></div>
+<div class="line"><span class="keyword">subroutine </span>test_function()</div>
+<div class="line">...</div>
+<div class="line"><span class="keyword">end subroutine</span></div>
+</div><!-- fragment --><p> And then simply call the <code>benchmark</code> macro. </p><div class="fragment"><div class="line"><span class="preprocessor">#include &lt;benchmark.inc&gt;</span></div>
 <div class="line"><span class="preprocessor"></span><span class="keyword">program</span> test</div>
 <div class="line"><span class="keywordtype">use </span>benchmark_library</div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">type</span>(runner) :: br</div>
 <div class="line"> </div>
-<div class="line">benchmark(br, run(1.0d-6, 30, test_function))</div>
-</div><!-- fragment --><p> and generates this kind of table: </p><pre class="fragment"> |         Method Name      |          Mean          |    Standard Deviation  |
+<div class="line">benchmark(br, run(test_function))</div>
+</div><!-- fragment --><p> This will generate this kind of table: </p><pre class="fragment"> |         Method Name      |          Mean          |    Standard Deviation  |
  |__________________________|________________________|________________________|
- |test_poisson(1.0d-6,30)   |           217350.000 us|          +/- 161306.626|
- |test_poisson(1.0d-6,30)   |            99250.000 us|            +/- 7588.643|
- |test_poisson(.10E-05,30)  |           176550.000 us|          +/- 135795.609|
+ |test_function()           |           217350.000 us|          +/- 161306.626|
 </pre><p><em>For more examples, please refer to the <a href="https://davidpfister.github.io/benchmark.f/examples_toc.html">Documentation</a></em></p>
 <p>The library takes care of everything else for you</p><ul>
 <li>Collection of system information</li>
