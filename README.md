@@ -12,7 +12,7 @@
   <h3 align="center">Benchmark.f</h3>
 
   <p align="center">
-    A KISS library for benchmarking Fortran functions and subroutines with precision
+    A KISS library for benchmarking Fortran functions and subroutines with precision.
     <br />
     <a href="https://github.com/davidpfister/benchmark.f"><strong>Explore the project »</strong></a>
     <br />
@@ -49,6 +49,7 @@ To build that library you need
 - a Fortran 2008 compliant compiler, or better, a Fortran 2018 compliant compiler (Intel Fortran compiler is known to work well for _benchmark.f_. gfortran has some limitations when using implicit procedures and unlimited polymorphic arguments. Please refer to the [documentation](https://davidpfister.github.io/benchmark.f/compiler_differences.html) to see the difference between compilers).
 
 The following compilers are tested on the default branch of _benchmark.f_:
+
 <center>
 
 | Name |	Version	| Platform	| Architecture |
@@ -57,6 +58,7 @@ The following compilers are tested on the default branch of _benchmark.f_:
 | Intel oneAPI classic	| 2021.5	| Windows 10 |	x86_64 |
 
 </center>
+
 - a preprocessor. _benchmark.f_ uses quite some preprocessor macros. It is known to work both with intel `fpp` and `cpp`.  
 
 Unit test rely on the the header file [`assertion.inc`](https://github.com/davidpfister/fortiche/tree/master/src/assertion). Since the whole framework fits in a single file, it has been added directly to the repo. 
@@ -76,7 +78,7 @@ cd benchmark.f
 
 #### Build with fpm
 
-The repo is compatible with fpm projects. It can be build using _fpm_
+The repo can be build using _fpm_
 ```bash
 fpm build --flag '-ffree-line-length-none'
 ```
@@ -84,21 +86,20 @@ For convenience, the  repo also contains a response file that can be invoked as 
 ```
 fpm @build
 ```
-(For the Windows users, that command does not work in Powershell since '@' is a reserved symbol. One should
-use the '--%' as follows: `fpm --% @build`.
+(For the Windows users, that command does not work in Powershell since '@' is a reserved symbol. One should use the '--%' as follows: `fpm --% @build`.
 This is linked to the following [issue](https://github.com/urbanjost/M_CLI2/issues/19))
 
 Building with ifort requires to specify the compiler name (gfortran by default)
-```cmd
+```bash
 fpm @build --compiler ifort
 ```
 Alternatively, the compiler can be set using fpm environment variables.
-```cmd
+```bash
 set FPM_FC=ifort
 ```
 
 Besides the build command, several commands are also available:
-```cmd
+```bash
 @pretiffy
 system fprettify .\examples\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations
 system fprettify .\src\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations
@@ -133,7 +134,7 @@ cpp.macros = ["_FPM"]
 The `_FPM` macro is used to differentiate the build when compiling with _fpm_ or _Visual Studio_. This is mostly present to adapt the hard coded paths that differs in both cases.
 
 2. The code must also be compiled allowing implicit procedures. This is reflected in the following option. 
-```
+```toml
 [fortran]
 implicit-external = true
 ```
@@ -153,6 +154,14 @@ Running the benchmark could not be simpler.
 2. Instantiate a benchmark runner 
 3. Run the benchmark
 
+The first step is to create a test function. It can be a function or a subroutine (gfortran only handles subroutine. For more issues related to gfortran, see [this article](https://davidpfister.github.io/benchmark.f/compiler_differences.html) ) with any number of arguments between 0 and 7. 
+```fortran
+!the funcion to be benchmarked
+subroutine test_function()
+...
+end subroutine
+```
+And then simply call the `benchmark` macro.
 ```fortran
 #include <benchmark.inc>
 program test
@@ -160,15 +169,13 @@ use benchmark_library
 
 type(runner) :: br
 
-benchmark(br, run(1.0d-6, 30, test_function))
+benchmark(br, run(test_function))
 ```
-and generates this kind of table: 
+This will generate this kind of table: 
 
      |         Method Name      |          Mean          |    Standard Deviation  |
      |__________________________|________________________|________________________|
-     |test_poisson(1.0d-6,30)   |           217350.000 us|          +/- 161306.626|
-     |test_poisson(1.0d-6,30)   |            99250.000 us|            +/- 7588.643|
-     |test_poisson(.10E-05,30)  |           176550.000 us|          +/- 135795.609|
+     |test_function()           |           217350.000 us|          +/- 161306.626|
 
 _For more examples, please refer to the [Documentation](https://davidpfister.github.io/benchmark.f/examples_toc.html)_
 
