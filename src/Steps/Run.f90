@@ -119,7 +119,7 @@ module benchmark_steps_benchmark_run
         character(:), allocatable :: c
         character(:), allocatable :: row
         character(:), allocatable :: csv
-        integer :: i
+        integer :: i, k
         
         if (first_call) then
             row = ''
@@ -173,7 +173,12 @@ module benchmark_steps_benchmark_run
             csv = trim(column(2:))
         end if
 
-        select case (int(log10(s%mean)))
+        k = 0
+        if (s%mean > 0._r8) then
+            k = int(log10(s%mean))
+        end if
+        
+        select case (k)
             case (1:2)
                 column = str(s%mean, '(f12.3)') // ' ms'
                 if (present(csv_unit)) then
