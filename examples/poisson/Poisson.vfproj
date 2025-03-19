@@ -2,49 +2,57 @@
 <VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application" Version="11.0" ProjectIdGuid="{50EE234E-EF8E-44E9-BF7A-6AB5CD4515E3}">
 	<Platforms>
 		<Platform Name="Win32"/>
-		<Platform Name="x64"/></Platforms>
+		<Platform Name="x64"/>
+	</Platforms>
 	<Configurations>
-		<Configuration Name="Debug|Win32" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" MultiProcessorCompilation="true" Optimization="optimizeDisabled" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\..\include" WarnDeclarations="true" WarnUncalled="true" WarnShape="true" WarnInterfaces="true" InitLocalVarToNAN="true" LocalSavedScalarsSNaN="true" Traceback="true" NullPointerCheck="true" BoundsCheck="true" ArrayShapeCheck="true" UninitializedVariablesCheck="true" DescriptorDataTypeCheck="true" DescriptorDataSizeCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" UseMkl="mklSequential"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="C:\Program Files (x86)\Intel\oneAPI\mkl\latest\lib\ia32; ..\..\Fornax\lib\x86-windows" GenerateDebugInformation="true" SubSystem="subSystemConsole" StackReserveSize="80000000"/>
-				<Tool Name="VFResourceCompilerTool"/>
-				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
-				<Tool Name="VFCustomBuildTool"/>
-				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool"/>
-				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
-		<Configuration Name="Release|Win32" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" MultiProcessorCompilation="true" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\..\include" RuntimeLibrary="rtMultiThreadedDLL" UseMkl="mklSequential"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="C:\Program Files (x86)\Intel\oneAPI\mkl\latest\lib\ia32; ..\..\Fornax\lib\x86-windows" GenerateDebugInformation="true" SubSystem="subSystemConsole" StackReserveSize="80000000"/>
-				<Tool Name="VFResourceCompilerTool"/>
-				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
-				<Tool Name="VFCustomBuildTool"/>
-				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool"/>
-				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
-		<Configuration Name="Debug|x64" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" MultiProcessorCompilation="true" Optimization="optimizeDisabled" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\..\include" WarnDeclarations="true" WarnUncalled="true" WarnShape="true" WarnInterfaces="true" InitLocalVarToNAN="true" LocalSavedScalarsSNaN="true" Traceback="true" NullPointerCheck="true" BoundsCheck="true" ArrayShapeCheck="true" UninitializedVariablesCheck="true" DescriptorDataTypeCheck="true" DescriptorDataSizeCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" UseMkl="mklSequential"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="C:\Program Files (x86)\Intel\oneAPI\mkl\latest\lib\intel64; ..\..\Fornax\lib\x64-windows" GenerateDebugInformation="true" SubSystem="subSystemConsole" StackReserveSize="80000000"/>
-				<Tool Name="VFResourceCompilerTool"/>
-				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
-				<Tool Name="VFCustomBuildTool"/>
-				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool"/>
-				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
-		<Configuration Name="Release|x64" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" MultiProcessorCompilation="true" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\..\include" RuntimeLibrary="rtMultiThreadedDLL" UseMkl="mklParallel"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="C:\Program Files (x86)\Intel\oneAPI\mkl\latest\lib\intel64; ..\..\Fornax\lib\x64-windows" SubSystem="subSystemConsole" StackReserveSize="80000000"/>
-				<Tool Name="VFResourceCompilerTool"/>
-				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
-				<Tool Name="VFCustomBuildTool"/>
-				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool"/>
-				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
+		<Configuration Name="Debug|Win32" UseCompiler="ifortCompiler" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)">
+			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" MultiProcessorCompilation="true" Optimization="optimizeDisabled" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\..\include" WarnDeclarations="true" WarnUncalled="true" WarnShape="true" WarnInterfaces="true" InitLocalVarToNAN="true" LocalSavedScalarsSNaN="true" Traceback="true" NullPointerCheck="true" BoundsCheck="true" ArrayShapeCheck="true" UninitializedVariablesCheck="true" DescriptorDataTypeCheck="true" DescriptorDataSizeCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" UseMkl="mklSequential"/>
+			<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="C:\Program Files (x86)\Intel\oneAPI\mkl\latest\lib\ia32; ..\..\Fornax\lib\x86-windows" GenerateDebugInformation="true" SubSystem="subSystemConsole" StackReserveSize="80000000"/>
+			<Tool Name="VFResourceCompilerTool"/>
+			<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+			<Tool Name="VFCustomBuildTool"/>
+			<Tool Name="VFPreLinkEventTool"/>
+			<Tool Name="VFPreBuildEventTool"/>
+			<Tool Name="VFPostBuildEventTool"/>
+			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
+		</Configuration>
+		<Configuration Name="Release|Win32" UseCompiler="ifortCompiler" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)">
+			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" MultiProcessorCompilation="true" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\..\include" RuntimeLibrary="rtMultiThreadedDLL" UseMkl="mklSequential"/>
+			<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="C:\Program Files (x86)\Intel\oneAPI\mkl\latest\lib\ia32; ..\..\Fornax\lib\x86-windows" GenerateDebugInformation="true" SubSystem="subSystemConsole" StackReserveSize="80000000"/>
+			<Tool Name="VFResourceCompilerTool"/>
+			<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+			<Tool Name="VFCustomBuildTool"/>
+			<Tool Name="VFPreLinkEventTool"/>
+			<Tool Name="VFPreBuildEventTool"/>
+			<Tool Name="VFPostBuildEventTool"/>
+			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
+		</Configuration>
+		<Configuration Name="Debug|x64" UseCompiler="ifortCompiler" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)">
+			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" MultiProcessorCompilation="true" Optimization="optimizeDisabled" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\..\include" WarnDeclarations="true" WarnUncalled="true" WarnShape="true" WarnInterfaces="true" InitLocalVarToNAN="true" LocalSavedScalarsSNaN="true" Traceback="true" NullPointerCheck="true" BoundsCheck="true" ArrayShapeCheck="true" UninitializedVariablesCheck="true" DescriptorDataTypeCheck="true" DescriptorDataSizeCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" UseMkl="mklSequential"/>
+			<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="C:\Program Files (x86)\Intel\oneAPI\mkl\latest\lib\intel64; ..\..\Fornax\lib\x64-windows" GenerateDebugInformation="true" SubSystem="subSystemConsole" StackReserveSize="80000000"/>
+			<Tool Name="VFResourceCompilerTool"/>
+			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+			<Tool Name="VFCustomBuildTool"/>
+			<Tool Name="VFPreLinkEventTool"/>
+			<Tool Name="VFPreBuildEventTool"/>
+			<Tool Name="VFPostBuildEventTool"/>
+			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
+		</Configuration>
+		<Configuration Name="Release|x64" UseCompiler="ifortCompiler" OutputDirectory="bin\$(ConfigurationName)\$(PlatformName)" IntermediateDirectory="obj\$(ConfigurationName)\$(PlatformName)">
+			<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" MultiProcessorCompilation="true" Preprocess="preprocessYes" AdditionalIncludeDirectories="..\..\include" RuntimeLibrary="rtMultiThreadedDLL" UseMkl="mklParallel"/>
+			<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="C:\Program Files (x86)\Intel\oneAPI\mkl\latest\lib\intel64; ..\..\Fornax\lib\x64-windows" SubSystem="subSystemConsole" StackReserveSize="80000000"/>
+			<Tool Name="VFResourceCompilerTool"/>
+			<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+			<Tool Name="VFCustomBuildTool"/>
+			<Tool Name="VFPreLinkEventTool"/>
+			<Tool Name="VFPreBuildEventTool"/>
+			<Tool Name="VFPostBuildEventTool"/>
+			<Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
+		</Configuration>
+	</Configurations>
 	<Files>
 		<File RelativePath=".\Poisson.f90"/>
-		<File RelativePath=".\rhofunc.f90"/></Files>
-	<Globals/></VisualStudioProject>
+		<File RelativePath=".\rhofunc.f90"/>
+	</Files>
+	<Globals/>
+</VisualStudioProject>
