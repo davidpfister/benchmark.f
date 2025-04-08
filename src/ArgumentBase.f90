@@ -1,5 +1,5 @@
 !> @defgroup group_arg_base benchmark_argument_base
-!! @brief @link benchmark_argument::arg Base Argument @endlink module
+!! @brief @link benchmark_argument_base::arg_base Base Argument @endlink module
 module benchmark_argument_base
     
     implicit none; private

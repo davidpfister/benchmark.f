@@ -38,7 +38,7 @@ module benchmark_library
     !! @n
     !! @snippet snippet.f90 benchmark_ex2
     !! @n
-    !! The third example demonstarte how functions can be passed using the `iso_c_binbing`
+    !! The third example demonstrate how functions can be passed using the `iso_c_binbing`
     !! module. The address of the procedure is first obtained using `c_funloc` and then casted 
     !! into an implicit procedure using `c_f_procpointer`.
     !! @n
