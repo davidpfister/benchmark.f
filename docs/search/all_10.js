@@ -12,7 +12,7 @@ var searchData=
   ['stddev_9',['stddev',['../structbenchmark__statistics_1_1stats.html#a92ee34cd5729dfc77d9f83d2da155f1f',1,'benchmark_statistics::stats']]],
   ['str_10',['str',['../group__group__string.html#ga7e5a2f4450b6418959f9246e5effe864',1,'benchmark_string']]],
   ['string_11',['string',['../structbenchmark__string_1_1string.html',1,'benchmark_string']]],
-  ['studio_202019_12',['Build with Visual Studio 2019',['../index.html#autotoc_md21',1,'']]],
+  ['studio_202019_12',['Build with Visual Studio 2019',['../index.html#autotoc_md22',1,'']]],
   ['style_13',['Style',['../index.html#autotoc_md24',1,'']]],
   ['summary_20statistic_14',['Repeat Benchmarks and Report a Summary Statistic',['../best_practices.html#autotoc_md4',1,'']]],
   ['system_15',['system',['../interfacebenchmark__steps__system_1_1system.html',1,'benchmark_steps_system']]],

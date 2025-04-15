@@ -7,7 +7,7 @@ var searchData=
   ['clock_4',['Use a High-Precision Clock',['../best_practices.html#autotoc_md2',1,'']]],
   ['clock_5',['clock',['../group__group__timer.html#ga093ba96a442c18d50e9f9c6acfe11534',1,'benchmark_timer']]],
   ['code_6',['Warmup the Target Code',['../best_practices.html#autotoc_md3',1,'']]],
-  ['code_7',['code',['../index.html#autotoc_md19',1,'Get the code'],['../best_practices.html#autotoc_md0',1,'Isolate the code']]],
+  ['code_7',['code',['../index.html#autotoc_md20',1,'Get the code'],['../best_practices.html#autotoc_md0',1,'Isolate the code']]],
   ['compiler_8',['compiler',['../interfacebenchmark__steps__compiler_1_1compiler.html',1,'benchmark_steps_compiler']]],
   ['compiler_20differences_9',['Compiler Differences',['../compiler_differences.html',1,'articles']]],
   ['compilerinfo_10',['compilerinfo',['../structbenchmark__steps__compiler_1_1compilerinfo.html',1,'benchmark_steps_compiler']]],

@@ -26,6 +26,6 @@ var searchData=
   ['benchmarks_20and_20report_20a_20summary_20statistic_23',['Repeat Benchmarks and Report a Summary Statistic',['../best_practices.html#autotoc_md4',1,'']]],
   ['best_20practices_24',['Best Practices',['../best_practices.html',1,'articles']]],
   ['bug_25',['Reporting a bug',['../index.html#autotoc_md25',1,'']]],
-  ['build_20with_20fpm_26',['Build with fpm',['../index.html#autotoc_md20',1,'']]],
-  ['build_20with_20visual_20studio_202019_27',['Build with Visual Studio 2019',['../index.html#autotoc_md21',1,'']]]
+  ['build_20with_20fpm_26',['Build with fpm',['../index.html#autotoc_md21',1,'']]],
+  ['build_20with_20visual_20studio_202019_27',['Build with Visual Studio 2019',['../index.html#autotoc_md22',1,'']]]
 ];

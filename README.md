@@ -31,7 +31,7 @@
   <img src="https://github.com/davidpfister/benchmark.f/blob/master/.dox/images/screenshot.png?raw=true">
 </p>
 Fortran is the fastest language on earth, so they say. But can we prove it? <br><br>
-And despite its legendary speed when it comes to crunching numbers, Fortran is no exception when it comes to writing code: it's also very possible to write terribly slow pieces of code. This is where benchmarking different implementations of the same function can help developing better and faster algorithms.  
+Despite its legendary speed when crunching numbers, Fortran is no exception when it comes to writing code: it's also very possible to write terribly slow pieces of code. This is where benchmarking different implementations of the same function can help developing better and faster algorithms.  
 
 This project aims at providing an easy interface to benchmark functions and subroutines while taking care of warming up the machine, collecting system information, computing statistics and reporting results. 
 
@@ -67,6 +67,46 @@ Linting, indentation, and styling is done with [fprettify](https://github.com/fo
 ```bash
 fprettify .\src\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations
 ```
+
+<!-- USAGE EXAMPLES -->
+## Usage
+
+Running the benchmark could not be simpler. 
+
+1. Start by including the file `benchmark.inc` into your code
+2. Instantiate a benchmark runner 
+3. Run the benchmark
+
+The first step is to create a test function. It can be a function or a subroutine (gfortran only handles subroutine. For more issues related to gfortran, see [this article](https://davidpfister.github.io/benchmark.f/compiler_differences.html) ) with any number of arguments between 0 and 7. 
+```fortran
+!the funcion to be benchmarked
+subroutine test_function()
+...
+end subroutine
+```
+And then simply call the `benchmark` macro.
+```fortran
+#include <benchmark.inc>
+program test
+use benchmark_library
+
+type(runner) :: br
+
+benchmark(br, run(test_function))
+```
+This will generate this kind of table: 
+
+     |         Method Name      |          Mean          |    Standard Deviation  |
+     |__________________________|________________________|________________________|
+     |test_function()           |           217350.000 us|          +/- 161306.626|
+
+_For more examples, please refer to the [Documentation](https://davidpfister.github.io/benchmark.f/examples_toc.html)_
+
+The library takes care of everything else for you
+- Collection of system information
+- Collection of compiler information
+- Collection of compilation options
+- Reporting
 
 ### Installation
 
@@ -143,47 +183,6 @@ In order to be able to benchmark functions AND subroutines with any number of du
 #### Build with Visual Studio 2019
 
 The project was originally developed on Windows with Visual Studio 2019. The repo contains the solution file (_Benchmark.f.sln_) to get you started with Visual Studio 2019. 
-
-
-<!-- USAGE EXAMPLES -->
-## Usage
-
-Running the benchmark could not be simpler. 
-
-1. Start by including the file `benchmark.inc` into your code
-2. Instantiate a benchmark runner 
-3. Run the benchmark
-
-The first step is to create a test function. It can be a function or a subroutine (gfortran only handles subroutine. For more issues related to gfortran, see [this article](https://davidpfister.github.io/benchmark.f/compiler_differences.html) ) with any number of arguments between 0 and 7. 
-```fortran
-!the funcion to be benchmarked
-subroutine test_function()
-...
-end subroutine
-```
-And then simply call the `benchmark` macro.
-```fortran
-#include <benchmark.inc>
-program test
-use benchmark_library
-
-type(runner) :: br
-
-benchmark(br, run(test_function))
-```
-This will generate this kind of table: 
-
-     |         Method Name      |          Mean          |    Standard Deviation  |
-     |__________________________|________________________|________________________|
-     |test_function()           |           217350.000 us|          +/- 161306.626|
-
-_For more examples, please refer to the [Documentation](https://davidpfister.github.io/benchmark.f/examples_toc.html)_
-
-The library takes care of everything else for you
-- Collection of system information
-- Collection of compiler information
-- Collection of compilation options
-- Reporting
 
 <!-- CONTRIBUTING -->
 ### Contributing

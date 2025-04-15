@@ -147,25 +147,25 @@ $(function(){initNavTree('index.html',''); initResizable(true); });
           <li class="level3">
             <a href="#autotoc_md17">Requirements</a>
           </li>
-          <li class="level3">
-            <a href="#autotoc_md18">Installation</a>
-            <ul>
-              <li class="level4">
-                <a href="#autotoc_md19">Get the code</a>
-              </li>
-              <li class="level4">
-                <a href="#autotoc_md20">Build with fpm</a>
-              </li>
-              <li class="level4">
-                <a href="#autotoc_md21">Build with Visual Studio 2019</a>
-              </li>
-            </ul>
-          </li>
         </ul>
       </li>
       <li class="level2">
-        <a href="#autotoc_md22">Usage</a>
+        <a href="#autotoc_md18">Usage</a>
         <ul>
+          <li class="level3">
+            <a href="#autotoc_md19">Installation</a>
+            <ul>
+              <li class="level4">
+                <a href="#autotoc_md20">Get the code</a>
+              </li>
+              <li class="level4">
+                <a href="#autotoc_md21">Build with fpm</a>
+              </li>
+              <li class="level4">
+                <a href="#autotoc_md22">Build with Visual Studio 2019</a>
+              </li>
+            </ul>
+          </li>
           <li class="level3">
             <a href="#autotoc_md23">Contributing</a>
           </li>
@@ -200,7 +200,7 @@ About the Project</h2>
 <p><img src="https://github.com/davidpfister/benchmark.f/blob/master/.dox/images/screenshot.png?raw=true" alt="" class="inline"/> </p>
 <p>Fortran is the fastest language on earth, so they say. But can we prove it? <br  />
 <br  />
- And despite its legendary speed when it comes to crunching numbers, Fortran is no exception when it comes to writing code: it's also very possible to write terribly slow pieces of code. This is where benchmarking different implementations of the same function can help developing better and faster algorithms. <br  />
+ Despite its legendary speed when crunching numbers, Fortran is no exception when it comes to writing code: it's also very possible to write terribly slow pieces of code. This is where benchmarking different implementations of the same function can help developing better and faster algorithms. <br  />
 </p>
 <p>This project aims at providing an easy interface to benchmark functions and subroutines while taking care of warming up the machine, collecting system information, computing statistics and reporting results.</p>
 <ul>
@@ -231,13 +231,42 @@ Requirements</h3>
 </ul>
 <p>Unit test rely on the the header file <a href="https://github.com/davidpfister/fortiche/tree/master/src/assertion"><code>assertion.inc</code></a>. Since the whole framework fits in a single file, it has been added directly to the repo.</p>
 <p>Linting, indentation, and styling is done with <a href="https://github.com/fortran-lang/fprettify">fprettify</a> with the following settings </p><div class="fragment"><div class="line">fprettify .\src\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md18"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md18"></a>
+Usage</h2>
+<p>Running the benchmark could not be simpler.</p>
+<ol type="1">
+<li>Start by including the file <code>benchmark.inc</code> into your code</li>
+<li>Instantiate a benchmark runner</li>
+<li>Run the benchmark</li>
+</ol>
+<p>The first step is to create a test function. It can be a function or a subroutine (gfortran only handles subroutine. For more issues related to gfortran, see <a href="https://davidpfister.github.io/benchmark.f/compiler_differences.html">this article</a> ) with any number of arguments between 0 and 7. </p><div class="fragment"><div class="line"><span class="comment">!the funcion to be benchmarked</span></div>
+<div class="line"><span class="keyword">subroutine </span>test_function()</div>
+<div class="line">...</div>
+<div class="line"><span class="keyword">end subroutine</span></div>
+</div><!-- fragment --><p> And then simply call the <code>benchmark</code> macro. </p><div class="fragment"><div class="line"><span class="preprocessor">#include &lt;benchmark.inc&gt;</span></div>
+<div class="line"><span class="preprocessor"></span><span class="keyword">program</span> test</div>
+<div class="line"><span class="keywordtype">use </span>benchmark_library</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">type</span>(runner) :: br</div>
+<div class="line"> </div>
+<div class="line">benchmark(br, run(test_function))</div>
+</div><!-- fragment --><p> This will generate this kind of table: </p><pre class="fragment"> |         Method Name      |          Mean          |    Standard Deviation  |
+ |__________________________|________________________|________________________|
+ |test_function()           |           217350.000 us|          +/- 161306.626|
+</pre><p><em>For more examples, please refer to the <a href="https://davidpfister.github.io/benchmark.f/examples_toc.html">Documentation</a></em></p>
+<p>The library takes care of everything else for you</p><ul>
+<li>Collection of system information</li>
+<li>Collection of compiler information</li>
+<li>Collection of compilation options</li>
+<li>Reporting</li>
+</ul>
+<h3><a class="anchor" id="autotoc_md19"></a>
 Installation</h3>
-<h4><a class="anchor" id="autotoc_md19"></a>
+<h4><a class="anchor" id="autotoc_md20"></a>
 Get the code</h4>
 <div class="fragment"><div class="line">git clone https://github.com/davidpfister/benchmark.f</div>
 <div class="line">cd benchmark.f</div>
-</div><!-- fragment --><h4><a class="anchor" id="autotoc_md20"></a>
+</div><!-- fragment --><h4><a class="anchor" id="autotoc_md21"></a>
 Build with fpm</h4>
 <p>The repo can be build using <em>fpm</em> </p><div class="fragment"><div class="line">fpm build --flag &#39;-ffree-line-length-none&#39;</div>
 </div><!-- fragment --><p> For convenience, the repo also contains a response file that can be invoked as follows: </p><div class="fragment"><div class="line">fpm @build</div>
@@ -277,38 +306,9 @@ Build with fpm</h4>
 <div class="line">implicit-external = true</div>
 </div><!-- fragment --> In order to be able to benchmark functions AND subroutines with any number of dummy arguments (0 to 7 at the moment) of any types (intrinsic or derived types), implicit procedures are a must. While this may be considered as bad practice and a remainder from F77 and the good old external, there would be no other way to provide a generic library without this option.</li>
 </ol>
-<h4><a class="anchor" id="autotoc_md21"></a>
+<h4><a class="anchor" id="autotoc_md22"></a>
 Build with Visual Studio 2019</h4>
 <p>The project was originally developed on Windows with Visual Studio 2019. The repo contains the solution file (<em>Benchmark.f.sln</em>) to get you started with Visual Studio 2019.</p>
-<h2><a class="anchor" id="autotoc_md22"></a>
-Usage</h2>
-<p>Running the benchmark could not be simpler.</p>
-<ol type="1">
-<li>Start by including the file <code>benchmark.inc</code> into your code</li>
-<li>Instantiate a benchmark runner</li>
-<li>Run the benchmark</li>
-</ol>
-<p>The first step is to create a test function. It can be a function or a subroutine (gfortran only handles subroutine. For more issues related to gfortran, see <a href="https://davidpfister.github.io/benchmark.f/compiler_differences.html">this article</a> ) with any number of arguments between 0 and 7. </p><div class="fragment"><div class="line"><span class="comment">!the funcion to be benchmarked</span></div>
-<div class="line"><span class="keyword">subroutine </span>test_function()</div>
-<div class="line">...</div>
-<div class="line"><span class="keyword">end subroutine</span></div>
-</div><!-- fragment --><p> And then simply call the <code>benchmark</code> macro. </p><div class="fragment"><div class="line"><span class="preprocessor">#include &lt;benchmark.inc&gt;</span></div>
-<div class="line"><span class="preprocessor"></span><span class="keyword">program</span> test</div>
-<div class="line"><span class="keywordtype">use </span>benchmark_library</div>
-<div class="line"> </div>
-<div class="line"><span class="keywordtype">type</span>(runner) :: br</div>
-<div class="line"> </div>
-<div class="line">benchmark(br, run(test_function))</div>
-</div><!-- fragment --><p> This will generate this kind of table: </p><pre class="fragment"> |         Method Name      |          Mean          |    Standard Deviation  |
- |__________________________|________________________|________________________|
- |test_function()           |           217350.000 us|          +/- 161306.626|
-</pre><p><em>For more examples, please refer to the <a href="https://davidpfister.github.io/benchmark.f/examples_toc.html">Documentation</a></em></p>
-<p>The library takes care of everything else for you</p><ul>
-<li>Collection of system information</li>
-<li>Collection of compiler information</li>
-<li>Collection of compilation options</li>
-<li>Reporting</li>
-</ul>
 <h3><a class="anchor" id="autotoc_md23"></a>
 Contributing</h3>
 <p>Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are <b>greatly appreciated</b>. So, thank you for considering contributing to <em>benchmark.f</em>. Please review and follow these guidelines to make the contribution process simple and effective for all involved. In return, the developers will help address your problem, evaluate changes, and guide you through your pull requests.</p>
