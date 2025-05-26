@@ -1,4 +1,4 @@
-#include <assert.inc>
+#include <assertion.inc>
 #include <benchmark.inc>
 TESTPROGRAM(main)
 

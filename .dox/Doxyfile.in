@@ -1392,7 +1392,6 @@ HTML_EXTRA_FILES       = ./config//doxygen-awesome-css-2.2.0/doxygen-awesome-dar
                          ./config//doxygen-awesome-css-2.2.0/doxygen-awesome-interactive-toc.js \
                          ./config//doxygen-awesome-css-2.2.0/doxygen-awesome-tabs.js \
                          ./config//highlight.js \
-                         ./config//MathJax.js \
                          ./config//devibeans.css
 
 # The HTML_COLORSTYLE tag can be used to specify if the generated HTML output
