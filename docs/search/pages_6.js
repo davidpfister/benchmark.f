@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['related_20pages_0',['Related Pages',['../articles.html',1,'']]]
+  ['upper_20case_0',['Upper Case',['../example_upper.html',1,'examples_toc']]]
 ];

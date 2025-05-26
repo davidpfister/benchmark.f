@@ -1,10 +1,10 @@
-!> @defgroup group_ssd benchmark_steady_state_detection
+!> @defgroup group_ssd benchmark_steady_state
 !! @brief Provides methods for detecting steady-state conditions
 !! based on t-test.
 !! @par
 !! <h2>Examples</h2>
 !! The following example demonstrates some of the methods found in the 
-!! @link benchmark_steady_state_detection benchmark_steady_state_detection @endlink module.
+!! @link benchmark_steady_state benchmark_steady_state @endlink module.
 !!
 !! @snippet snippet.f90 ssd
 !! @par
@@ -16,7 +16,7 @@
 !! The original algorithm has been altered to be used with dynamic real-time 
 !! data.
 !! @{
-module benchmark_steady_state_detection
+module benchmark_steady_state
     use benchmark_kinds
     
     implicit none; private 

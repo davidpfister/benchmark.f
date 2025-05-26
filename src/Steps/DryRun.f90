@@ -1,7 +1,6 @@
 !> @ingroup group_steps
 !> @defgroup group_steps_dryrun benchmark_steps_dryrun
 !> @brief Run the method calls with an empty dummy function
-!> @{
 module benchmark_steps_dryrun
     use benchmark_workflow, only: workflow
     use benchmark_timer, only: clock
@@ -24,6 +23,7 @@ module benchmark_steps_dryrun
         final :: finalize
     end type
        
+    !> @brief dryrun constructor
     interface dryrun
         module procedure :: dryrun_new
     end interface

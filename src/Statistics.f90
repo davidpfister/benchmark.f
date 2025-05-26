@@ -94,4 +94,3 @@ module benchmark_statistics
     end subroutine
     
 end module
-!> @}

@@ -43,7 +43,7 @@ var NAVTREE =
       ] ],
       [ "License", "index.html#autotoc_md27", null ]
     ] ],
-    [ "Related Pages", "articles.html", "articles" ],
+    [ "Documentation", "articles.html", "articles" ],
     [ "API", "topics.html", "topics" ],
     [ "Files", "files.html", "files" ],
     [ "GitHub Repository", "^https://github.com/davidpfister/benchmark.f", null ]

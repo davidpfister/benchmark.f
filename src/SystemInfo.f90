@@ -259,4 +259,4 @@ module benchmark_systeminfo
         end select
     end function
 end module
-!> @}
+!! @}

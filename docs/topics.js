@@ -8,7 +8,7 @@ var topics =
     [ "benchmark_options", "group__group__options.html", "group__group__options" ],
     [ "benchmark_output_unit", "group__group__output.html", "group__group__output" ],
     [ "benchmark_statistics", "group__group__statistics.html", "group__group__statistics" ],
-    [ "benchmark_steady_state_detection", "group__group__ssd.html", "group__group__ssd" ],
+    [ "benchmark_steady_state", "group__group__ssd.html", "group__group__ssd" ],
     [ "benchmark_steps", "group__group__steps.html", "group__group__steps" ],
     [ "benchmark_string", "group__group__string.html", "group__group__string" ],
     [ "benchmark_systeminfo", "group__group__systeminfo.html", null ],

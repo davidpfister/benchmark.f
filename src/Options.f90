@@ -20,7 +20,6 @@ module benchmark_options
     !! @par
     !! <h2>Remarks</h2>
     !! The @ref runner_options is the base class for the @link benchmark_library::runner runner @endlink class. 
-    !! @{
     type, public :: runner_options
         integer,  public        :: maxcalls = 100000000     !< Maximum number of function calls
         integer,  public        :: csv_unit = 0             !< Integer designating the logical output unit for csv results. Null value corresponds to unset value
@@ -36,3 +35,4 @@ module benchmark_options
         character(200), public  :: name = ''                !<  String name
     end type
 end module
+!! @}

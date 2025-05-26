@@ -1,12 +1,12 @@
 !> @ingroup group_steps
-!> @defgroup group_steps_run benchmark_steps_benchmark_run
+!> @defgroup group_steps_run benchmark_steps_run
 !> @brief Run the method call and compute statistics
 !>          Runs the method call until reaching steady state. 
 !>          Statistics as mean and standard deviations are 
 !>          computed and reported
 !> @{
-module benchmark_steps_benchmark_run
-    use benchmark_steady_state_detection, only: ssd
+module benchmark_steps_run
+    use benchmark_steady_state, only: ssd
     use benchmark_workflow, only: workflow
     use benchmark_options
     use benchmark_method
@@ -33,7 +33,8 @@ module benchmark_steps_benchmark_run
         procedure, pass(this), public :: dispose
         final :: finalize
     end type
-       
+    
+    !> @brief benchmarker constructor
     interface benchmarker
         module procedure :: benchmarker_new
     end interface
@@ -240,3 +241,4 @@ module benchmark_steps_benchmark_run
     end subroutine
     
 end module
+!> @}

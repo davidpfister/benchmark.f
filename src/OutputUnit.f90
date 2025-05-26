@@ -103,4 +103,3 @@ module benchmark_output_unit
     end subroutine
     
 end module
-!> @}

@@ -37,7 +37,7 @@ MathJax.Hub.Config({
   jax: ["input/TeX","output/HTML-CSS"],
 });
 </script>
-<script type="text/javascript" async="async" src="./mathjax/MathJax.js"></script>
+<script type="text/javascript" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js"></script>
   <link href="doxygen.css" rel="stylesheet" type="text/css" />
   <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
   <link rel="stylesheet" href="devibeans.css">
@@ -134,28 +134,28 @@ $(function(){initNavTree('_dry_run_8f90_source.html',''); initResizable(true); }
 </div><!--header-->
 <div class="contents">
 <div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="keyword">module</span> benchmark_steps_dryrun</div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span>    <span class="keywordtype">use </span>benchmark_workflow, <span class="keywordtype">only</span>: <a class="code hl_class" href="structbenchmark__workflow_1_1workflow.html">workflow</a></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span>    <span class="keywordtype">use </span>benchmark_timer, <span class="keywordtype">only</span>: <a class="code hl_function" href="group__group__timer.html#ga093ba96a442c18d50e9f9c6acfe11534">clock</a></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span>    <span class="keywordtype">use </span>benchmark_kinds</div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>    <span class="keywordtype">use </span>benchmark_method</div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>    <span class="keywordtype">use </span>benchmark_options</div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>    <span class="keywordtype">use </span>benchmark_string, <span class="keywordtype">only</span>: <a class="code hl_function" href="group__group__string.html#ga7e5a2f4450b6418959f9246e5effe864">str</a></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>    <span class="keywordtype">use </span>benchmark_output_unit</div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>    </div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    <span class="keywordtype">implicit none</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>    </div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <span class="keywordtype">private</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    </div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    <span class="keywordtype">public</span> :: <a class="code hl_interface" href="interfacebenchmark__steps__dryrun_1_1dryrun.html">dryrun</a></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <span class="keyword">type</span>, <span class="keyword">extends</span>(<a class="code hl_class" href="structbenchmark__workflow_1_1workflow.html">workflow</a>) :: benchmark_dryrun</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>        <span class="keywordtype">type</span>(runner_options), <span class="keywordtype">pointer</span> :: options =&gt; null()</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <span class="keyword">contains</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="group__group__steps__dryrun.html#gadbd4a763a49410b7fb1d046d52662ff1">   23</a></span>        <span class="keywordtype">procedure</span>, pass(this), <span class="keywordtype">public</span> :: dispose</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        final :: finalize</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <span class="keyword">end type</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>       </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="keyword">module</span> benchmark_steps_dryrun</div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span>    <span class="keywordtype">use </span>benchmark_workflow, <span class="keywordtype">only</span>: <a class="code hl_class" href="structbenchmark__workflow_1_1workflow.html">workflow</a></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span>    <span class="keywordtype">use </span>benchmark_timer, <span class="keywordtype">only</span>: <a class="code hl_function" href="group__group__timer.html#ga093ba96a442c18d50e9f9c6acfe11534">clock</a></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span>    <span class="keywordtype">use </span>benchmark_kinds</div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span>    <span class="keywordtype">use </span>benchmark_method</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>    <span class="keywordtype">use </span>benchmark_options</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>    <span class="keywordtype">use </span>benchmark_string, <span class="keywordtype">only</span>: <a class="code hl_function" href="group__group__string.html#ga7e5a2f4450b6418959f9246e5effe864">str</a></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>    <span class="keywordtype">use </span>benchmark_output_unit</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>    </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>    <span class="keywordtype">implicit none</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>    <span class="keywordtype">private</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    <span class="keywordtype">public</span> :: <a class="code hl_interface" href="interfacebenchmark__steps__dryrun_1_1dryrun.html">dryrun</a></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    <span class="keyword">type</span>, <span class="keyword">extends</span>(<a class="code hl_class" href="structbenchmark__workflow_1_1workflow.html">workflow</a>) :: benchmark_dryrun</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>        <span class="keywordtype">type</span>(runner_options), <span class="keywordtype">pointer</span> :: options =&gt; null()</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <span class="keyword">contains</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        <span class="keywordtype">procedure</span>, pass(this), <span class="keywordtype">public</span> :: dispose</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        final :: finalize</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keyword">end type</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>       </div>
 <div class="foldopen" id="foldopen00027" data-start="" data-end="">
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="interfacebenchmark__steps__dryrun_1_1dryrun.html">   27</a></span>    <span class="keyword">interface</span> <a class="code hl_interface" href="interfacebenchmark__steps__dryrun_1_1dryrun.html">dryrun</a></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        <span class="keyword">module procedure</span> :: dryrun_new</div>
@@ -225,7 +225,7 @@ $(function(){initNavTree('_dry_run_8f90_source.html',''); initResizable(true); }
 <div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="keyword">end module</span></div>
 <div class="ttc" id="agroup__group__string_html_ga7e5a2f4450b6418959f9246e5effe864"><div class="ttname"><a href="group__group__string.html#ga7e5a2f4450b6418959f9246e5effe864">benchmark_string::str</a></div><div class="ttdeci">pure recursive character(:) function, allocatable, public str(value, fmt)</div><div class="ttdoc">Function to stringify anything.</div><div class="ttdef"><b>Definition</b> <a href="_string_8f90_source.html#l00135">String.f90:136</a></div></div>
 <div class="ttc" id="agroup__group__timer_html_ga093ba96a442c18d50e9f9c6acfe11534"><div class="ttname"><a href="group__group__timer.html#ga093ba96a442c18d50e9f9c6acfe11534">benchmark_timer::clock</a></div><div class="ttdeci">subroutine, public clock(r, option)</div><div class="ttdoc">Returns the actual time in milliseconds.</div><div class="ttdef"><b>Definition</b> <a href="_timer_8f90_source.html#l00051">Timer.f90:52</a></div></div>
-<div class="ttc" id="ainterfacebenchmark__steps__dryrun_1_1dryrun_html"><div class="ttname"><a href="interfacebenchmark__steps__dryrun_1_1dryrun.html">benchmark_steps_dryrun::dryrun</a></div><div class="ttdef"><b>Definition</b> <a href="#l00027">DryRun.f90:27</a></div></div>
+<div class="ttc" id="ainterfacebenchmark__steps__dryrun_1_1dryrun_html"><div class="ttname"><a href="interfacebenchmark__steps__dryrun_1_1dryrun.html">benchmark_steps_dryrun::dryrun</a></div><div class="ttdoc">dryrun constructor</div><div class="ttdef"><b>Definition</b> <a href="#l00027">DryRun.f90:27</a></div></div>
 <div class="ttc" id="astructbenchmark__workflow_1_1workflow_html"><div class="ttname"><a href="structbenchmark__workflow_1_1workflow.html">benchmark_workflow::workflow</a></div><div class="ttdoc">Provides properties and instance methods for the creation, modification, execution and deletion of a ...</div><div class="ttdef"><b>Definition</b> <a href="_workflow_8f90_source.html#l00059">Workflow.f90:59</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->

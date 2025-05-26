@@ -4,7 +4,7 @@ var searchData=
   ['set_5fcaller_1',['set_caller',['../structbenchmark__library_1_1runner.html#a9659f9754bdb102cbcaed00236ddcde3',1,'benchmark_library::runner']]],
   ['setup_2',['setup',['../interfacebenchmark__steps__setup_1_1setup.html',1,'benchmark_steps_setup']]],
   ['skip_5fprelude_3',['skip_prelude',['../structbenchmark__options_1_1runner__options.html#aa2fea0e403e4909261de691ba8fb7d1f',1,'benchmark_options::runner_options']]],
-  ['ssd_4',['ssd',['../group__group__ssd.html#ga01bcc74b1d63853ac0880e6fbdb43c21',1,'benchmark_steady_state_detection']]],
+  ['ssd_4',['ssd',['../group__group__ssd.html#ga01bcc74b1d63853ac0880e6fbdb43c21',1,'benchmark_steady_state']]],
   ['ssd_5fthreshold_5',['ssd_threshold',['../structbenchmark__options_1_1runner__options.html#a87be6e744c589b23300a9d7ff6f42f56',1,'benchmark_options::runner_options']]],
   ['started_6',['Getting Started',['../index.html#autotoc_md16',1,'']]],
   ['statistic_7',['Repeat Benchmarks and Report a Summary Statistic',['../best_practices.html#autotoc_md4',1,'']]],

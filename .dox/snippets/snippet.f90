@@ -237,7 +237,7 @@ block
 
    block
    !> [ssd]
-   use benchmark_steady_state_detection, only: ssd
+   use benchmark_steady_state, only: ssd
    use benchmark_workflow, only: workflow
    use benchmark_options
    use benchmark_method

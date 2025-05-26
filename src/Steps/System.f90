@@ -1,7 +1,7 @@
 !> @ingroup group_steps
 !> @defgroup group_steps_system benchmark_steps_system
 !> @brief Retrieve system information at run time
-!> @{
+!! @{
 module benchmark_steps_system
     use benchmark_systeminfo
     use benchmark_workflow, only: workflow
@@ -13,6 +13,7 @@ module benchmark_steps_system
     
     public :: system
        
+    !> @brief system constructor
     interface system
         module procedure :: system_new
     end interface
@@ -31,3 +32,4 @@ module benchmark_steps_system
         call get_systeminfo()
     end subroutine
 end module
+!> @}

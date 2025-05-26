@@ -6,7 +6,7 @@ module benchmark_steps
     use benchmark_steps_system
     use benchmark_steps_compiler
     use benchmark_steps_dryrun
-    use benchmark_steps_benchmark_run
+    use benchmark_steps_run
     use benchmark_workflow, only: workflow
     use benchmark_options
     
@@ -33,3 +33,4 @@ module benchmark_steps
     end subroutine
     
 end module
+!> @}

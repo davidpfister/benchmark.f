@@ -1,4 +1,4 @@
-# Related Pages {#articles}
+# Documentation {#articles}
 
 * Page @subpage best_practices
 * Page @subpage compiler_differences

@@ -14,6 +14,7 @@ module benchmark_steps_setup
     
     public :: setup
        
+    !> @brief setup constructor
     interface setup
         module procedure :: setup_new
     end interface
@@ -65,3 +66,4 @@ module benchmark_steps_setup
     
 
 end module
+!> @}
