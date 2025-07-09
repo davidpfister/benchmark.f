@@ -2,7 +2,7 @@
 #include <benchmark.inc>
 TESTPROGRAM(main)
 
-    TEST(test_arguments)
+    TEST('test_arguments')
         use benchmark_argument
         use benchmark_kinds
         use benchmark_string
@@ -34,7 +34,7 @@ TESTPROGRAM(main)
  
     END_TEST
     
-    TEST(test_string)
+    TEST('test_string')
         use benchmark_kinds
         use benchmark_string
         use test_utility
@@ -58,7 +58,7 @@ TESTPROGRAM(main)
         
     END_TEST
     
-    TEST(test_serialization)
+    TEST('test_serialization')
         use benchmark_kinds
         use benchmark_library
         
@@ -91,7 +91,7 @@ TESTPROGRAM(main)
         open(file='benchmark.nml', newunit=lu); close(lu, status='delete')
     END_TEST
         
-    TEST(test_calling)
+    TEST('test_calling')
         use benchmark_library
         use test_utility
         
@@ -140,7 +140,7 @@ TESTPROGRAM(main)
         close(15, status='delete')
     END_TEST
     
-    TEST(test_methods)
+    TEST('test_methods')
         use benchmark_method
         use benchmark_string
         use test_utility

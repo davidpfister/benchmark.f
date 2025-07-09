@@ -8,9 +8,9 @@ keywords = ["benchmark", "timer"]
 homepage = "https://github.com/davidpfister/benchmark.f"
 
 [build]
-auto-executables = true
-auto-tests = true
-auto-examples = true
+auto-executables = false
+auto-tests = false
+auto-examples = false
 external-modules = ["omp_lib","symengine"]
 
 [preprocess]

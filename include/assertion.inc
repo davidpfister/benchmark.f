@@ -37,7 +37,7 @@
 #    define MACRO_STRINGIFY(A) #A
 # endif
 # define LOWERCASE(sin, sout)                                          \
-do i = 1, len(sin);                                                    \
+do i = 1, len_trim(sin);                                               \
 j = iachar(sin(i:i));                                                  \
 if (j>= iachar('A') .and. j<=iachar('Z') ) then;                       \
 sout(i:i) = achar(iachar(sin(i:i))+32);                                \
@@ -49,8 +49,8 @@ end do;
 nfailures = nfailures + 1;                                             \
 call cpu_time(toc_assert);                                             \
 write(*,'(A, A, I3, A)') testname,'(', __LINE__,') : error:'; \
-write(*,*) '   Actual: ', actual; \
-write(*,*) ' Expected: ', expected; \
+print*, '   Actual: ', actual; \
+print*, ' Expected: ', expected; \
 write(*,'(A, A, A, A, A, I3, A, E10.3, A)') ESCAPE//'[31m'//'[  FAILED  ]'//ESCAPE//'[0m ', testcase,'.', testname, ' line ', __LINE__,' (', toc_assert - tic_assert, ' ms)'; \
 call flush(output_unit);
 # define REPORT_SUCCESS                                                \
@@ -73,14 +73,16 @@ use, intrinsic :: iso_fortran_env;
 # define IMPLICIT_NONE                                                 \
 implicit none;
 # define TEST(case)                                                    \
-write(*,'(A, A)') '[----------] Test ', MACRO_STRINGIFY(case);         \
-call flush(output_unit);                                               \
 block;                                                                 \
-character(*), parameter :: testcase = MACRO_STRINGIFY(case);           \
 integer :: nfailures = 0;                                              \
 integer :: nsuccess = 0;                                               \
 real, allocatable :: tic_case, toc_case;                               \
+associate(testcase => case);                                           \
+write(*,'(A, A)') '[----------] Test ', testcase;                      \
+call flush(output_unit);                                               \
 block
+# define TEST_PRINT(msg)                                               \
+write(*,'(A, A)') '[          ] ', msg
 # define START_BLOCK(name)                                             \
 block;                                                                 \
 character(*), parameter :: testname = MACRO_STRINGIFY(name);           \
@@ -111,6 +113,7 @@ write(*,'(A, I3, A, A, A, E10.3, A)') ESCAPE//'[32m'//'[  PASSED  ]'//ESCAPE//'[
 end if;                                                                \
 call flush(output_unit);                                               \
 end block;                                                             \
+end associate;                                                         \
 end block;
 # define END_TESTPROGRAM                                               \
 write(*,'(A, I3, A, A)') '[==========] Ran ', nsuccess_all + nfailures_all, ' tests from ', __FILE__; \
@@ -308,8 +311,8 @@ END_BLOCK(s2, s1, .false.)
 # define EXPECT_STRCASEEQ(s1, s2) \
 START_BLOCK(EXPECT_STRCASEEQ) \
 block; \
-character(len(s1)) :: s1l; \
-character(len(s2)) :: s2l; \
+character(len_trim(s1)) :: s1l; \
+character(len_trim(s2)) :: s2l; \
 integer :: i,j; \
 LOWERCASE(s1,s1l) \
 LOWERCASE(s2,s2l) \
@@ -319,8 +322,8 @@ end block;
 # define EXPECT_STRCASENE(s1, s2) \
 START_BLOCK(EXPECT_STRCASENE) \
 block; \
-character(len(s1)) :: s1l; \
-character(len(s2)) :: s2l; \
+character(len_trim(s1)) :: s1l; \
+character(len_trim(s2)) :: s2l; \
 integer :: i,j; \
 LOWERCASE(s1,s1l) \
 LOWERCASE(s2,s2l) \
@@ -338,8 +341,8 @@ END_BLOCK(s2, s1, .true.)
 # define ASSERT_STRCASEEQ(s1, s2) \
 START_BLOCK(ASSERT_STRCASEEQ) \
 block; \
-character(len(s1)) :: s1l; \
-character(len(s2)) :: s2l; \
+character(len_trim(s1)) :: s1l; \
+character(len_trim(s2)) :: s2l; \
 integer :: i,j; \
 LOWERCASE(s1,s1l) \
 LOWERCASE(s2,s2l) \
@@ -349,8 +352,8 @@ end block;
 # define ASSERT_STRCASENE(s1, s2) \
 START_BLOCK(ASSERT_STRCASENE) \
 block; \
-character(len(s1)) :: s1l; \
-character(len(s2)) :: s2l; \
+character(len_trim(s1)) :: s1l; \
+character(len_trim(s2)) :: s2l; \
 integer :: i,j; \
 LOWERCASE(s1,s1l) \
 LOWERCASE(s2,s2l) \
