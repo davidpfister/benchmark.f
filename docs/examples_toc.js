@@ -5,8 +5,8 @@ var examples_toc =
     [ "Allocation", "example_allocation.html", null ],
     [ "Upper Case", "example_upper.html", null ],
     [ "Equation Parsers", "example_parsers.html", [
-      [ "Expressions", "example_parsers.html#autotoc_md11", null ],
-      [ "Prerequisite", "example_parsers.html#autotoc_md12", null ],
-      [ "Notes", "example_parsers.html#autotoc_md13", null ]
+      [ "Expressions", "example_parsers.html#autotoc_md21", null ],
+      [ "Prerequisite", "example_parsers.html#autotoc_md22", null ],
+      [ "Notes", "example_parsers.html#autotoc_md23", null ]
     ] ]
 ];

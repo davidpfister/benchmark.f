@@ -1,10 +1,15 @@
 var searchData=
 [
-  ['target_20code_0',['Warmup the Target Code',['../best_practices.html#autotoc_md3',1,'']]],
-  ['the_20code_1',['the code',['../index.html#autotoc_md20',1,'Get the code'],['../best_practices.html#autotoc_md0',1,'Isolate the code']]],
-  ['the_20environment_2',['Isolate the environment',['../best_practices.html#autotoc_md1',1,'']]],
-  ['the_20project_3',['About the Project',['../index.html#autotoc_md15',1,'']]],
-  ['the_20target_20code_4',['Warmup the Target Code',['../best_practices.html#autotoc_md3',1,'']]],
-  ['to_20internal_20file_5',['Writing namelist to internal file',['../compiler_differences.html#autotoc_md7',1,'']]],
-  ['to_5fstring_6',['to_string',['../structbenchmark__argument_1_1arg.html#a2b38ac3cb3faf7f3f00df880f2441225',1,'benchmark_argument::arg']]]
+  ['r16_0',['r16',['../group__group__kinds.html#ga4452c7c7931ee3cba575c780ff2c638f',1,'benchmark_kinds']]],
+  ['r4_1',['r4',['../group__group__kinds.html#ga5a0e31a5262471f433d7a68a75fcbebe',1,'benchmark_kinds']]],
+  ['r8_2',['r8',['../group__group__kinds.html#gaa779ae802be5bb6de8bba8cbe82c435a',1,'benchmark_kinds']]],
+  ['read_3',['read',['../structbenchmark__library_1_1runner.html#acf2c7ba197c6f63d2669f52de2a17e2c',1,'benchmark_library::runner']]],
+  ['repeat_20benchmarks_20and_20report_20a_20summary_20statistic_4',['Repeat Benchmarks and Report a Summary Statistic',['../best_practices.html#autotoc_md14',1,'']]],
+  ['report_20a_20summary_20statistic_5',['Repeat Benchmarks and Report a Summary Statistic',['../best_practices.html#autotoc_md14',1,'']]],
+  ['requirements_6',['Requirements',['../index.html#autotoc_md3',1,'']]],
+  ['run_7',['Run',['../group__group__steps__run.html',1,'']]],
+  ['run_8',['run',['../structbenchmark__library_1_1runner.html#acf87a705de98409827721c86627a8f5c',1,'benchmark_library::runner::run(this, f)'],['../structbenchmark__library_1_1runner.html#a3d28fdee3c08a6ad2aadf7cc77935d9f',1,'benchmark_library::runner::run(this, a1, f)'],['../structbenchmark__library_1_1runner.html#a16b1c2252df05866e53fb7a260184beb',1,'benchmark_library::runner::run(this, a1, a2, f)'],['../structbenchmark__library_1_1runner.html#af31a2d398451bb325d90b3ec573db384',1,'benchmark_library::runner::run(this, a1, a2, a3, f)'],['../structbenchmark__library_1_1runner.html#a62eae7589904d3d1e9aad430ed924f1c',1,'benchmark_library::runner::run(this, a1, a2, a3, a4, f)'],['../structbenchmark__library_1_1runner.html#ad4d880ac4ab41c5de51c84abbbb010fa',1,'benchmark_library::runner::run(this, a1, a2, a3, a4, a5, f)'],['../structbenchmark__library_1_1runner.html#a6305f9926e96306e2a473c228ee4358c',1,'benchmark_library::runner::run(this, a1, a2, a3, a4, a5, a6, f)'],['../structbenchmark__library_1_1runner.html#a44eb0ea7429c25342f83b5d37ea3db29',1,'benchmark_library::runner::run(this, a1, a2, a3, a4, a5, a6, a7, f)'],['../structbenchmark__workflow_1_1workflow.html#a430726d75fe628edd8599c4ad9ff66d8',1,'benchmark_workflow::workflow::run()']]],
+  ['run_2ef90_9',['Run.f90',['../_run_8f90.html',1,'']]],
+  ['runner_10',['runner',['../structbenchmark__library_1_1runner.html',1,'benchmark_library']]],
+  ['runner_5foptions_11',['runner_options',['../structbenchmark__options_1_1runner__options.html',1,'benchmark_options']]]
 ];

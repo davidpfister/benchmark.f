@@ -1,8 +1,7 @@
 @pretiffy
 option clean --all
-system fprettify .\app\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations
-system fprettify .\src\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations
-system fprettify .\tests\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations
+system fprettify codee format ./src
+system fortitute check ./src --fix
 
 @clean
 option clean --all
@@ -20,3 +19,4 @@ options test --flag '-ffree-line-length-none' '-D_QUIET'
 @doc
 option clean --all
 system cd ./.dox & doxygen ./Doxyfile.in & cd ..
+system powershell ./tools/Fix-Doxygen.ps1 -Path "./docs"

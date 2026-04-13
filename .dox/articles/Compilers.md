@@ -10,9 +10,10 @@ are not portable due to different interpretation of the standard. Some of the co
 ## Implicit procedure pointer
 
 Since Fortran 2003, it is possible to declare procedure pointers as function argument. The declaration is usually something like this 
-```fortran 
+@code{.f90}
 procedure(interface), intent(in) :: ptr
-```
+...
+@endcode
 It is also possible to omit the interface in the procedure declaration statement. `procedure()` with no type or interface name is 
 supposed to work as a dummy procedure or procedure pointer that can handle either a function or a subroutine, so long as it isn't 
 referenced. Many compilers assume that it means a subroutine, or just can't deal with it. gfortran is one of them.
@@ -30,21 +31,23 @@ there one is forced to use the `select type` construct.
 
 For instance, one can try this simple function call: 
 
-```fortran
+@code{.f90}
     class(*), intent(in)            :: a1
 
     associate(arg1 => a1)
         call func(arg1)
     end associate
-```
+    ...
+@endcode
 
 with the function 
-```fortran
+@code{.f90}
 subroutine func(n)
     integer, intent(in) :: n
     print*, n
 end subroutine
-```
+...
+@endcode
 
 The argument `n` is the desired integer value when the code is compiled with ifort, while gfortran returns a random value(maybe the address of the variable?)
 
@@ -52,7 +55,7 @@ The argument `n` is the desired integer value when the code is compiled with ifo
 
 gfortran does not support writing `namelist` to internal files. As such the option is only available when compiled 
 with ifort. Preprocessor macros and conditional compilation are used to provide this option to ifort
-```fortran 
+@code{.f90}
 #ifdef __INTEL_COMPILER
     subroutine benchmark_serialize_to_string(this, str)
         class(runner), intent(in), target       :: this
@@ -70,14 +73,15 @@ with ifort. Preprocessor macros and conditional compilation are used to provide 
         nullify(bench)
     end subroutine
 #endif
-``` 
+...
+@endcode
 
 ## Example
 
 Here is an example that illustrate how the same benchmark can be written for both compilers: 
 
 The test program is the same, irrespective of the compiler used.
-```fortran
+@code{.f90}
 #include <benchmark.inc>
 program poisson
     use rhofunc
@@ -92,11 +96,11 @@ program poisson
     end block
     read(*,*)
 end program
-```
+@endcode
 
 ### gfortran
 
-```fortran
+@code{.f90}
     pure subroutine poisson_optimized(treshold, m)
         class(*), intent(in) :: treshold
         class(*), intent(in)  :: m
@@ -145,11 +149,11 @@ end program
             rho = 0.0_rp
         end if
     end function
-```
+@endcode
 
 ### ifort
 
-```fortran
+@code{.f90}
     pure subroutine poisson_optimized(treshold, m)
         real(rp), intent(in) :: treshold
         integer, intent(in)  :: m
@@ -182,14 +186,16 @@ end program
         end do
     end subroutine
     
-    pure real(rp) function rho(x,y)
+    pure function rho(x,y) result(res)
         real(rp), intent(in) :: x,y
+        real(rp) :: res
+        
         if (x > 0.6_rp .and. x < 0.8_rp .and. y > 0.6_rp .and. y < 0.8_rp) then
-            rho = 1.0_rp
+            res = 1.0_rp
         else if (x > 0.2_rp .and. x < 0.4_rp .and. y > 0.2_rp .and. y < 0.4_rp) then
-            rho = -1.0_rp
+            res = -1.0_rp
         else
-            rho = 0.0_rp
+            res = 0.0_rp
         end if
     end function
-```
+@endcode

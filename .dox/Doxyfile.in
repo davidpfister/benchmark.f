@@ -54,7 +54,7 @@ PROJECT_NUMBER         =
 # for a project that appears at the top of each page and should give viewer a
 # quick idea about the purpose of the project. Keep the description short.
 
-PROJECT_BRIEF          = 
+PROJECT_BRIEF          = Benchmark with precision
 
 # With the PROJECT_LOGO tag one can specify a logo or an icon that is included
 # in the documentation. The maximum height of the logo should not exceed 55
@@ -164,7 +164,7 @@ ALWAYS_DETAILED_SEC    = YES
 # operators of the base classes will not be shown.
 # The default value is: NO.
 
-INLINE_INHERITED_MEMB  = YES
+INLINE_INHERITED_MEMB  = NO
 
 # If the FULL_PATH_NAMES tag is set to YES, doxygen will prepend the full path
 # before files name in the file list and in the header files. If set to NO the
@@ -505,7 +505,7 @@ EXTRACT_ALL            = NO
 # be included in the documentation.
 # The default value is: NO.
 
-EXTRACT_PRIVATE        = NO
+EXTRACT_PRIVATE        = YES
 
 # If the EXTRACT_PRIV_VIRTUAL tag is set to YES, documented private virtual
 # methods of a class will be included in the documentation.
@@ -563,7 +563,7 @@ RESOLVE_UNNAMED_PARAMS = YES
 # section is generated. This option has no effect if EXTRACT_ALL is enabled.
 # The default value is: NO.
 
-HIDE_UNDOC_MEMBERS     = NO
+HIDE_UNDOC_MEMBERS     = YES
 
 # If the HIDE_UNDOC_CLASSES tag is set to YES, doxygen will hide all
 # undocumented classes that are normally visible in the class hierarchy. If set
@@ -772,7 +772,7 @@ SHOW_FILES             = YES
 # Folder Tree View (if specified).
 # The default value is: YES.
 
-SHOW_NAMESPACES        = YES
+SHOW_NAMESPACES        = NO
 
 # The FILE_VERSION_FILTER tag can be used to specify a program or script that
 # doxygen should invoke to get the current version for each file (typically from
@@ -917,9 +917,9 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT = ../src \
-        ./articles \
-        ../README.md
+INPUT = ../README.md\
+        ../src \
+        ./articles
         
 
 # This tag can be used to specify the character encoding of the source files
@@ -1139,6 +1139,15 @@ FILTER_SOURCE_PATTERNS =
 
 USE_MDFILE_AS_MAINPAGE = README.md
 
+# If the IMPLICIT_DIR_DOCS tag is set to YES, any README.md file found in 
+# sub-directories of the project's root, is used as the documentation for 
+# that sub-directory, except when the README.md starts with a \dir, \page 
+# or \mainpage command. If set to NO, the README.md file needs to start with 
+# an explicit \dir command in order to be used as directory documentation.
+# The default value is: YES.
+
+IMPLICIT_DIR_DOCS      = NO
+
 # The Fortran standard specifies that for fixed formatted Fortran code all
 # characters from position 72 are to be considered as comment. A common
 # extension is to allow longer lines before the automatic comment starts. The
@@ -1172,7 +1181,7 @@ INLINE_SOURCES         = NO
 # Fortran comments will always remain visible.
 # The default value is: YES.
 
-STRIP_CODE_COMMENTS    = YES
+STRIP_CODE_COMMENTS    = NO
 
 # If the REFERENCED_BY_RELATION tag is set to YES then for each documented
 # entity all documented functions referencing it will be listed.
@@ -1376,7 +1385,11 @@ HTML_STYLESHEET        =
 # documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_STYLESHEET  = ./config/doxygen-awesome-css-2.2.0/doxygen-awesome.css
+HTML_EXTRA_STYLESHEET  = ./config/doxygen-awesome-css/doxygen-awesome.css \
+                         ./config/doxygen-awesome-css/doxygen-awesome-sidebar-only.css \
+                         ./config/doxygen-awesome-css/doxygen-awesome-sidebar-only-darkmode-toggle.css \
+                         ./config/custom.css \
+                         ./config/table.css
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note
@@ -1386,13 +1399,12 @@ HTML_EXTRA_STYLESHEET  = ./config/doxygen-awesome-css-2.2.0/doxygen-awesome.css
 # files will be copied as-is; there are no commands or markers available.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_FILES       = ./config//doxygen-awesome-css-2.2.0/doxygen-awesome-darkmode-toggle.js \
-                         ./config//doxygen-awesome-css-2.2.0/doxygen-awesome-fragment-copy-button.js \
-                         ./config//doxygen-awesome-css-2.2.0/doxygen-awesome-paragraph-link.js \
-                         ./config//doxygen-awesome-css-2.2.0/doxygen-awesome-interactive-toc.js \
-                         ./config//doxygen-awesome-css-2.2.0/doxygen-awesome-tabs.js \
-                         ./config//highlight.js \
-                         ./config//devibeans.css
+HTML_EXTRA_FILES       = ./config/doxygen-awesome-css/doxygen-awesome-darkmode-toggle.js \
+                         ./config/doxygen-awesome-css/doxygen-awesome-fragment-copy-button.js \
+                         ./config/doxygen-awesome-css/doxygen-awesome-paragraph-link.js \
+                         ./config/doxygen-awesome-css/doxygen-awesome-interactive-toc.js \
+                         ./config/doxygen-awesome-css/doxygen-awesome-tabs.js \
+                         ./config/nav-buttons.js
 
 # The HTML_COLORSTYLE tag can be used to specify if the generated HTML output
 # should be rendered with a dark or light theme.
@@ -1708,7 +1720,7 @@ GENERATE_TREEVIEW      = YES
 # The default value is: NO.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-FULL_SIDEBAR           = YES
+FULL_SIDEBAR           = NO
 
 # The ENUM_VALUES_PER_LINE tag can be used to set the number of enum values that
 # doxygen will group on one line in the generated HTML documentation.
@@ -1725,7 +1737,7 @@ ENUM_VALUES_PER_LINE   = 4
 # Minimum value: 0, maximum value: 1500, default value: 250.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-TREEVIEW_WIDTH         = 280
+TREEVIEW_WIDTH         = 240
 
 # If the EXT_LINKS_IN_WINDOW option is set to YES, doxygen will open links to
 # external symbols imported via tag files in a separate window.
@@ -1781,7 +1793,7 @@ USE_MATHJAX            = YES
 # The default value is: MathJax_2.
 # This tag requires that the tag USE_MATHJAX is set to YES.
 
-MATHJAX_VERSION        = MathJax_2
+MATHJAX_VERSION        = MathJax_3
 
 # When MathJax is enabled you can set the default output format to be used for
 # the MathJax output. For more details about the output format see MathJax
@@ -1812,7 +1824,7 @@ MATHJAX_FORMAT         = HTML-CSS
 # - in case of MathJax version 3: https://cdn.jsdelivr.net/npm/mathjax@3
 # This tag requires that the tag USE_MATHJAX is set to YES.
 
-MATHJAX_RELPATH        = 
+MATHJAX_RELPATH        = https://cdn.jsdelivr.net/npm/mathjax@3
 
 # The MATHJAX_EXTENSIONS tag can be used to specify one or more MathJax
 # extension names that should be enabled during MathJax rendering. For example
@@ -2767,3 +2779,7 @@ GENERATE_LEGEND        = YES
 # The default value is: YES.
 
 DOT_CLEANUP            = YES
+
+PAGE_OUTLINE_PANEL     = YES 
+SHOW_ENUM_VALUES       = YES
+HTML_COPY_CLIPBOARD    = NO

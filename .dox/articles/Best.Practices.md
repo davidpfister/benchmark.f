@@ -1,7 +1,5 @@
 # Best Practices {#best_practices}
 
-[TOC]
-
 There are good practices to keep in mind when benchmarking a 
 Fortran code designed to avoid the most common problems and help to ensure 
 reliability, reproducibility and usefulness of the results. 
@@ -32,14 +30,15 @@ Disk IO are usually slow as compared to other operations.
 The system has more than one clock available. In Fortran, one can use `cpu_time`, `date_and_time` and `system_clock`
 `system_clock` with 64-bits integer usually gives the best precision. 
 
-```fortran
+@code{.f90}
 block
     integer(i8) :: clock_max, clock_rate, clock_reading
 
     call system_clock(clock_reading, clock_rate, clock_max)
     ctime = 1000_r8 * real(clock_reading, r8) / real(clock_rate, r8)
 end block
-```
+...
+@endcode
 
 ## Warmup the Target Code
 

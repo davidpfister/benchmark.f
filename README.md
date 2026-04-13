@@ -1,36 +1,37 @@
-<a id="readme-top"></a>
+<!--! @mainpage -->
+<h1 class="title">
+    <span class="name">Benchmark.f</span>
+    <br>
+    <span class="text">Benchmarking with precision</span>
+    <br>
+    <span class="tagline">
+    A KISS library for benchmarking Fortran functions and subroutines.
+    </span>
+</h1>
+<br>
 
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <h3 align="center">Benchmark.f</h3>
-
-  <p align="center">
-    A KISS library for benchmarking Fortran functions and subroutines with precision.
-    <br />
-    <a href="https://github.com/davidpfister/benchmark.f"><strong>Explore the project »</strong></a>
-    <br />
-  </p>
+<div class="actions">
+    <div class="action">
+        <a class="button medium brand" href="index.html#autotoc_md2">Get Started</a>
+    </div>
+    <div class="action">
+        <a class="button medium alt" href="topics.html">API</a>
+    </div>
+    <div class="action">
+        <a class="button medium alt" href="https://github.com/davidpfister/benchmark.f" target="_blank" rel="noreferrer">View on GitHub</a>
+    </div>
 </div>
-
-
-
-<!-- TABLE OF CONTENTS -->
-[TOC]
 
 # Introduction
 <!-- ABOUT THE PROJECT -->
 ## About the Project
-<p align="center">
-  <img src="https://github.com/davidpfister/benchmark.f/blob/master/.dox/images/screenshot.png?raw=true">
-</p>
-Fortran is the fastest language on earth, so they say. But can we prove it? <br><br>
+
+<div style="text-align: center;">
+  <img src="https://github.com/davidpfister/benchmark.f/blob/master/.dox/images/screenshot.png?raw=true" width="512" height="512">
+</div>
+
+
+Fortran is the fastest language on earth, so they say. But can we prove it? <br>
 Despite its legendary speed when crunching numbers, Fortran is no exception when it comes to writing code: it's also very possible to write terribly slow pieces of code. This is where benchmarking different implementations of the same function can help developing better and faster algorithms.  
 
 This project aims at providing an easy interface to benchmark functions and subroutines while taking care of warming up the machine, collecting system information, computing statistics and reporting results. 
@@ -40,7 +41,7 @@ This project aims at providing an easy interface to benchmark functions and subr
 * [![gfortran][gfortran]][gfortran-url]
 
 <!-- GETTING STARTED -->
-## Getting Started
+## Installation
 
 ### Requirements
 
@@ -63,13 +64,92 @@ The following compilers are tested on the default branch of _benchmark.f_:
 
 Unit test rely on the the header file [`assertion.inc`](https://github.com/davidpfister/fortiche/tree/master/src/assertion). Since the whole framework fits in a single file, it has been added directly to the repo. 
 
-Linting, indentation, and styling is done with [fprettify](https://github.com/fortran-lang/fprettify) with the following settings
+Linting, indentation, and styling is done with [codee](https://www.codee.com/codee-formatter/) and [fortitude](https://fortitude.readthedocs.io/en/stable/) with the following settings
 ```bash
-fprettify .\src\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations
+codee format ./src
+fortitute check ./src --fix
 ```
 
+#### Get the code
+```bash
+git clone https://github.com/davidpfister/benchmark.f
+cd benchmark.f
+```
+
+#### Build with fpm
+
+The repo can be build using _fpm_
+```bash
+fpm build --flag '-ffree-line-length-none'
+```
+For convenience, the  repo also contains a response file that can be invoked as follows: 
+```
+fpm @build
+```
+(For the Windows users, that command does not work in Powershell since '@' is a reserved symbol. One should use the '--%' as follows: `fpm --% @build`.
+This is linked to the following [issue](https://github.com/urbanjost/M_CLI2/issues/19))
+
+Building with ifort requires to specify the compiler name (gfortran by default)
+```bash
+fpm @build --compiler ifort
+```
+Alternatively, the compiler can be set using fpm environment variables.
+```bash
+set FPM_FC=ifort
+```
+
+Besides the build command, several commands are also available:
+```bash
+@pretiffy
+option clean --all
+system fprettify codee format ./src
+system fortitute check ./src --fix
+
+@clean
+option clean --all
+
+@rebuild
+system rmdir /s /q build
+option build --flag '-ffree-line-length-none'
+
+@build
+option build --flag '-ffree-line-length-none'
+
+@test
+options test --flag '-ffree-line-length-none'
+
+@doc
+option clean --all
+system cd ./.dox & doxygen ./Doxyfile.in & cd ..
+```
+
+The toml files contains two items that are worth commenting.
+
+**The settings to the cpp preprocessor are specified in the file.**
+
+```ini
+[preprocess]
+cpp.suffixes = ["F90", "f90"]
+cpp.macros = ["_FPM"]
+```
+The `_FPM` macro is used to differentiate the build when compiling with _fpm_ or _Visual Studio_. This is mostly present to adapt the hard coded paths that differs in both cases.
+
+**The code must also be compiled allowing implicit procedures.**
+This is reflected in the following option. 
+
+```ini
+[fortran]
+implicit-external = true
+```
+In order to be able to benchmark functions AND subroutines with any number of dummy arguments (0 to 7 at the moment) of any types (intrinsic or derived types), implicit procedures are a must. While this may be considered as bad practice and a remainder from F77 and the good old external, there would be no other way to provide a generic library without this option. 
+
+#### Build with Visual Studio 2019
+
+The project was originally developed on Windows with Visual Studio 2019. The repo contains the solution file (_Benchmark.f.sln_) to get you started with Visual Studio 2019. 
+
+<!-- LICENSE -->
 <!-- USAGE EXAMPLES -->
-## Usage
+## Quick Start
 
 Running the benchmark could not be simpler. 
 
@@ -107,94 +187,21 @@ The library takes care of everything else for you
 - Collection of compiler information
 - Collection of compilation options
 - Reporting
+## Contributing
 
-### Installation
-
-#### Get the code
-```bash
-git clone https://github.com/davidpfister/benchmark.f
-cd benchmark.f
-```
-
-#### Build with fpm
-
-The repo can be build using _fpm_
-```bash
-fpm build --flag '-ffree-line-length-none'
-```
-For convenience, the  repo also contains a response file that can be invoked as follows: 
-```
-fpm @build
-```
-(For the Windows users, that command does not work in Powershell since '@' is a reserved symbol. One should use the '--%' as follows: `fpm --% @build`.
-This is linked to the following [issue](https://github.com/urbanjost/M_CLI2/issues/19))
-
-Building with ifort requires to specify the compiler name (gfortran by default)
-```bash
-fpm @build --compiler ifort
-```
-Alternatively, the compiler can be set using fpm environment variables.
-```bash
-set FPM_FC=ifort
-```
-
-Besides the build command, several commands are also available:
-```bash
-@pretiffy
-system fprettify .\examples\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations
-system fprettify .\src\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations
-system fprettify .\tests\ -r --case 1 1 1 1 -i 4 --strict-indent --enable-replacements --strip-comments --c-relations
-
-@clean
-option clean --all
-
-@rebuild
-system rmdir /s /q build
-option build --flag '-ffree-line-length-none'
-
-@build
-option build --flag '-ffree-line-length-none'
-
-@test
-options test --flag '-ffree-line-length-none'
-
-@doc
-option clean --all
-system cd ./.dox & doxygen ./Doxyfile.in & cd ..
-```
-
-The toml files contains two items that are worth commenting: 
-1. The settings to the cpp preprocessor are specified in the file. 
-
-```toml
-[preprocess]
-cpp.suffixes = ["F90", "f90"]
-cpp.macros = ["_FPM"]
-```
-The `_FPM` macro is used to differentiate the build when compiling with _fpm_ or _Visual Studio_. This is mostly present to adapt the hard coded paths that differs in both cases.
-
-2. The code must also be compiled allowing implicit procedures. This is reflected in the following option. 
-```toml
-[fortran]
-implicit-external = true
-```
-In order to be able to benchmark functions AND subroutines with any number of dummy arguments (0 to 7 at the moment) of any types (intrinsic or derived types), implicit procedures are a must. While this may be considered as bad practice and a remainder from F77 and the good old external, there would be no other way to provide a generic library without this option. 
-
-#### Build with Visual Studio 2019
-
-The project was originally developed on Windows with Visual Studio 2019. The repo contains the solution file (_Benchmark.f.sln_) to get you started with Visual Studio 2019. 
-
-<!-- CONTRIBUTING -->
-### Contributing
-
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**. So, thank you for considering contributing to _fpm-modules_.
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**. So, thank you for considering contributing to _benchmark.f_.
 Please review and follow these [guidelines](https://github.com/davidpfister/benchmark.f/tree/master?tab=contributing-ov-file) to make the contribution process simple and effective for all involved. In return, the developers will help address your problem, evaluate changes, and guide you through your pull requests.
 
-
-<!-- LICENSE -->
+By contributing to _benchmark.f_, you certify that you own or are allowed to share the content of your contribution under the same license.
 ## License
 
 Distributed under the MIT License.
+
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [contributors-shield]: https://img.shields.io/github/contributors/davidpfister/benchmark.f.svg?style=for-the-badge

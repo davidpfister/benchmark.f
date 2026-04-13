@@ -1,0 +1,486 @@
+html:not(.dark-mode) {
+  --font-family-monospace: ui-monospace, Menlo, Consolas, monospace;
+}
+
+html{
+  overflow: hidden;
+    /* Modern color palette (VitePress-inspired blues/grays) */
+  --primary-color: #3b82f6;           /* Tailwind blue-500 */
+  --primary-dark-color: #1e40af;
+  --primary-light-color: #60a5fa;
+
+  --page-background-color: #f8fafc;   /* Slate-50 */
+  --page-foreground-color: #1e2937;   /* Slate-800 */
+  --page-secondary-foreground-color: #64748b; /* Slate-500 */
+
+  /* Typography – Inter is very modern (VitePress uses system + clean sans) */
+  --font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Spacing & radius – more generous and rounded like Tailwind/VitePress */
+  --spacing-small: 6px;
+  --spacing-medium: 12px;
+  --spacing-large: 20px;
+  --spacing-xlarge: 28px;
+
+  --border-radius-small: 6px;
+  --border-radius-medium: 10px;
+  --border-radius-large: 12px;
+
+  /* Content width – VitePress feels more spacious */
+  --content-maxwidth: auto;         /* or 'auto' for full-width */
+  /* Code & fragments – softer, more modern */
+  --fragment-background: #f1f5f9;     /* Slate-100 */
+  --fragment-foreground: #334155;
+
+  /* Shadows – subtle elevation like Tailwind */
+  --box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+
+  /* added to :root element */
+    --shadow-color: #FBFBFB;
+
+    --handle-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAAMCAQAAADitaTfAAAAFUlEQVQIW2O++j+bkWUTAwZgJiwBAB9kCOy+u0d3AAAAAElFTkSuQmCC);
+
+    /* Add to darkmode overrides */
+    --shadow-color: #242424;
+    --side-nav-fixed-width: 240px
+}
+
+/* Additional modern enhancements */
+body, .PageDoc {
+  font-feature-settings: "kern" 1, "liga" 1, "tnum" 1;
+  overflow: hidden;
+}
+
+#container {
+    grid-template-columns: auto !important;
+}
+
+#doc-content {
+    height: calc(100vh - 36px) !important;
+}
+
+/* Clean Microsoft Learn-style member list – aggressive cleanup of old remnants */
+
+.memitem {
+  margin: 2rem 0 1.5rem 0;
+  padding: 0;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  overflow: visible;
+}
+
+/* Clean memtitle – no underline */
+.memtitle,
+h2.memtitle,
+.memtitle h2 {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: none !important;           /* ← this removes the underline */
+  padding: 1.1rem 0 0.75rem 0 !important;
+  margin: 0 0 1rem 0 !important;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--page-foreground-color);
+  text-decoration: none !important;
+  box-shadow: none !important;
+}
+
+/* Rounded top bar for the prototype (memproto) */
+.memproto {
+  background: var(--fragment-background) !important;   /* light gray in light mode, dark in dark mode */
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  border-radius: 10px 10px 0 0 !important;            /* round only the top corners */
+  padding: 0.85rem 1.1rem !important;
+  margin: 0 0 0 0 !important;
+  box-shadow: none !important;
+  overflow: hidden;
+}
+
+.memtitle::after {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 0.3rem;
+  bottom: 0.3rem;
+  width: 4px;
+  background: transparent;
+  border-radius: 9999px;
+}
+
+h2.memtitle {
+    box-shadow: none;
+}
+
+/* Force-hide any remaining old styles and the diamond permalink */
+.memtitle .permalink,
+.memtitle a.permalink,
+.memtitle .memtemplate,
+.memtitle .memname,
+.memtitle table,
+.memtitle td,
+.memtitle tr {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Clean memdoc (the content below the title) */
+.memdoc {
+  padding: 0 0 1.5rem 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  line-height: 1.65;
+}
+
+/* Dark mode support */
+html.dark-mode .memtitle {
+  border-bottom-color: rgba(148, 163, 184, 0.3) !important;
+}
+
+html.dark-mode .memtitle::before {
+  background: var(--primary-color);
+}
+
+.paramname {
+    color: var(--page-foreground-color)
+}
+.paramname em {
+    color: var(--primary-color)
+}
+
+/* Better headings (VitePress-style) */
+h1, h2, h3, h4 {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+/* Navigation / sidebar improvements */
+#nav-tree a {
+  border-radius: var(--border-radius-small);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Tables – more modern */
+table.doxtable {
+  border-radius: var(--border-radius-medium);
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+}
+
+/* Code blocks */
+div.fragment {
+  border-radius: var(--border-radius-medium);
+  border: none;
+}
+
+/* Buttons & labels */
+.primary-button {
+  border-radius: var(--border-radius-medium);
+  transition: all 0.2s ease;
+}
+
+#projectname {
+  white-space: revert;
+}
+
+.arrow {
+  color: var(--primary-color);
+  font-size: 80%;
+  font-family: var(--font-family);
+  text-align: left;
+}
+
+/* hide nav-sync icon */
+#nav-sync {
+  visibility: hidden;
+}
+
+/* page title larger than section heading */
+div.header .title {
+  font-size: 2.25em;
+}
+
+/* group header margins */
+div.groupHeader {
+  margin-left: 0;
+  margin-bottom: 1em;
+}
+
+/* figure caption font and margin */
+div.caption {
+  font-weight: normal;
+  margin-top: 0.5em;
+}
+
+/* centered copyright footer */
+#nav-path address {
+  border-top: 1px solid var(--separator-color);
+  border-bottom: 1px solid var(--separator-color);
+  background-color: var(--page-background-color);
+  color: var(--page-secondary-foreground-color);
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  font-size: small;
+  text-align: center;
+}
+
+/* fix appearance of numbers in citation list */
+dl.citelist dt {
+  font-weight: normal;
+  font-size: var(--page-font-size);
+  line-height: var(--content-line-height);
+  color: var(--page-foreground-color);
+  padding-top: 0.4em;
+}
+
+.demo {
+  display: block;
+  width: 75%;
+  height: 60vh;
+  border: 1px solid #dedede;
+  border-radius: 3px;
+}
+
+div.toc h3,
+div.toc li {
+  font-family: var(--font-family);
+}
+
+.section_buttons:not(:empty) 
+{
+    margin-top: 0;
+}
+
+.section_buttons table.markdownTable 
+{
+    width: auto;
+}
+
+table.markdownTable {
+    margin-left: 28px;
+    margin-right: 28px;
+}
+
+/* Modern badges for member labels (private, protected, public, static, etc.) */
+
+span.mlabel {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  margin-left: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  border-radius: 9999px;           /* fully rounded pills */
+  border: 1px solid transparent;
+  white-space: nowrap;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/* Private - subtle red/gray tone */
+span.mlabel.private {
+  background: #fee2e2;             /* light red */
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+html.dark-mode span.mlabel.private {
+  background: #7f1d1d;
+  color: #fda4af;
+  border-color: #991b1b;
+}
+
+/* Protected - orange/amber tone */
+span.mlabel.protected {
+  background: #fef3c7;
+  color: #b45309;
+  border-color: #fcd34d;
+}
+
+html.dark-mode span.mlabel.protected {
+  background: #78350f;
+  color: #fcd34d;
+  border-color: #92400e;
+}
+
+/* Public - clean blue/primary tone (matches your theme) */
+span.mlabel.public {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--primary-color);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+html.dark-mode span.mlabel.public {
+  background: rgba(96, 165, 250, 0.15);
+  color: var(--primary-color);
+}
+
+/* Other common labels (static, inline, virtual, const, etc.) */
+span.mlabel.static,
+span.mlabel.inline,
+span.mlabel.virtual,
+span.mlabel.const,
+span.mlabel.explicit,
+span.mlabel.mutable {
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--page-secondary-foreground-color);
+  border-color: rgba(148, 163, 184, 0.25);
+  font-weight: 500;
+  text-transform: none;
+}
+
+html.dark-mode span.mlabel.static,
+html.dark-mode span.mlabel.inline,
+html.dark-mode span.mlabel.virtual,
+html.dark-mode span.mlabel.const {
+  background: rgba(148, 163, 184, 0.15);
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+/* VuePress / VitePress-style Hero Title Elements */
+
+.title {
+  font-size: 3.2rem;                    /* Large, impactful title */
+  line-height: 1.05;
+  margin: 0 0 1rem 0;
+  padding: 0;
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--primary-color);
+  padding-bottom: 8px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+h2.groupheader {
+  font-size: 1.8rem;                    /* Large, impactful title */
+  font-weight: 600;
+  line-height: 1.05;
+  color: var(--page-foreground-color);
+  margin: 0 0 1rem 0;
+  padding-bottom: 8px;
+}
+/* Project / Site name (often inside span.name) */
+span.name {
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--primary-color);
+  padding-bottom: 8px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+/* Subtitle / description text */
+span.text {
+  font-size: 3.2rem;
+  font-weight: 500;
+  line-height: 1.05;
+  color: var(--page-secondary-foreground-color);
+  margin: 0 0 2rem 0;
+  max-width: 680px;
+}
+
+span.tagline {
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--page-secondary-foreground-color);
+  opacity: 0.75;
+  margin: 0.25rem 0 2.5rem 0;
+  max-width: 680px;
+}
+
+/* VitePress-style VPButton - matching the provided image */
+.actions{
+    display: flex;
+    flex-wrap: wrap;
+    margin: -6px;
+    padding-top: 24px;
+}
+
+.action{
+    padding: 6px;
+    flex-shrink: 0;
+}
+
+.button {
+  display: inline-block;
+  border: 1px solid transparent;
+  text-align: center;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color 0.25s, border-color 0.25s, background-color 0.25s;
+}
+
+.button:active {
+  transition: color 0.1s, border-color 0.1s, background-color 0.1s;
+}
+
+.button.medium {
+  border-radius: 20px;
+  padding: 0 20px;
+  line-height: 38px;
+  font-size: 14px;
+}
+
+.button.big {
+  border-radius: 24px;
+  padding: 0 24px;
+  line-height: 46px;
+  font-size: 16px;
+}
+
+.button.brand {
+  border-color: var(--primary-color);
+  color: var(--page-foreground-color) !important;
+  background-color: var(--primary-color);
+  text-decoration: none;
+}
+
+.button.brand:hover {
+  border-color: var(--primary-color);
+  background-color: var(--primary-light-color);
+  text-decoration: none;
+}
+
+.button.brand:active {
+  border-color: var(--primary-color);
+  background-color: var(--primary-dark-color);
+  text-decoration: none;
+}
+
+.button.alt {
+  border-color: var(--primary-color);
+  color: var(--primary-color) !important;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+.button.alt:hover {
+  border-color: var(--primary-color);
+  color: var(--page-foreground-color) !important;
+  background-color: var(--primary-light-color);
+  text-decoration: none;
+}
+
+.button.alt:active {
+  border-color: var(--primary-color);
+  color: var(--page-foreground-color) !important;
+  background-color: var(--primary-light-color);
+  text-decoration: none;
+}

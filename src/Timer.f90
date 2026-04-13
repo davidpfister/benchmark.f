@@ -1,50 +1,48 @@
-!> @defgroup group_timer benchmark_timer
-!! @brief Returns the actual time in milliseconds.
+!> @file
+!! @defgroup group_timer Timer
+!! Returns the actual time in milliseconds.
 !! @par
 !! <h2>Examples</h2>
-!! The following example uses the @ref benchmark_timer::clock subroutine to get the 
-!! actual time in milliseconds. 
+!! The following example uses the @ref benchmark_timer::clock subroutine to get the
+!! actual time in milliseconds.
 !! @n
 !! @snippet snippet.f90 timer
 !! @par
 !! <h2>Remarks</h2>
 !! The system clock that is used can be modified. Three
-!! options are available at the moment: CPUTIME, DATETIME, SYSTEMTIME. 
-!! They corresponds to the underlying functions `cpu_time`, `date_and_time` and 
+!! options are available at the moment: CPUTIME, DATETIME, SYSTEMTIME.
+!! They corresponds to the underlying functions `cpu_time`, `date_and_time` and
 !! `system_clock`, respectively.
-!! @{
 module benchmark_timer
     use benchmark_kinds
-    
-    implicit none
 
-    !> @name Enums
-    !! @{
-    !! <h3>CLOCK_ENUM</h3>
-    !! @cond
+    implicit none; private
+
+    !> Clock enum
+    !! @ingroup group_timer
     enum, bind(c)
-    !! @endcond    
-        enumerator :: CPUTIME = 0 !< Value related to the function `cpu_time`
-        enumerator :: DATETIME = 1 !< Value related to the function `date_and_time`
-        enumerator :: SYSTEMTIME = 2 !< Value related to the function `system_clock`
+        !! @endcond
+        enumerator :: CPUTIME = 0  !< Value related to the function `cpu_time`
+        enumerator :: DATETIME = 1  !< Value related to the function `date_and_time`
+        enumerator :: SYSTEMTIME = 2  !< Value related to the function `system_clock`
     end enum
-    !> @}
 
+    !> @brief clock enum
+    !! @ingroup group_timer
     integer, parameter, public :: CLOCK_ENUM = kind(CPUTIME)
 
-    private 
-    
     public :: clock
-    
-    contains
-    
-    !> @brief Returns the actual time in milliseconds.
+
+contains
+
+    !> Returns the actual time in milliseconds.
     !! @param[inout] r The parameter containing the clock time in milliseconds
-    !! @param[in] option (optional) Clock type. 
+    !! @param[in] option (optional) Clock type.
     !!
+    !! @ingroup group_timer
     !! @b Remarks
     !!
-    !! Possible values are 
+    !! Possible values are
     !! - CPUTIME
     !! - DATETIME
     !! - SYSTEMTIME
@@ -53,7 +51,7 @@ module benchmark_timer
         integer(CLOCK_ENUM), intent(in), optional   :: option
         !private
         integer(CLOCK_ENUM) :: dft_option
-#ifdef _DEFAULT_CLOCK        
+#ifdef _DEFAULT_CLOCK
         dft_option = _DEFAULT_CLOCK
 #else
         dft_option = SYSTEMTIME
@@ -70,7 +68,8 @@ module benchmark_timer
 #endif
     end subroutine
 
-    subroutine get_time(ctime, option)! in milliseconds
+    !> @private
+    subroutine get_time(ctime, option)  ! in milliseconds
         real(r8), intent(out)           :: ctime
         integer(CLOCK_ENUM), intent(in) :: option
 
@@ -78,7 +77,7 @@ module benchmark_timer
         case (CPUTIME)
             call cpu_time(ctime)
             ctime = ctime * 1000_r8
-        case (DATETIME) 
+        case (DATETIME)
             block
                 integer(i8) :: dt(8)
 
@@ -95,4 +94,3 @@ module benchmark_timer
         end select
     end subroutine
 end module
-!> @}

@@ -1,7 +1,9 @@
 var searchData=
 [
-  ['parsers_0',['Equation Parsers',['../example_parsers.html',1,'examples_toc']]],
-  ['pi_20calculation_1',['Pi Calculation',['../example_simple.html',1,'examples_toc']]],
-  ['poisson_20equation_2',['Poisson Equation',['../example_poisson.html',1,'examples_toc']]],
-  ['practices_3',['Best Practices',['../best_practices.html',1,'articles']]]
+  ['environment_0',['Isolate the environment',['../best_practices.html#autotoc_md11',1,'']]],
+  ['equation_1',['Poisson Equation',['../example_poisson.html',1,'examples_toc']]],
+  ['equation_20parsers_2',['Equation Parsers',['../example_parsers.html',1,'examples_toc']]],
+  ['example_3',['Example',['../compiler_differences.html#autotoc_md18',1,'']]],
+  ['examples_4',['Examples',['../examples_toc.html',1,'articles']]],
+  ['expressions_5',['Expressions',['../example_parsers.html#autotoc_md21',1,'']]]
 ];

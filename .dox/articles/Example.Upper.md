@@ -5,7 +5,7 @@ It is based on the discussion https://github.com/fortran-lang/stdlib/issues/703
 
 This example demonstrate the use of the `caller` functionality and casting into explicit interface. 
 
-```
+```fortran
 block
     integer :: i
     type(runner) :: br   
@@ -30,6 +30,7 @@ block
     end do
 
 end block
+...
 ```
 
 The results are as follows: 
@@ -43,8 +44,8 @@ The results are as follows:
 |upper1(ABCDEFGHIJKLMNOPQRSTUVWXYZ)             |                0.161 us|            +/- 0.010 us|
 |upper2(ABCDEFGHIJKLMNOPQRSTUVWXYZ)             |                0.175 us|            +/- 0.016 us|
 |upper3(ABCDEFGHIJKLMNOPQRSTUVWXYZ)             |                0.181 us|            +/- 0.016 us|
-|upper1(Lorem ipsum dolor sit amet, consectetur |                2.587 us|            +/- 0.305 us|
-|upper2(Lorem ipsum dolor sit amet, consectetur |                3.512 us|            +/- 0.266 us|
-|upper3(Lorem ipsum dolor sit amet, consectetur |                2.544 us|            +/- 0.214 us|
+|upper1(Lorem ipsum dolor sit amet, consectetur) |                2.587 us|            +/- 0.305 us|
+|upper2(Lorem ipsum dolor sit amet, consectetur) |                3.512 us|            +/- 0.266 us|
+|upper3(Lorem ipsum dolor sit amet, consectetur) |                2.544 us|            +/- 0.214 us|
 
 </center>

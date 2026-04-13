@@ -1,0 +1,138 @@
+/* custom-modern.css – Directory / File list improvements (GitHub-style) */
+
+.directory table {
+  width: 100% !important;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--page-background-color);
+  border-radius: var(--border-radius-large);
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  margin-top: 1rem;
+  table-layout: fixed;               /* Helps full-width row behavior */
+}
+
+.directory table tbody {
+    width: 100% !important;
+}
+/* Remove doxygen's alternating row colors and old styling */
+.directory tr.even,
+.directory tr.odd,
+.directory tr {
+  background: transparent !important;
+  transition: background-color 0.15s ease;
+}
+
+/* Full-width rows + subtle GitHub-like hover */
+.directory tr:hover {
+  background-color: rgba(148, 163, 184, 0.08) !important;
+}
+
+/* Table cells */
+.directory td {
+  padding: 11px 14px !important;
+  vertical-align: middle;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  font-size: 0.95rem;
+}
+
+.directory td:last-child {
+  color: var(--page-secondary-foreground-color);
+  font-size: 0.9rem;
+}
+
+/* First column (icon + arrow + name) – takes remaining space */
+.directory td.entry {
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Icons – larger, cleaner, no old icons left */
+.directory .iconfolder,
+.directory .icondoc {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin-right: 4px;
+}
+
+/* Hide any remaining old doxygen icon elements */
+.directory .folder-icon,
+.directory .iconfolder > div,
+.directory .icondoc > div {
+  display: none !important;
+}
+
+/* Modern SVG icons (larger and better looking) */
+.directory .iconfolder::before,
+.directory .icondoc::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-size: 24px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Folder icon */
+.directory .iconfolder::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%2363b3ed'%3E%3Cpath d='M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z'/%3E%3C/svg%3E");
+}
+
+.directory .iconfolder.open::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%2363b3ed'%3E%3Cpath d='M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z'/%3E%3C/svg%3E");
+}
+
+/* File icon */
+.directory .icondoc::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23647b9e'%3E%3Cpath d='M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z'/%3E%3C/svg%3E");
+}
+
+/* Arrow / expander */
+.directory .arrow {
+  color: var(--page-secondary-foreground-color);
+  margin-right: 2px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Links */
+.directory a.el {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.directory a.el:hover {
+  color: var(--primary-dark-color);
+  text-decoration: underline;
+}
+
+/* Levels indicator */
+.directory .levels {
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  color: var(--page-secondary-foreground-color);
+}
+
+/* Dark mode adjustments */
+html.dark-mode .directory tr:hover {
+  background-color: rgba(148, 163, 184, 0.15) !important;
+}
+
+html.dark-mode .iconfolder::before,
+html.dark-mode .icondoc::before {
+  filter: brightness(1.15);
+}
+
+/* Hide the detail level pills completely */
+.directory .levels {
+  display: none !important;
+}

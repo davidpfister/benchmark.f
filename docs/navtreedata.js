@@ -25,35 +25,31 @@
 var NAVTREE =
 [
   [ "Benchmark", "index.html", [
-    [ "Introduction", "index.html#autotoc_md14", [
-      [ "About the Project", "index.html#autotoc_md15", null ],
-      [ "Getting Started", "index.html#autotoc_md16", [
-        [ "Requirements", "index.html#autotoc_md17", null ]
+    [ "Introduction", "index.html#autotoc_md0", [
+      [ "About the Project", "index.html#autotoc_md1", null ],
+      [ "Installation", "index.html#autotoc_md2", [
+        [ "Requirements", "index.html#autotoc_md3", [
+          [ "Get the code", "index.html#autotoc_md4", null ],
+          [ "Build with fpm", "index.html#autotoc_md5", null ],
+          [ "Build with Visual Studio 2019", "index.html#autotoc_md6", null ]
+        ] ]
       ] ],
-      [ "Usage", "index.html#autotoc_md18", [
-        [ "Installation", "index.html#autotoc_md19", [
-          [ "Get the code", "index.html#autotoc_md20", null ],
-          [ "Build with fpm", "index.html#autotoc_md21", null ],
-          [ "Build with Visual Studio 2019", "index.html#autotoc_md22", null ]
-        ] ],
-        [ "Contributing", "index.html#autotoc_md23", null ],
-        [ "Style", "index.html#autotoc_md24", null ],
-        [ "Reporting a bug", "index.html#autotoc_md25", null ],
-        [ "Pull request", "index.html#autotoc_md26", null ]
-      ] ],
-      [ "License", "index.html#autotoc_md27", null ]
+      [ "Quick Start", "index.html#autotoc_md7", null ],
+      [ "Contributing", "index.html#autotoc_md8", null ],
+      [ "License", "index.html#autotoc_md9", null ]
     ] ],
     [ "Documentation", "articles.html", "articles" ],
     [ "API", "topics.html", "topics" ],
     [ "Files", "files.html", "files" ],
-    [ "GitHub Repository", "^https://github.com/davidpfister/benchmark.f", null ]
+    [ "Code", "^https://github.com/davidpfister/benchmark.f", null ]
   ] ]
 ];
 
 var NAVTREEINDEX =
 [
-"_argument_8f90_source.html"
+"_argument_8f90.html"
 ];
 
-var SYNCONMSG = 'click to disable panel synchronisation';
-var SYNCOFFMSG = 'click to enable panel synchronisation';
+var SYNCONMSG = 'click to disable panel synchronization';
+var SYNCOFFMSG = 'click to enable panel synchronization';
+var LISTOFALLMEMBERS = 'List of all members';

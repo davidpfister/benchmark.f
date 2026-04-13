@@ -9,11 +9,13 @@ allocate(array(n))
 do i = 1, n
     array(i) = i
 end do
+...
 ```
 
 Array contructor
 ```fortran
 array = [(i, i = 1,n)]
+...
 ```
 
 Dynamic reallocation 
@@ -22,6 +24,7 @@ allocate(array(0))
 do i = 1, n
     array = [array, i]
 end do
+...
 ```
 
 And a method using buffers based on the following [example](https://degenerateconic.com/dynamically-sizing-arrays.html)

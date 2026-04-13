@@ -67,3 +67,8 @@ M_calculator = {path = "./examples/parsers/M_calculator"}
 name = "test"
 source-dir = "tests"
 main="main.f90"
+
+[extra.fortitude.check]
+select = ["C", "E", "S"]
+ignore = ["S001", "S061", "C121", "C003"]
+line-length = 132

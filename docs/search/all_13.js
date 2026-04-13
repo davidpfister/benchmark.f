@@ -1,8 +1,13 @@
 var searchData=
 [
-  ['value_0',['value',['../structbenchmark__argument__base_1_1arg__base.html#a2ab5fb98ed290e45a4754ef679bfb3ef',1,'benchmark_argument_base::arg_base']]],
-  ['variance_1',['variance',['../structbenchmark__statistics_1_1stats.html#a5ef1416cd79dfcdf5ff19de3eb09738b',1,'benchmark_statistics::stats']]],
-  ['vendor_2',['vendor',['../structbenchmark__steps__compiler_1_1compilerinfo.html#ae631ef7b838143895e8387ddb23f2a56',1,'benchmark_steps_compiler::compilerinfo']]],
-  ['version_3',['version',['../structbenchmark__steps__compiler_1_1compilerinfo.html#af226162e18f82fe72ddd5f0d2549cf55',1,'benchmark_steps_compiler::compilerinfo::version'],['../group__group__version.html#ga8e98c7a7f0f9ff7ae5616a9b2442c55b',1,'benchmark_version::version']]],
-  ['visual_20studio_202019_4',['Build with Visual Studio 2019',['../index.html#autotoc_md22',1,'']]]
+  ['target_20code_0',['Warmup the Target Code',['../best_practices.html#autotoc_md13',1,'']]],
+  ['the_20code_1',['the code',['../index.html#autotoc_md4',1,'Get the code'],['../best_practices.html#autotoc_md10',1,'Isolate the code']]],
+  ['the_20environment_2',['Isolate the environment',['../best_practices.html#autotoc_md11',1,'']]],
+  ['the_20project_3',['About the Project',['../index.html#autotoc_md1',1,'']]],
+  ['the_20target_20code_4',['Warmup the Target Code',['../best_practices.html#autotoc_md13',1,'']]],
+  ['timer_5',['Timer',['../group__group__timer.html',1,'']]],
+  ['timer_2ef90_6',['Timer.f90',['../_timer_8f90.html',1,'']]],
+  ['to_20internal_20file_7',['Writing namelist to internal file',['../compiler_differences.html#autotoc_md17',1,'']]],
+  ['to_5flower_8',['to_lower',['../_compiler_8f90.html#ade4bdb3912871d895d81c777d4944f05',1,'Compiler.f90']]],
+  ['to_5fstring_9',['to_string',['../structbenchmark__argument_1_1arg.html#a2b38ac3cb3faf7f3f00df880f2441225',1,'benchmark_argument::arg::to_string()'],['../group__group__arg.html#gaef50d15cc7636af27cbe357505272759',1,'benchmark_argument::to_string()']]]
 ];

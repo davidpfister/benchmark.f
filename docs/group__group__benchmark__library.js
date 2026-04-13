@@ -1,6 +1,14 @@
-var group__group__benchmark__library =
+﻿var group__group__benchmark__library =
 [
     [ "runner", "structbenchmark__library_1_1runner.html", [
+      [ "benchmark_a1", "structbenchmark__library_1_1runner.html#a552c349e9f5a4999e2da357cdb28b3d9", null ],
+      [ "benchmark_a2", "structbenchmark__library_1_1runner.html#ac2e79bf6ea6bc71cbb2b862f587bf633", null ],
+      [ "benchmark_a3", "structbenchmark__library_1_1runner.html#a2ab01282888fffa5feda0d596521f7b8", null ],
+      [ "benchmark_a4", "structbenchmark__library_1_1runner.html#a741bf68af3640818e88aef73fe253c5b", null ],
+      [ "benchmark_a5", "structbenchmark__library_1_1runner.html#a40b3a4aafb2a5bdd067ada989a229a49", null ],
+      [ "benchmark_a6", "structbenchmark__library_1_1runner.html#a40337464a311c301c3adb084d9883d95", null ],
+      [ "benchmark_a7", "structbenchmark__library_1_1runner.html#aa0fbbfd34f98e9c5592f9444362a84df", null ],
+      [ "benchmark_void", "structbenchmark__library_1_1runner.html#a4aca98186b4755b3a8eff97409b8f260", null ],
       [ "dispose", "structbenchmark__library_1_1runner.html#adbd4a763a49410b7fb1d046d52662ff1", null ],
       [ "read", "structbenchmark__library_1_1runner.html#acf2c7ba197c6f63d2669f52de2a17e2c", null ],
       [ "run", "structbenchmark__library_1_1runner.html#a44eb0ea7429c25342f83b5d37ea3db29", null ],
@@ -13,5 +21,17 @@ var group__group__benchmark__library =
       [ "run", "structbenchmark__library_1_1runner.html#acf87a705de98409827721c86627a8f5c", null ],
       [ "set_caller", "structbenchmark__library_1_1runner.html#a9659f9754bdb102cbcaed00236ddcde3", null ],
       [ "write", "structbenchmark__library_1_1runner.html#afacd30b0bdeffb5b62ab73949c7a1779", null ]
-    ] ]
+    ] ],
+    [ "benchmark_a1", "group__group__benchmark__library.html#gaad5ff6b2612152623e625bde7d67b689", null ],
+    [ "benchmark_a2", "group__group__benchmark__library.html#gae481e7962d2d1b5a8bb8334c69444bff", null ],
+    [ "benchmark_a3", "group__group__benchmark__library.html#gadb31e3f1259d187a727bc232471216fe", null ],
+    [ "benchmark_a4", "group__group__benchmark__library.html#ga895d7556b447ec5493354579ae151f47", null ],
+    [ "benchmark_a5", "group__group__benchmark__library.html#ga472ea2b72b47885b6ae181c4efe8028e", null ],
+    [ "benchmark_a6", "group__group__benchmark__library.html#gaa9a8d8449e82206aaaf9a3ea4592fa14", null ],
+    [ "benchmark_a7", "group__group__benchmark__library.html#ga1af314e0676022754dd00f2e1d953a6e", null ],
+    [ "benchmark_read", "group__group__benchmark__library.html#ga807f748eee97ba6b0ded1c0cfddfccaf", null ],
+    [ "benchmark_void", "group__group__benchmark__library.html#gac1556cf251907641f8a90cfedd237628", null ],
+    [ "benchmark_write", "group__group__benchmark__library.html#gaf22d5413b7ae6ae6e59970b308d5149a", null ],
+    [ "dispose", "group__group__benchmark__library.html#ga181b4d4db6803e5487dbe7c4a4766944", null ],
+    [ "set_caller", "group__group__benchmark__library.html#ga298e31d4f511cca415bb7f0256a9f68d", null ]
 ];
