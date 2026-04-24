@@ -48,7 +48,7 @@ PROJECT_NAME           = Benchmark
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = 
+PROJECT_NUMBER         = 1
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -61,7 +61,7 @@ PROJECT_BRIEF          = Benchmark with precision
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-PROJECT_LOGO           = ./images/hare.png
+PROJECT_LOGO           = ./images/logo.png
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
@@ -1008,7 +1008,8 @@ FILE_PATTERNS          = *.c \
                          *.qsf \
                          *.ice \
                          *.as \
-                         *.js
+                         *.js \
+                         *.dox
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
 # be searched for input files as well.
@@ -1404,7 +1405,8 @@ HTML_EXTRA_FILES       = ./config/doxygen-awesome-css/doxygen-awesome-darkmode-t
                          ./config/doxygen-awesome-css/doxygen-awesome-paragraph-link.js \
                          ./config/doxygen-awesome-css/doxygen-awesome-interactive-toc.js \
                          ./config/doxygen-awesome-css/doxygen-awesome-tabs.js \
-                         ./config/nav-buttons.js
+                         ./config/nav-buttons.js \
+                         ./config/custom.js
 
 # The HTML_COLORSTYLE tag can be used to specify if the generated HTML output
 # should be rendered with a dark or light theme.

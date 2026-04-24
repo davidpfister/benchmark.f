@@ -1,65 +1,58 @@
+:root {
+  --vp-side-width: var(--side-nav-fixed-width);
+  --primary-color: #3b82f6;
+  --primary-dark-color: #1e40af;
+  --primary-light-color: #60a5fa;
+  --page-background-color: #f8fafc;
+  --page-foreground-color: #1e2937;
+  --page-secondary-foreground-color: #64748b;
+  --font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --spacing-small: 6px;
+  --spacing-medium: 12px;
+  --spacing-large: 20px;
+  --spacing-xlarge: 140px;
+  --border-radius-small: 6px;
+  --border-radius-medium: 10px;
+  --border-radius-large: 12px;
+  --content-maxwidth: auto;
+  --fragment-background: #f1f5f9;
+  --fragment-foreground: #334155;
+  --box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  --shadow-color: #242424;
+  --handle-icon: url(data: image/png;
+	base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAAMCAQAAADitaTfAAAAFUlEQVQIW2O++j+bkWUTAwZgJiwBAB9kCOy+u0d3AAAAAElFTkSuQmCC);
+  --side-nav-fixed-width: 280px;
+  --top-height: 56px;
+  --bottom-height: 36px;
+  --searchbar-width: 240px;
+}
+
 html:not(.dark-mode) {
   --font-family-monospace: ui-monospace, Menlo, Consolas, monospace;
 }
 
-html{
+html {
   overflow: hidden;
-    /* Modern color palette (VitePress-inspired blues/grays) */
-  --primary-color: #3b82f6;           /* Tailwind blue-500 */
-  --primary-dark-color: #1e40af;
-  --primary-light-color: #60a5fa;
-
-  --page-background-color: #f8fafc;   /* Slate-50 */
-  --page-foreground-color: #1e2937;   /* Slate-800 */
-  --page-secondary-foreground-color: #64748b; /* Slate-500 */
-
-  /* Typography – Inter is very modern (VitePress uses system + clean sans) */
-  --font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-
-  /* Spacing & radius – more generous and rounded like Tailwind/VitePress */
-  --spacing-small: 6px;
-  --spacing-medium: 12px;
-  --spacing-large: 20px;
-  --spacing-xlarge: 28px;
-
-  --border-radius-small: 6px;
-  --border-radius-medium: 10px;
-  --border-radius-large: 12px;
-
-  /* Content width – VitePress feels more spacious */
-  --content-maxwidth: auto;         /* or 'auto' for full-width */
-  /* Code & fragments – softer, more modern */
-  --fragment-background: #f1f5f9;     /* Slate-100 */
-  --fragment-foreground: #334155;
-
-  /* Shadows – subtle elevation like Tailwind */
-  --box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
-
-  /* added to :root element */
-    --shadow-color: #FBFBFB;
-
-    --handle-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAAMCAQAAADitaTfAAAAFUlEQVQIW2O++j+bkWUTAwZgJiwBAB9kCOy+u0d3AAAAAElFTkSuQmCC);
-
-    /* Add to darkmode overrides */
-    --shadow-color: #242424;
-    --side-nav-fixed-width: 240px
 }
 
-/* Additional modern enhancements */
 body, .PageDoc {
   font-feature-settings: "kern" 1, "liga" 1, "tnum" 1;
   overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 #container {
-    grid-template-columns: auto !important;
+  grid-template-columns: auto !important;
 }
 
 #doc-content {
-    height: calc(100vh - 36px) !important;
+  height: calc(100vh - var(--top-height) - var(--bottom-height)) !important;
+  margin-top: var(--top-height);
+  padding-top: 0 !important;
+  margin-left: var(--vp-side-width);
+  transition: width 0.15s ease, margin-left 0.15s ease;
 }
-
-/* Clean Microsoft Learn-style member list – aggressive cleanup of old remnants */
 
 .memitem {
   margin: 2rem 0 1.5rem 0;
@@ -71,13 +64,10 @@ body, .PageDoc {
   overflow: visible;
 }
 
-/* Clean memtitle – no underline */
-.memtitle,
-h2.memtitle,
-.memtitle h2 {
+.memtitle,h2.memtitle,.memtitle h2 {
   background: transparent !important;
   border: none !important;
-  border-bottom: none !important;           /* ← this removes the underline */
+  border-bottom: none !important;
   padding: 1.1rem 0 0.75rem 0 !important;
   margin: 0 0 1rem 0 !important;
   font-size: 1.15rem;
@@ -87,11 +77,10 @@ h2.memtitle,
   box-shadow: none !important;
 }
 
-/* Rounded top bar for the prototype (memproto) */
 .memproto {
-  background: var(--fragment-background) !important;   /* light gray in light mode, dark in dark mode */
+  background: var(--fragment-background) !important;
   border: 1px solid rgba(148, 163, 184, 0.2) !important;
-  border-radius: 10px 10px 0 0 !important;            /* round only the top corners */
+  border-radius: 10px 10px 0 0 !important;
   padding: 0.85rem 1.1rem !important;
   margin: 0 0 0 0 !important;
   box-shadow: none !important;
@@ -110,17 +99,10 @@ h2.memtitle,
 }
 
 h2.memtitle {
-    box-shadow: none;
+  box-shadow: none;
 }
 
-/* Force-hide any remaining old styles and the diamond permalink */
-.memtitle .permalink,
-.memtitle a.permalink,
-.memtitle .memtemplate,
-.memtitle .memname,
-.memtitle table,
-.memtitle td,
-.memtitle tr {
+.memtitle .permalink,.memtitle a.permalink,.memtitle .memtemplate,.memtitle .memname,.memtitle table,.memtitle td,.memtitle tr {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
@@ -129,7 +111,6 @@ h2.memtitle {
   overflow: hidden;
 }
 
-/* Clean memdoc (the content below the title) */
 .memdoc {
   padding: 0 0 1.5rem 0;
   margin: 0;
@@ -138,7 +119,6 @@ h2.memtitle {
   line-height: 1.65;
 }
 
-/* Dark mode support */
 html.dark-mode .memtitle {
   border-bottom-color: rgba(148, 163, 184, 0.3) !important;
 }
@@ -148,38 +128,44 @@ html.dark-mode .memtitle::before {
 }
 
 .paramname {
-    color: var(--page-foreground-color)
-}
-.paramname em {
-    color: var(--primary-color)
+  color: var(--page-foreground-color);
 }
 
-/* Better headings (VitePress-style) */
+.paramname em {
+  color: var(--primary-color);
+}
+
 h1, h2, h3, h4 {
   font-weight: 600;
   letter-spacing: -0.025em;
 }
 
-/* Navigation / sidebar improvements */
+#projectbrief {
+    font-family: inherit;
+    font-size: 60%;
+}
+
+#projectbriefContainer {
+    vertical-align: top;
+    margin-top: -8px;
+}
+
 #nav-tree a {
   border-radius: var(--border-radius-small);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Tables – more modern */
 table.doxtable {
   border-radius: var(--border-radius-medium);
   overflow: hidden;
   box-shadow: var(--box-shadow);
 }
 
-/* Code blocks */
 div.fragment {
   border-radius: var(--border-radius-medium);
   border: none;
 }
 
-/* Buttons & labels */
 .primary-button {
   border-radius: var(--border-radius-medium);
   transition: all 0.2s ease;
@@ -196,29 +182,29 @@ div.fragment {
   text-align: left;
 }
 
-/* hide nav-sync icon */
 #nav-sync {
   visibility: hidden;
 }
 
-/* page title larger than section heading */
 div.header .title {
   font-size: 2.25em;
 }
 
-/* group header margins */
 div.groupHeader {
   margin-left: 0;
   margin-bottom: 1em;
 }
 
-/* figure caption font and margin */
 div.caption {
   font-weight: normal;
   margin-top: 0.5em;
 }
 
-/* centered copyright footer */
+#nav-path {
+    height: var(--bottom-height);
+    left:0;
+}
+
 #nav-path address {
   border-top: 1px solid var(--separator-color);
   border-bottom: 1px solid var(--separator-color);
@@ -230,7 +216,6 @@ div.caption {
   text-align: center;
 }
 
-/* fix appearance of numbers in citation list */
 dl.citelist dt {
   font-weight: normal;
   font-size: var(--page-font-size);
@@ -247,27 +232,22 @@ dl.citelist dt {
   border-radius: 3px;
 }
 
-div.toc h3,
-div.toc li {
+div.toc h3,div.toc li {
   font-family: var(--font-family);
 }
 
-.section_buttons:not(:empty) 
-{
-    margin-top: 0;
+.section_buttons:not(:empty) {
+  margin-top: 0;
 }
 
-.section_buttons table.markdownTable 
-{
-    width: auto;
+.section_buttons table.markdownTable {
+  width: auto;
 }
 
 table.markdownTable {
-    margin-left: 28px;
-    margin-right: 28px;
+  margin-left: 28px;
+  margin-right: 28px;
 }
-
-/* Modern badges for member labels (private, protected, public, static, etc.) */
 
 span.mlabel {
   display: inline-flex;
@@ -278,16 +258,15 @@ span.mlabel {
   font-weight: 600;
   letter-spacing: 0.3px;
   text-transform: uppercase;
-  border-radius: 9999px;           /* fully rounded pills */
+  border-radius: 9999px;
   border: 1px solid transparent;
   white-space: nowrap;
   line-height: 1;
   vertical-align: middle;
 }
 
-/* Private - subtle red/gray tone */
 span.mlabel.private {
-  background: #fee2e2;             /* light red */
+  background: #fee2e2;
   color: #b91c1c;
   border-color: #fecaca;
 }
@@ -298,7 +277,6 @@ html.dark-mode span.mlabel.private {
   border-color: #991b1b;
 }
 
-/* Protected - orange/amber tone */
 span.mlabel.protected {
   background: #fef3c7;
   color: #b45309;
@@ -311,7 +289,6 @@ html.dark-mode span.mlabel.protected {
   border-color: #92400e;
 }
 
-/* Public - clean blue/primary tone (matches your theme) */
 span.mlabel.public {
   background: rgba(59, 130, 246, 0.1);
   color: var(--primary-color);
@@ -323,13 +300,7 @@ html.dark-mode span.mlabel.public {
   color: var(--primary-color);
 }
 
-/* Other common labels (static, inline, virtual, const, etc.) */
-span.mlabel.static,
-span.mlabel.inline,
-span.mlabel.virtual,
-span.mlabel.const,
-span.mlabel.explicit,
-span.mlabel.mutable {
+span.mlabel.static,span.mlabel.inline,span.mlabel.virtual,span.mlabel.const,span.mlabel.explicit,span.mlabel.mutable {
   background: rgba(148, 163, 184, 0.1);
   color: var(--page-secondary-foreground-color);
   border-color: rgba(148, 163, 184, 0.25);
@@ -337,19 +308,14 @@ span.mlabel.mutable {
   text-transform: none;
 }
 
-html.dark-mode span.mlabel.static,
-html.dark-mode span.mlabel.inline,
-html.dark-mode span.mlabel.virtual,
-html.dark-mode span.mlabel.const {
+html.dark-mode span.mlabel.static,html.dark-mode span.mlabel.inline,html.dark-mode span.mlabel.virtual,html.dark-mode span.mlabel.const {
   background: rgba(148, 163, 184, 0.15);
   color: #cbd5e1;
   border-color: rgba(148, 163, 184, 0.35);
 }
 
-/* VuePress / VitePress-style Hero Title Elements */
-
 .title {
-  font-size: 3.2rem;                    /* Large, impactful title */
+  font-size: 3.2rem;
   line-height: 1.05;
   margin: 0 0 1rem 0;
   padding: 0;
@@ -365,14 +331,14 @@ html.dark-mode span.mlabel.const {
 }
 
 h2.groupheader {
-  font-size: 1.8rem;                    /* Large, impactful title */
+  font-size: 1.8rem;
   font-weight: 600;
   line-height: 1.05;
   color: var(--page-foreground-color);
   margin: 0 0 1rem 0;
   padding-bottom: 8px;
 }
-/* Project / Site name (often inside span.name) */
+
 span.name {
   display: inline-block;
   max-width: 100%;
@@ -381,11 +347,11 @@ span.name {
   text-overflow: ellipsis;
   color: var(--primary-color);
   padding-bottom: 8px;
+  font-size: 4rem;
   font-weight: 700;
   letter-spacing: -0.04em;
 }
 
-/* Subtitle / description text */
 span.text {
   font-size: 3.2rem;
   font-weight: 500;
@@ -405,17 +371,16 @@ span.tagline {
   max-width: 680px;
 }
 
-/* VitePress-style VPButton - matching the provided image */
-.actions{
-    display: flex;
-    flex-wrap: wrap;
-    margin: -6px;
-    padding-top: 24px;
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -6px;
+  padding-top: 24px;
 }
 
-.action{
-    padding: 6px;
-    flex-shrink: 0;
+.action {
+  padding: 6px;
+  flex-shrink: 0;
 }
 
 .button {
@@ -483,4 +448,167 @@ span.tagline {
   color: var(--page-foreground-color) !important;
   background-color: var(--primary-light-color);
   text-decoration: none;
+}
+
+#top {
+  display: none !important;
+}
+
+#vp-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--top-height);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background: var(--page-background);
+  color: var(--primary-text-color);
+  border-bottom: 1px solid var(--separator-color);
+  z-index: 9999;
+}
+
+.vp-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vp-logo {
+  height: 24px;
+}
+
+.vp-title {
+  font-weight: 600;
+}
+
+.vp-center {
+  flex: 1;
+  display: flex;
+  margin-left: 12px;
+  margin-right: 12px;
+  justify-content: center;
+}
+
+#vp-search {
+  width: 400px;
+  max-width: 60vw;
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.vp-nav {
+  margin-left: auto;
+  display: flex;
+  gap: 18px;
+  font-size: 14px;
+}
+
+.vp-nav a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.vp-right {
+  margin-left: 12px;
+  margin-right: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#nav-tree.vp-hidden {
+  display: none !important;
+}
+
+#nav-tree {
+  width: var(--side-nav-fixed-width);
+  transition: width 0.15s ease, margin-left 0.15s ease;
+  overflow: hidden;
+  margin-top: 0;
+  position: relative;
+}
+
+#nav-tree, #side-nav {
+    height: calc(100vh - var(--top-height) - var(--bottom-height)) !important;
+}
+
+#nav-tree-contents {
+  margin-top: 18px;
+}
+
+body.vp-sidebar-collapsed {
+  --vp-side-width: 0px;
+}
+
+body.vp-sidebar-collapsed #nav-tree {
+  width: 0 !important;
+}
+
+body.vp-sidebar-collapsed #doc-content {
+  margin-left: 0 !important;
+  width: 100%;
+}
+
+#vp-resizer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  margin-right: -5px;
+  height: calc(100vh - 56px);
+  cursor: col-resize;
+  z-index: 10000;
+  background: transparent;
+}
+
+#vp-resizer:hover {
+  background: var(--separator-color);
+}
+
+body.vp-resizing #vp-resizer {
+  background: var(--separator-color);
+}
+
+body.vp-resizing,body.vp-resizing * {
+  user-select: none !important;
+  cursor: col-resize !important;
+}
+
+#MSearchBox {
+  width: var(--searchbar-width) !important;
+}
+
+#MSearchField {
+  width: var(--searchbar-width) - calc(2 * var(--spacing-medium)) - 66px - var(--searchbar-height);
+}
+
+.vp-icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  color: var(--primary-text-color);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.vp-icon-button:hover {
+  background: var(--separator-color);
+}
+
+.vp-icon-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+#vp-header .vp-icon-button {
+  color: var(--primary-text-color) !important;
 }

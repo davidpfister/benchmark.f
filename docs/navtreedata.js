@@ -40,8 +40,7 @@ var NAVTREE =
     ] ],
     [ "Documentation", "articles.html", "articles" ],
     [ "API", "topics.html", "topics" ],
-    [ "Files", "files.html", "files" ],
-    [ "Code", "^https://github.com/davidpfister/benchmark.f", null ]
+    [ "Files", "files.html", "files" ]
   ] ]
 ];
 

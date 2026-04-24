@@ -26,5 +26,4 @@ var menudata={children:[
 {text:"benchmark.f",url:"index.html"},
 {text:"Articles",url:"pages.html"},
 {text:"API",url:"topics.html"},
-{text:"Files",url:"files.html"},
-{text:"Code",url:"^https://github.com/davidpfister/benchmark.f"}]}
+{text:"Files",url:"files.html"}]}

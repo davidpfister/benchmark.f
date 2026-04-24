@@ -1,9 +1,9 @@
 # Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**. So, thank you for considering contributing to _fpm-modules_.
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**. So, thank you for considering contributing to _benchmark.f_.
 Please review and follow these guidelines to make the contribution process simple and effective for all involved. In return, the developers will help address your problem, evaluate changes, and guide you through your pull requests.
 
-By contributing to _fpm-modules_, you certify that you own or are allowed to share the content of your contribution under the same license.
+By contributing to _benchmark.f_, you certify that you own or are allowed to share the content of your contribution under the same license.
 
 ## Style
 
@@ -25,7 +25,7 @@ Before opening a bug report:
 A good bug report should include all information needed to reproduce the bug.
 Please be as detailed as possible:
 
-1. Which version of _fpm-modules_ are you using? Please be specific.
+1. Which version of _benchmark.f_ are you using? Please be specific.
 2. What are the steps to reproduce the issue?
 3. What is the expected outcome?
 4. What happens instead?
@@ -51,7 +51,7 @@ Don't forget to give the project a star! Thanks again!
    The body of the PR should at least include a bullet-point summary of the
    changes, and a detailed description is encouraged.
    If the PR completely addresses the issue you opened in step 1, include in
-   the PR description the following line: ```Fixes #<issue-number>```. If your PR implements a feature that adds or changes the behavior of _fpm-modules_,
+   the PR description the following line: ```Fixes #<issue-number>```. If your PR implements a feature that adds or changes the behavior of _benchmark.f_,
    your PR must also include appropriate changes to the documentation and associated units tests.
 
 In brief, 

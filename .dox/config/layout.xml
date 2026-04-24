@@ -6,7 +6,6 @@
     <tab type="pages" visible="yes" title="Articles" intro=""/>
     <tab type="topics" visible="yes" title="API" intro=""/>
     <tab type="filelist" visible="yes" title="Files" intro=""/>
-    <tab type="user" visible="yes" title="Code" url="https://github.com/davidpfister/benchmark.f"/>
   </navindex>
 
   <!-- Layout definition for a class page -->
