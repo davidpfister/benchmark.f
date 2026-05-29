@@ -67,7 +67,7 @@ Unit test rely on the the header file [`assertion.inc`](https://github.com/david
 Linting, indentation, and styling is done with [codee](https://www.codee.com/codee-formatter/) and [fortitude](https://fortitude.readthedocs.io/en/stable/) with the following settings
 ```bash
 codee format ./src
-fortitute check ./src --fix
+fortitude check ./src --fix
 ```
 
 #### Get the code
@@ -80,7 +80,7 @@ cd benchmark.f
 
 The repo can be build using _fpm_
 ```bash
-fpm build --flag '-ffree-line-length-none'
+fpm build
 ```
 For convenience, the  repo also contains a response file that can be invoked as follows: 
 ```
@@ -101,26 +101,27 @@ set FPM_FC=ifort
 Besides the build command, several commands are also available:
 ```bash
 @pretiffy
-option clean --all
 system codee format ./src
-system fortitute check ./src --fix
+system fortitude check ./src --fix
+option run --list
 
 @clean
 option clean --all
 
 @rebuild
 system rmdir /s /q build
-option build --flag '-ffree-line-length-none'
+option build
 
 @build
-option build --flag '-ffree-line-length-none'
+option build
 
 @test
-options test --flag '-ffree-line-length-none'
+options test
 
 @doc
-option clean --all
 system cd ./.dox & doxygen ./Doxyfile.in & cd ..
+system powershell ./tools/Fix-Doxygen.ps1 -Path "./docs"
+option run --list
 ```
 
 The toml files contains two items that are worth commenting.
