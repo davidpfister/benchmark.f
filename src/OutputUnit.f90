@@ -2,7 +2,8 @@
 !! @defgroup group_output Output_Unit
 !! Output unit module
 module benchmark_output_unit
-    use, intrinsic :: iso_fortran_env, only: stdout => output_unit
+    use, intrinsic :: iso_fortran_env, only: &
+            stdout => output_unit
 
     implicit none; private
 

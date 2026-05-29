@@ -147,7 +147,7 @@ h1, h2, h3, h4 {
 
 #projectbriefContainer {
     vertical-align: top;
-    margin-top: -8px;
+    line-height: .5em;
 }
 
 #nav-tree a {
@@ -533,6 +533,10 @@ span.tagline {
 
 #nav-tree, #side-nav {
     height: calc(100vh - var(--top-height) - var(--bottom-height)) !important;
+}
+
+#nav-tree {
+    overflow-y:auto;
 }
 
 #nav-tree-contents {

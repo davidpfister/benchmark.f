@@ -102,7 +102,7 @@ Besides the build command, several commands are also available:
 ```bash
 @pretiffy
 option clean --all
-system fprettify codee format ./src
+system codee format ./src
 system fortitute check ./src --fix
 
 @clean
@@ -187,6 +187,7 @@ The library takes care of everything else for you
 - Collection of compiler information
 - Collection of compilation options
 - Reporting
+
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**. So, thank you for considering contributing to _benchmark.f_.

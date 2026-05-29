@@ -16,7 +16,7 @@ module benchmark_steps_dryrun
     public :: dryrun
 
     !> Provides base class for performing a dry run
-    !! 
+    !!
     !! @ingroup group_steps_dryrun
     !! @b Remarks
     type, extends(workflow) :: benchmark_dryrun

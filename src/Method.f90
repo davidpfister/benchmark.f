@@ -218,7 +218,7 @@ contains
         if (present(caller)) then
             that%caller => caller
         end if
-ADD_ARGUMENT(1)
+        ADD_ARGUMENT(1)
     end function
 
     function method_create_2(f, a1, a2, caller) result(that)
@@ -233,8 +233,8 @@ ADD_ARGUMENT(1)
         if (present(caller)) then
             that%caller => caller
         end if
-ADD_ARGUMENT(1)
-ADD_ARGUMENT(2)
+        ADD_ARGUMENT(1)
+        ADD_ARGUMENT(2)
     end function
 
     function method_create_3(f, a1, a2, a3, caller) result(that)
@@ -249,9 +249,9 @@ ADD_ARGUMENT(2)
         if (present(caller)) then
             that%caller => caller
         end if
-ADD_ARGUMENT(1)
-ADD_ARGUMENT(2)
-ADD_ARGUMENT(3)
+        ADD_ARGUMENT(1)
+        ADD_ARGUMENT(2)
+        ADD_ARGUMENT(3)
     end function
 
     function method_create_4(f, a1, a2, a3, a4, caller) result(that)
@@ -266,10 +266,10 @@ ADD_ARGUMENT(3)
         if (present(caller)) then
             that%caller => caller
         end if
-ADD_ARGUMENT(1)
-ADD_ARGUMENT(2)
-ADD_ARGUMENT(3)
-ADD_ARGUMENT(4)
+        ADD_ARGUMENT(1)
+        ADD_ARGUMENT(2)
+        ADD_ARGUMENT(3)
+        ADD_ARGUMENT(4)
     end function
 
     function method_create_5(f, a1, a2, a3, a4, a5, caller) result(that)
@@ -284,11 +284,11 @@ ADD_ARGUMENT(4)
         if (present(caller)) then
             that%caller => caller
         end if
-ADD_ARGUMENT(1)
-ADD_ARGUMENT(2)
-ADD_ARGUMENT(3)
-ADD_ARGUMENT(4)
-ADD_ARGUMENT(5)
+        ADD_ARGUMENT(1)
+        ADD_ARGUMENT(2)
+        ADD_ARGUMENT(3)
+        ADD_ARGUMENT(4)
+        ADD_ARGUMENT(5)
     end function
 
     function method_create_6(f, a1, a2, a3, a4, a5, a6, caller) result(that)
@@ -303,12 +303,12 @@ ADD_ARGUMENT(5)
         if (present(caller)) then
             that%caller => caller
         end if
-ADD_ARGUMENT(1)
-ADD_ARGUMENT(2)
-ADD_ARGUMENT(3)
-ADD_ARGUMENT(4)
-ADD_ARGUMENT(5)
-ADD_ARGUMENT(6)
+        ADD_ARGUMENT(1)
+        ADD_ARGUMENT(2)
+        ADD_ARGUMENT(3)
+        ADD_ARGUMENT(4)
+        ADD_ARGUMENT(5)
+        ADD_ARGUMENT(6)
     end function
 
     function method_create_7(f, a1, a2, a3, a4, a5, a6, a7, caller) result(that)
@@ -323,13 +323,13 @@ ADD_ARGUMENT(6)
         if (present(caller)) then
             that%caller => caller
         end if
-ADD_ARGUMENT(1)
-ADD_ARGUMENT(2)
-ADD_ARGUMENT(3)
-ADD_ARGUMENT(4)
-ADD_ARGUMENT(5)
-ADD_ARGUMENT(6)
-ADD_ARGUMENT(7)
+        ADD_ARGUMENT(1)
+        ADD_ARGUMENT(2)
+        ADD_ARGUMENT(3)
+        ADD_ARGUMENT(4)
+        ADD_ARGUMENT(5)
+        ADD_ARGUMENT(6)
+        ADD_ARGUMENT(7)
     end function
 
     !> Bound procedure to invoke a method

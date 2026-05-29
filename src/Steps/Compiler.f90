@@ -41,7 +41,8 @@
 !! print *, 'Options:', opts
 !! @endcode
 module benchmark_steps_compiler
-    use, intrinsic :: iso_fortran_env, only : compiler_version, compiler_options
+    use, intrinsic :: iso_fortran_env, only : compiler_version, &
+                                              compiler_options
     use benchmark_workflow, only: workflow
     use benchmark_output_unit
     use benchmark_systeminfo
@@ -141,7 +142,7 @@ contains
 
     !> Creates and returns a workflow step that prints compiler information
     !! @ingroup group_steps_compiler
-    !! @b Remarks   
+    !! @b Remarks
     function compiler_new() result(step)
         type(workflow) :: step
 
