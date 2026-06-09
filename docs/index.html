@@ -168,7 +168,7 @@ Build with fpm</h4>
 </div><!-- fragment --><p> (For the Windows users, that command does not work in Powershell since '@' is a reserved symbol. One should use the '&ndash;' as follows: <span class="tt">fpm --% @build</span>. This is linked to the following <a href="https://github.com/urbanjost/M_CLI2/issues/19">issue</a>)</p>
 <p>Building with ifort requires to specify the compiler name (gfortran by default) </p><div class="fragment"><div class="line">fpm @build --compiler ifort</div>
 </div><!-- fragment --><p> Alternatively, the compiler can be set using fpm environment variables. </p><div class="fragment"><div class="line">set FPM_FC=ifort</div>
-</div><!-- fragment --><p>Besides the build command, several commands are also available: </p><div class="fragment"><div class="line">@pretiffy</div>
+</div><!-- fragment --><p>Besides the build command, several commands are also available: </p><div class="fragment"><div class="line">@prettify</div>
 <div class="line">system codee format ./src</div>
 <div class="line">system fortitude check ./src --fix</div>
 <div class="line">option run --list</div>

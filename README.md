@@ -100,7 +100,7 @@ set FPM_FC=ifort
 
 Besides the build command, several commands are also available:
 ```bash
-@pretiffy
+@prettify
 system codee format ./src
 system fortitude check ./src --fix
 option run --list
