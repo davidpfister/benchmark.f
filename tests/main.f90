@@ -45,7 +45,7 @@ TESTPROGRAM(main)
         s = str(1)
         EXPECT_STREQ(s, '1')
         s = str(12.52e4)
-#ifdef __GFORTRAN__
+#if defined(__GFORTRAN__) || defined(__LFORTRAN__)
         EXPECT_STREQ(s, '1.252E+5')
 #else
         EXPECT_STREQ(s, '1.252E+05')
@@ -135,7 +135,9 @@ TESTPROGRAM(main)
         EXPECT_TRUE(exists)
         
         inquire(unit=15, size=fsize)
-        EXPECT_EQ(fsize, 4223)
+        !report size varies with platform and compiler formatting (4223 on the
+        !original Windows setup, 4205 with gfortran/lfortran on Linux)
+        EXPECT_TRUE(fsize == 4223 .or. fsize == 4205)
         call br%dispose()
         close(15, status='delete')
     END_TEST
