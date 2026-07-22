@@ -91,7 +91,11 @@ contains
         character(:), allocatable, intent(inout) :: lhs
         class(string), intent(in)                :: rhs
 
-        lhs = rhs%chars
+        if (allocated(rhs%chars)) then
+            lhs = rhs%chars
+        else
+            if (allocated(lhs)) deallocate(lhs)
+        end if
     end subroutine
 
     !> Length of the string entity
@@ -112,7 +116,11 @@ contains
     !! @b Remarks
     pure integer function string_len(this) result(res)
         class(string), intent(in) :: this
-        res = len(this%chars)
+        
+        res = 0
+        if (allocated(this%chars)) then
+            res = len(this%chars)
+        end if
     end function
 
     !> Function to stringify anything

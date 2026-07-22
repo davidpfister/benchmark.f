@@ -6,8 +6,6 @@ module benchmark_options
 
     implicit none; private
 
-    public :: runner_options
-
     !> Provides a base class for the benchmark runner
     !! @par
     !! <h2>Examples</h2>

@@ -50,8 +50,6 @@ module benchmark_steps_compiler
 
     implicit none; private
 
-    public :: compiler
-
     !> @brief Enum defining supported Fortran compilers
     !! @ingroup group_steps_compiler
     enum, bind(c)

@@ -96,10 +96,12 @@ contains
         class(*), intent(in)        :: value
         class(string), intent(in)   :: display
 
-        if (len_trim(display%chars) > 0) then
-            a%display = trim(adjustl(display%chars))
+        if (allocated(display%chars)) then
+            if (len_trim(display%chars) > 0) then
+                a%display = trim(adjustl(display%chars))
+            end if
         end if
-
+        
         allocate(a%value, source=value)
     end function
 
