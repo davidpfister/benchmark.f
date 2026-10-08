@@ -1779,13 +1779,7 @@ module extrafunc
 #endif
     end function f_erf
   
-  
-  
     recursive function f_ierfc(x) result(f)
-      !
-      !  Inverse of the complimentary error function
-      !
-  
       real(fdp), intent(in) :: x
       real(fdp) :: f
   

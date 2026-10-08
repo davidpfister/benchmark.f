@@ -3,8 +3,7 @@
 !! Method module
 !> @cond
 #include <concat.inc>
-#define ADD_ARGUMENT(n) \
-        that%args(n) = MACRO_CAT2(a,n)
+#define ADD_ARGUMENT(n) that%args(n) = MACRO_CAT2(a,n)
 !> @endcond
 module benchmark_method
     use iso_c_binding
